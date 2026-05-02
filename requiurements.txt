@@ -1,0 +1,5 @@
+pip install yfinance pandas numpy scikit-learn requests python-dotenv loguru pytest pytest-cov dvc pyarrow fastparquet ta
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+pip install mlflow optuna statsmodels scikit-learn joblib
+
+pip install gymnasium stable-baselines3
