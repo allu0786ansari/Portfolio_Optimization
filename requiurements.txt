@@ -3,3 +3,5 @@ pip install torch --index-url https://download.pytorch.org/whl/cpu
 pip install mlflow optuna statsmodels scikit-learn joblib
 
 pip install gymnasium stable-baselines3
+pip install cvxpy
+pip install ecos
