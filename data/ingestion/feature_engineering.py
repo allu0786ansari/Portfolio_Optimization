@@ -107,7 +107,7 @@ def compute_features_for_ticker(
     features["price_vs_ma200"] = df["Close"] / df["Close"].rolling(200).mean() - 1
 
     # Drop rows where features cannot be computed (beginning of series)
-    features = features.dropna(subset=["momentum_126d", "beta_63d"])
+    features = features.dropna(subset=["momentum_126d", "beta_63d", "price_vs_ma200"])
 
     logger.info(f"Features for {ticker}: {features.shape} — {features.index[0].date()} to {features.index[-1].date()}")
     return features
