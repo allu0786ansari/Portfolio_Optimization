@@ -1,0 +1,819 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.copy-btn:hover{background:var(--color-background-primary)}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.file-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.concept-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:1rem}
+.concept{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.concept-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.concept-val{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+.page-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:8px}
+.page-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:6px}
+.page-desc{font-size:12px;color:var(--color-text-secondary);line-height:1.6}
+</style>
+
+<div style="padding:1rem 0 0">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div><div style="font-size:18px;font-weight:500">7 of 10</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New files</div><div style="font-size:18px;font-weight:500">6</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Dashboard pages</div><div style="font-size:18px;font-weight:500">4</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div><div style="font-size:14px;font-weight:500;line-height:1.4">Live public dashboard on Streamlit Cloud</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('pages')">Dashboard pages</button>
+  <button class="tab" onclick="sw('setup')">Setup & commands</button>
+  <button class="tab" onclick="sw('files')">All source files</button>
+  <button class="tab" onclick="sw('deploy')">Deploy to cloud</button>
+</div>
+
+<!-- PAGES TAB -->
+<div id="p-pages" class="panel on">
+  <p style="margin-bottom:1rem">Four pages — each tells a different story about the project to the interviewer.</p>
+  <div class="page-card">
+    <div class="page-title">Page 1 — Performance Overview</div>
+    <div class="page-desc">The headline page. Shows 6 KPI metric cards (Sharpe, Sortino, CAGR, Max Drawdown, CVaR, alpha significance), the equity curve vs all baselines, drawdown chart, and rolling 63-day Sharpe. Reads from backtest_results.json. This is the first thing an interviewer sees — it needs to communicate "this model works" in under 5 seconds.</div>
+  </div>
+  <div class="page-card">
+    <div class="page-title">Page 2 — Asset Allocation</div>
+    <div class="page-desc">Interactive allocation tool. User selects tickers from a multiselect, clicks "Get Allocation", and the dashboard calls your live FastAPI /predict endpoint in real time. Shows the returned weights as a donut chart and a ranked bar chart. This is the live demo moment — showing a real API call returning real predictions.</div>
+  </div>
+  <div class="page-card">
+    <div class="page-title">Page 3 — Strategy Comparison</div>
+    <div class="page-desc">Side-by-side table comparing RL agent vs Markowitz vs Equal-Weight across all 7 metrics. Also shows per-window Sharpe bar chart from the walk-forward backtest — makes it clear the RL agent was evaluated across multiple market regimes, not just one lucky period.</div>
+  </div>
+  <div class="page-card">
+    <div class="page-title">Page 4 — Efficient Frontier</div>
+    <div class="page-desc">Markowitz efficient frontier scatter plot showing the risk-return tradeoff for random portfolios vs the optimal frontier. Plots your RL agent's average risk/return point on the same chart. Shows financial domain knowledge — not just ML engineering.</div>
+  </div>
+</div>
+
+<!-- SETUP TAB -->
+<div id="p-setup" class="panel">
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Install Week 7 dependency</div></div>
+  <code class="cmd">pip install streamlit</code>
+  <div class="info">plotly is already installed from Week 5. streamlit is the only new dependency this week.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create folder structure</div></div>
+  <code class="cmd">mkdir dashboard\pages
+type nul > dashboard\__init__.py</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Create all 6 files from the source files tab</div></div>
+  <p>Files in order:</p>
+  <p style="margin-top:6px">
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/app.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/data_utils.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/pages/1_Performance.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/pages/2_Allocation.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/pages/3_Comparison.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">dashboard/pages/4_Frontier.py</code>
+  </p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Make sure both servers are running</div></div>
+  <p>You need two terminals running simultaneously:</p>
+  <code class="cmd">Terminal 1: mlflow server --host 127.0.0.1 --port 5000
+Terminal 2: uvicorn serving.main:app --host 0.0.0.0 --port 8000 --reload</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Launch the dashboard</div></div>
+  <code class="cmd">streamlit run dashboard/app.py</code>
+  <div class="ok">Opens automatically at http://localhost:8501. You'll see the sidebar with 4 page links and the Performance page loaded by default.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">6</div><div class="step-title">Commit</div></div>
+  <code class="cmd">git add . && git commit -m "feat: Week 7 — Streamlit dashboard, 4 pages, live API integration"</code>
+</div>
+</div>
+
+<!-- FILES TAB -->
+<div id="p-files" class="panel">
+  <div class="file-nav" id="fnav"></div>
+  <div id="file-display"></div>
+</div>
+
+<!-- DEPLOY TAB -->
+<div id="p-deploy" class="panel">
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Create requirements.txt for Streamlit Cloud</div></div>
+  <code class="cmd">pip freeze > requirements.txt</code>
+  <div class="warn">After generating, open requirements.txt and remove any line containing <code style="font-family:var(--font-mono)">torch==2.11.0+cpu</code> — the +cpu suffix breaks pip on cloud. Replace it with just <code style="font-family:var(--font-mono)">torch==2.11.0</code></div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create .streamlit/config.toml</div></div>
+  <code class="cmd">mkdir .streamlit
+type nul > .streamlit\config.toml</code>
+  <p style="margin-top:6px">Paste this into <code style="font-family:var(--font-mono)">.streamlit/config.toml</code>:</p>
+  <code class="cmd">[theme]
+primaryColor = "#185FA5"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F5F5"
+textColor = "#1A1A1A"
+
+[server]
+headless = true
+port = 8501</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Push to GitHub</div></div>
+  <code class="cmd">git add .
+git commit -m "chore: add requirements.txt and streamlit config for cloud deploy"
+git push origin main</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Deploy on Streamlit Community Cloud</div></div>
+  <p>Go to <strong>share.streamlit.io</strong> → Sign in with GitHub → New app → Select your repo → Set main file path to <code style="font-family:var(--font-mono)">dashboard/app.py</code> → Deploy.</p>
+  <div class="info">The cloud deploy shows Performance and Comparison pages (reads from JSON). The live Allocation page needs your FastAPI running — on cloud you can point it to your EC2 URL once deployed in Week 8.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Take screenshots for README</div></div>
+  <p>Screenshot these 3 views for your GitHub README and LinkedIn post:</p>
+  <p style="margin-top:6px">1. Performance page — equity curves chart + 6 KPI cards<br>2. Allocation page — donut chart showing live weights<br>3. Comparison page — strategy metrics table</p>
+  <div class="ok">These screenshots are what interviewers see before they read a single line of your code. Make them count.</div>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ask-btn" onclick="sendPrompt('Week 7 of portfolio optimizer is done — Streamlit dashboard running locally with all 4 pages, deployed to Streamlit Cloud. Start Week 8 — Docker and CI/CD pipeline.')">Week 7 done, start Week 8 ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('I got an error running the Streamlit dashboard in Week 7 of portfolio optimizer. Here is the error:')">Got an error ↗</button>
+</div>
+</div>
+</div>
+
+<script>
+const files = [
+{name:"app.py", path:"dashboard/app.py", code:`"""Streamlit multi-page app entry point.
+
+Run with: streamlit run dashboard/app.py
+
+Pages are in dashboard/pages/ — Streamlit auto-discovers them
+by filename prefix (1_, 2_, 3_, 4_) and shows them in the sidebar.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import streamlit as st
+
+st.set_page_config(
+    page_title = "Portfolio Optimization Engine",
+    page_icon  = "📈",
+    layout     = "wide",
+    initial_sidebar_state = "expanded",
+)
+
+# ── Sidebar ──────────────────────────────────────────────────────
+st.sidebar.title("📈 Portfolio Optimizer")
+st.sidebar.markdown("---")
+st.sidebar.markdown("""
+**AI-Powered Portfolio Allocation**
+
+Trained with Reinforcement Learning (PPO/SAC) on Nifty50 + S&P500.
+Walk-forward backtested over 5 years.
+
+---
+**Stack**
+- RL Agent: Stable-Baselines3 (PPO)
+- Tracking: MLflow
+- API: FastAPI
+- Backtest: Walk-forward (11 windows)
+""")
+st.sidebar.markdown("---")
+st.sidebar.caption("Navigate using the pages above ↑")
+
+# ── Home page ─────────────────────────────────────────────────────
+st.title("Portfolio Optimization Engine")
+st.markdown("""
+An end-to-end AI engineering project demonstrating:
+- **Reinforcement Learning** for portfolio allocation (PPO/SAC agents)
+- **MLOps** with MLflow experiment tracking and model registry
+- **Walk-forward backtesting** across 11 market windows (5 years)
+- **Production serving** via FastAPI with auto model hot-reload
+- **CI/CD** with Docker and GitHub Actions
+
+---
+**Navigate using the sidebar** to explore:
+- 📊 **Performance** — equity curves, Sharpe, drawdown, rolling metrics
+- 🥧 **Allocation** — live portfolio weights from the API
+- ⚖️ **Comparison** — RL vs Markowitz vs Equal-Weight
+- 🔵 **Frontier** — Markowitz efficient frontier visualisation
+""")
+
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.metric("Assets", "40", "Nifty50 + S&P500")
+with col2:
+    st.metric("Backtest Period", "5 Years", "11 walk-forward windows")
+with col3:
+    st.metric("Strategy", "RL-PPO", "Champion model")`},
+
+{name:"data_utils.py", path:"dashboard/data_utils.py", code:`"""Shared data loading utilities for all dashboard pages.
+
+Uses st.cache_data to avoid reloading backtest results on every
+page interaction — critical for dashboard responsiveness.
+"""
+import sys
+import json
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import numpy as np
+import pandas as pd
+import streamlit as st
+
+RESULTS_PATH = Path("backtesting/backtest_results.json")
+API_BASE_URL = "http://localhost:8000"
+API_KEY      = "portfolio-secret-key-change-in-production"
+
+
+@st.cache_data(ttl=300)   # cache for 5 minutes
+def load_backtest_results() -> dict | None:
+    """Load walk-forward backtest results from JSON file."""
+    if not RESULTS_PATH.exists():
+        return None
+    return json.loads(RESULTS_PATH.read_text())
+
+
+@st.cache_data(ttl=300)
+def get_equity_df(results: dict) -> pd.DataFrame:
+    """Build a tidy DataFrame of equity curves for all strategies."""
+    dates = results.get("dates", [])
+    eq    = results.get("equity_curves", {})
+    df = pd.DataFrame({
+        "date":         pd.to_datetime(dates),
+        "RL Agent":     eq.get("rl", []),
+        "Markowitz":    eq.get("markowitz", []),
+        "Equal-Weight": eq.get("equal_weight", []),
+    })
+    return df.set_index("date")
+
+
+@st.cache_data(ttl=300)
+def get_metrics_df(results: dict) -> pd.DataFrame:
+    """Build a comparison DataFrame of all strategy metrics."""
+    strategies = results.get("strategies", {})
+    rows = []
+    labels = {
+        "rl":           f"RL-{results.get('algo','PPO').upper()} Agent",
+        "markowitz":    "Markowitz (MVO)",
+        "equal_weight": "Equal-Weight (1/N)",
+    }
+    metric_labels = {
+        "sharpe":       "Sharpe Ratio",
+        "sortino":      "Sortino Ratio",
+        "calmar":       "Calmar Ratio",
+        "cagr":         "CAGR",
+        "max_drawdown": "Max Drawdown",
+        "var_95":       "VaR 95%",
+        "cvar_95":      "CVaR 95%",
+    }
+    for key, label in labels.items():
+        s = strategies.get(key, {})
+        row = {"Strategy": label}
+        for mkey, mlabel in metric_labels.items():
+            v = s.get(mkey, 0.0)
+            if mkey in ("cagr", "max_drawdown", "var_95", "cvar_95"):
+                row[mlabel] = f"{v:.1%}"
+            else:
+                row[mlabel] = f"{v:.3f}"
+        rows.append(row)
+    return pd.DataFrame(rows).set_index("Strategy")
+
+
+def call_predict_api(tickers: list[str]) -> dict | None:
+    """Call the FastAPI /predict endpoint and return result dict."""
+    try:
+        import httpx
+        r = httpx.post(
+            f"{API_BASE_URL}/predict",
+            json={"tickers": tickers},
+            headers={"X-API-Key": API_KEY},
+            timeout=10.0,
+        )
+        if r.status_code == 200:
+            return r.json()
+        return {"error": f"API error {r.status_code}: {r.text}"}
+    except Exception as e:
+        return {"error": f"Could not reach API: {e}"}
+
+
+def get_rolling_sharpe_df(results: dict) -> pd.DataFrame:
+    """Build rolling Sharpe DataFrame."""
+    dates = results.get("dates", [])
+    rs    = results.get("rolling_sharpe", {})
+    df = pd.DataFrame({
+        "date":         pd.to_datetime(dates),
+        "RL Agent":     [v if v == v else None for v in rs.get("rl", [])],
+        "Equal-Weight": [v if v == v else None for v in rs.get("equal_weight", [])],
+    })
+    return df.set_index("date")`},
+
+{name:"1_Performance.py", path:"dashboard/pages/1_Performance.py", code:`"""Page 1: Performance Overview — equity curves, drawdown, rolling Sharpe."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import pandas as pd
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+import streamlit as st
+
+from dashboard.data_utils import (
+    load_backtest_results, get_equity_df,
+    get_rolling_sharpe_df,
+)
+
+st.set_page_config(page_title="Performance", page_icon="📊", layout="wide")
+st.title("📊 Performance Overview")
+st.caption("Walk-forward backtest results across 5 years and 11 market windows")
+
+results = load_backtest_results()
+if results is None:
+    st.error("Backtest results not found. Run: python -m backtesting.walk_forward")
+    st.stop()
+
+strategies = results["strategies"]
+rl  = strategies.get("rl", {})
+algo = results.get("algo", "ppo").upper()
+
+# ── KPI Cards ───────────────────────────────────────────────────
+st.subheader("Key Metrics — RL Agent")
+c1, c2, c3, c4, c5, c6 = st.columns(6)
+c1.metric("Sharpe Ratio",   f"{rl.get('sharpe',0):.3f}",   delta="vs 0.6 benchmark")
+c2.metric("Sortino Ratio",  f"{rl.get('sortino',0):.3f}")
+c3.metric("CAGR",           f"{rl.get('cagr',0):.1%}",     delta=f"+{rl.get('cagr',0)-0.08:.1%} vs 8% passive")
+c4.metric("Max Drawdown",   f"{rl.get('max_drawdown',0):.1%}")
+c5.metric("CVaR 95%",       f"{rl.get('cvar_95',0):.2%}")
+
+p_val  = rl.get("p_value_vs_ew", 1.0)
+sig    = "✅ p<0.05" if p_val < 0.05 else "❌ p≥0.05"
+c6.metric("Alpha Sig.",     sig, delta=f"p={p_val:.4f}")
+
+st.markdown("---")
+
+# ── Equity Curves ───────────────────────────────────────────────
+eq_df = get_equity_df(results)
+st.subheader("Equity Curves")
+
+fig1 = go.Figure()
+colors = {"RL Agent": "#185FA5", "Markowitz": "#0F6E56", "Equal-Weight": "#854F0B"}
+for col in eq_df.columns:
+    fig1.add_trace(go.Scatter(
+        x=eq_df.index, y=eq_df[col],
+        name=col, line=dict(color=colors.get(col, "#888"), width=2),
+    ))
+fig1.update_layout(
+    height=380, hovermode="x unified",
+    yaxis_title="Portfolio Value (start=1.0)",
+    legend=dict(orientation="h", yanchor="bottom", y=1.02),
+    margin=dict(t=30, b=20),
+)
+st.plotly_chart(fig1, use_container_width=True)
+
+# ── Drawdown + Rolling Sharpe side by side ──────────────────────
+col_left, col_right = st.columns(2)
+
+with col_left:
+    st.subheader("Drawdown")
+    dates  = results.get("dates", [])
+    dds    = results.get("drawdowns", {})
+    fig2   = go.Figure()
+    for key, label, color in [("rl","RL Agent","#185FA5"), ("equal_weight","Equal-Weight","#854F0B")]:
+        if key in dds:
+            fig2.add_trace(go.Scatter(
+                x=pd.to_datetime(dates),
+                y=[v*100 for v in dds[key]],
+                name=label, fill="tozeroy",
+                line=dict(color=color, width=1.5),
+            ))
+    fig2.update_layout(height=300, yaxis_title="Drawdown (%)",
+                       hovermode="x unified", margin=dict(t=20,b=20))
+    st.plotly_chart(fig2, use_container_width=True)
+
+with col_right:
+    st.subheader("Rolling 63-Day Sharpe")
+    rs_df  = get_rolling_sharpe_df(results)
+    fig3   = go.Figure()
+    for col, color in [("RL Agent","#185FA5"), ("Equal-Weight","#854F0B")]:
+        if col in rs_df.columns:
+            fig3.add_trace(go.Scatter(
+                x=rs_df.index, y=rs_df[col],
+                name=col, line=dict(color=color, width=2),
+            ))
+    fig3.add_hline(y=1, line_dash="dot", line_color="#0F6E56",
+                   annotation_text="Target Sharpe=1.0")
+    fig3.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.4)
+    fig3.update_layout(height=300, yaxis_title="Sharpe",
+                       hovermode="x unified", margin=dict(t=20,b=20))
+    st.plotly_chart(fig3, use_container_width=True)
+
+# ── Per-window table ────────────────────────────────────────────
+with st.expander("Per-Window Sharpe Ratios (all 11 windows)"):
+    windows = results.get("windows", [])
+    if windows:
+        wdf = pd.DataFrame(windows)
+        wdf = wdf.rename(columns={
+            "test_start": "Window Start", "test_end": "Window End",
+            "rl_sharpe": "RL Agent", "mvo_sharpe": "Markowitz",
+            "ew_sharpe": "Equal-Weight",
+        })
+        wdf["RL Wins"] = wdf["RL Agent"] > wdf["Equal-Weight"]
+        st.dataframe(wdf.drop(columns=["window"]).style.format({
+            "RL Agent": "{:.3f}", "Markowitz": "{:.3f}", "Equal-Weight": "{:.3f}",
+        }), use_container_width=True)`},
+
+{name:"2_Allocation.py", path:"dashboard/pages/2_Allocation.py", code:`"""Page 2: Live Allocation — calls FastAPI /predict in real time."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import plotly.graph_objects as go
+import streamlit as st
+
+from dashboard.data_utils import call_predict_api
+from data.config import NIFTY50_TICKERS, SP500_TICKERS
+
+st.set_page_config(page_title="Allocation", page_icon="🥧", layout="wide")
+st.title("🥧 Live Portfolio Allocation")
+st.caption("Calls the FastAPI /predict endpoint in real time and displays weights")
+
+# ── Ticker selection ─────────────────────────────────────────────
+st.subheader("Select Assets")
+col_left, col_right = st.columns(2)
+
+with col_left:
+    nifty_selected = st.multiselect(
+        "Nifty50 stocks",
+        options=NIFTY50_TICKERS,
+        default=NIFTY50_TICKERS[:5],
+        help="Indian market stocks (NSE)"
+    )
+
+with col_right:
+    sp500_selected = st.multiselect(
+        "S&P500 stocks",
+        options=SP500_TICKERS,
+        default=SP500_TICKERS[:5],
+        help="US market stocks"
+    )
+
+selected = nifty_selected + sp500_selected
+
+st.info(f"Selected: **{len(selected)} assets**. Minimum 2 required.")
+
+if len(selected) < 2:
+    st.warning("Please select at least 2 assets.")
+    st.stop()
+
+# ── Predict button ───────────────────────────────────────────────
+if st.button("🚀 Get Portfolio Allocation", type="primary", use_container_width=True):
+    with st.spinner("Calling API..."):
+        result = call_predict_api(selected)
+
+    if result is None or "error" in result:
+        err = result.get("error", "Unknown error") if result else "No response"
+        st.error(f"API Error: {err}")
+        st.info("Make sure the FastAPI server is running: uvicorn serving.main:app --port 8000")
+    else:
+        weights = result["weights"]
+        sorted_w = dict(sorted(weights.items(), key=lambda x: x[1], reverse=True))
+
+        # ── Metadata row
+        m1, m2, m3, m4 = st.columns(4)
+        m1.metric("Model",       result.get("model_version", "—"))
+        m2.metric("Algorithm",   result.get("algo", "—"))
+        m3.metric("Latency",     f"{result.get('latency_ms',0):.1f} ms")
+        m4.metric("Weights Sum", f"{result.get('weights_sum',0):.6f}")
+
+        st.markdown("---")
+
+        # ── Charts side by side
+        c1, c2 = st.columns(2)
+
+        with c1:
+            st.subheader("Allocation Donut")
+            fig_donut = go.Figure(go.Pie(
+                labels = list(sorted_w.keys()),
+                values = list(sorted_w.values()),
+                hole   = 0.45,
+                textinfo = "label+percent",
+                hovertemplate = "%{label}: %{value:.4f}<extra></extra>",
+            ))
+            fig_donut.update_layout(
+                height=380, margin=dict(t=20,b=20),
+                showlegend=False,
+            )
+            st.plotly_chart(fig_donut, use_container_width=True)
+
+        with c2:
+            st.subheader("Weight Ranking")
+            fig_bar = go.Figure(go.Bar(
+                x = list(sorted_w.values()),
+                y = list(sorted_w.keys()),
+                orientation = "h",
+                marker_color = "#185FA5",
+                text = [f"{v:.3f}" for v in sorted_w.values()],
+                textposition = "outside",
+            ))
+            fig_bar.update_layout(
+                height=380, xaxis_title="Weight",
+                margin=dict(t=20, b=20, r=60),
+                xaxis=dict(range=[0, max(sorted_w.values()) * 1.2]),
+            )
+            st.plotly_chart(fig_bar, use_container_width=True)
+
+        # ── Raw weights table
+        with st.expander("Raw weights table"):
+            import pandas as pd
+            df = pd.DataFrame(sorted_w.items(), columns=["Ticker", "Weight"])
+            df["Weight %"] = (df["Weight"] * 100).round(2).astype(str) + "%"
+            st.dataframe(df, use_container_width=True, hide_index=True)
+
+        # ── Skipped tickers
+        skipped = result.get("skipped_tickers", [])
+        if skipped:
+            st.warning(f"Tickers not in feature store (skipped): {skipped}")`},
+
+{name:"3_Comparison.py", path:"dashboard/pages/3_Comparison.py", code:`"""Page 3: Strategy Comparison — RL vs Markowitz vs Equal-Weight."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import pandas as pd
+import plotly.graph_objects as go
+import streamlit as st
+
+from dashboard.data_utils import load_backtest_results, get_metrics_df
+
+st.set_page_config(page_title="Comparison", page_icon="⚖️", layout="wide")
+st.title("⚖️ Strategy Comparison")
+st.caption("RL Agent vs Markowitz vs Equal-Weight — walk-forward backtest")
+
+results = load_backtest_results()
+if results is None:
+    st.error("Backtest results not found. Run: python -m backtesting.walk_forward")
+    st.stop()
+
+algo = results.get("algo", "ppo").upper()
+
+# ── Metrics table ────────────────────────────────────────────────
+st.subheader("Full Metrics Table")
+metrics_df = get_metrics_df(results)
+
+def highlight_best(s):
+    """Highlight the best value in each row green."""
+    is_best = []
+    for v in s:
+        try:
+            num = float(v.strip("%"))
+            is_best.append(num)
+        except:
+            is_best.append(None)
+    best = max((x for x in is_best if x is not None), default=None)
+    return ["background-color: #E1F5EE; font-weight: 500"
+            if x == best else "" for x in is_best]
+
+st.dataframe(
+    metrics_df.style.apply(highlight_best, axis=1),
+    use_container_width=True,
+)
+
+st.markdown("---")
+
+# ── Per-window bar chart ─────────────────────────────────────────
+st.subheader("Sharpe Ratio — Per Walk-Forward Window")
+windows = results.get("windows", [])
+
+if windows:
+    w_labels = [w["test_start"][:7] for w in windows]
+    fig = go.Figure()
+    for key, label, color in [
+        ("rl_sharpe",  f"RL-{algo}", "#185FA5"),
+        ("mvo_sharpe", "Markowitz",  "#0F6E56"),
+        ("ew_sharpe",  "Equal-Wt",   "#854F0B"),
+    ]:
+        fig.add_trace(go.Bar(
+            name=label,
+            x=w_labels,
+            y=[w[key] for w in windows],
+            marker_color=color,
+        ))
+    fig.add_hline(y=0, line_color="gray", line_dash="dash", opacity=0.5)
+    fig.update_layout(
+        barmode="group", height=380,
+        xaxis_title="Test Window Start",
+        yaxis_title="Sharpe Ratio",
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02),
+        margin=dict(t=30, b=20),
+    )
+    st.plotly_chart(fig, use_container_width=True)
+
+# ── Statistical significance ─────────────────────────────────────
+st.markdown("---")
+st.subheader("Statistical Significance")
+rl_m   = results["strategies"].get("rl", {})
+t_stat = rl_m.get("t_stat_vs_ew", 0)
+p_val  = rl_m.get("p_value_vs_ew", 1)
+
+c1, c2, c3 = st.columns(3)
+c1.metric("t-statistic", f"{t_stat:.3f}")
+c2.metric("p-value",     f"{p_val:.4f}")
+c3.metric("Significant?", "✅ YES" if p_val < 0.05 else "❌ NO",
+          delta="p < 0.05 threshold" if p_val < 0.05 else "Need p < 0.05")
+
+if p_val < 0.05:
+    st.success("The RL agent's alpha over equal-weight is statistically significant (p < 0.05). The excess returns are unlikely to be due to chance.")
+else:
+    st.warning("Alpha is not statistically significant yet. Consider retraining with more timesteps or tuning hyperparameters.")`},
+
+{name:"4_Frontier.py", path:"dashboard/pages/4_Frontier.py", code:`"""Page 4: Efficient Frontier — Markowitz risk-return visualisation."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import plotly.graph_objects as go
+import streamlit as st
+
+from dashboard.data_utils import load_backtest_results
+from models.rl_agent.data_loader import load_aligned_features, build_return_matrix
+from models.classical.markowitz import ledoit_wolf_cov
+from data.config import ALL_TICKERS
+
+st.set_page_config(page_title="Frontier", page_icon="🔵", layout="wide")
+st.title("🔵 Markowitz Efficient Frontier")
+st.caption("Risk-return tradeoff for random portfolios vs optimal frontier — with RL agent plotted")
+
+results = load_backtest_results()
+
+# ── Controls ─────────────────────────────────────────────────────
+n_portfolios = st.slider("Number of random portfolios to simulate", 500, 5000, 2000, step=500)
+
+with st.spinner("Computing efficient frontier..."):
+    try:
+        features_dict, tickers, dates = load_aligned_features(ALL_TICKERS)
+        return_matrix = build_return_matrix(features_dict, tickers)
+
+        # Use last 2 years for frontier computation
+        lookback = min(504, len(dates))
+        ret = return_matrix[-lookback:]
+        mu  = ret.mean(axis=0) * 252           # annualised mean returns
+        cov = ledoit_wolf_cov(ret) * 252       # annualised covariance
+        n   = len(tickers)
+
+        # Simulate random portfolios
+        np.random.seed(42)
+        port_returns = []
+        port_vols    = []
+        port_sharpes = []
+
+        for _ in range(n_portfolios):
+            w  = np.random.dirichlet(np.ones(n))
+            pr = float(w @ mu)
+            pv = float(np.sqrt(w @ cov @ w))
+            port_returns.append(pr)
+            port_vols.append(pv)
+            port_sharpes.append(pr / pv if pv > 0 else 0)
+
+        port_returns = np.array(port_returns)
+        port_vols    = np.array(port_vols)
+        port_sharpes = np.array(port_sharpes)
+
+        # RL agent point from backtest results
+        rl_ret = rl_vol = None
+        if results:
+            rl_m   = results["strategies"].get("rl", {})
+            rl_ret = rl_m.get("cagr", None)
+            rl_std = rl_m.get("vol_daily", None)
+            if rl_std:
+                rl_vol = rl_std * np.sqrt(252)
+
+        # ── Plot ────────────────────────────────────────────────
+        fig = go.Figure()
+
+        # Random portfolios coloured by Sharpe
+        fig.add_trace(go.Scatter(
+            x=port_vols * 100,
+            y=port_returns * 100,
+            mode="markers",
+            marker=dict(
+                size=4,
+                color=port_sharpes,
+                colorscale="Viridis",
+                colorbar=dict(title="Sharpe"),
+                opacity=0.6,
+            ),
+            name="Random Portfolios",
+            hovertemplate="Vol: %{x:.1f}%<br>Return: %{y:.1f}%<extra></extra>",
+        ))
+
+        # Max-Sharpe portfolio
+        best_idx = np.argmax(port_sharpes)
+        fig.add_trace(go.Scatter(
+            x=[port_vols[best_idx] * 100],
+            y=[port_returns[best_idx] * 100],
+            mode="markers",
+            marker=dict(size=16, color="#FFD700", symbol="star"),
+            name=f"Max Sharpe ({port_sharpes[best_idx]:.2f})",
+        ))
+
+        # RL agent point
+        if rl_ret is not None and rl_vol is not None:
+            fig.add_trace(go.Scatter(
+                x=[rl_vol * 100],
+                y=[rl_ret * 100],
+                mode="markers",
+                marker=dict(size=16, color="#185FA5", symbol="diamond"),
+                name=f"RL Agent (Sharpe={rl_ret/rl_vol:.2f})" if rl_vol > 0 else "RL Agent",
+            ))
+
+        fig.update_layout(
+            height=520,
+            xaxis_title="Annualised Volatility (%)",
+            yaxis_title="Annualised Return (%)",
+            hovermode="closest",
+            legend=dict(orientation="h", yanchor="bottom", y=1.02),
+            margin=dict(t=30, b=30),
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        # ── Stats ────────────────────────────────────────────────
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Max Sharpe Portfolio", f"{port_sharpes[best_idx]:.3f}")
+        c2.metric("Best Portfolio Return", f"{port_returns[best_idx]*100:.1f}%")
+        c3.metric("Best Portfolio Vol",   f"{port_vols[best_idx]*100:.1f}%")
+
+    except Exception as e:
+        st.error(f"Error computing frontier: {e}")
+        st.info("Make sure feature engineering has been run: python -m data.ingestion.feature_engineering")`},
+];
+
+let activeFile = 0;
+function renderFileNav() {
+  document.getElementById('fnav').innerHTML = files.map((f,i) =>
+    `<button class="fnav ${i===activeFile?'on':''}" onclick="showFile(${i})">${f.name}</button>`
+  ).join('');
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function renderFile() {
+  const f = files[activeFile];
+  document.getElementById('file-display').innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">${f.path}</span>
+        <button class="copy-btn" id="cb${activeFile}" onclick="copyCode(${activeFile})">Copy</button>
+      </div>
+      <div class="code-body">${escHtml(f.code)}</div>
+    </div>`;
+}
+function showFile(i){activeFile=i;renderFileNav();renderFile();}
+function copyCode(i){
+  navigator.clipboard.writeText(files[i].code).then(()=>{
+    const b=document.getElementById('cb'+i);
+    b.textContent='Copied!';setTimeout(()=>b.textContent='Copy',1500);
+  });
+}
+function sw(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+renderFileNav();renderFile();
+</script>

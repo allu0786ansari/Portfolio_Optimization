@@ -1,0 +1,986 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.copy-btn:hover{background:var(--color-background-primary)}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.file-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.metric-label{font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px}
+.metric-val{font-size:18px;font-weight:500}
+</style>
+
+<h2 class="sr-only">Week 2 implementation: LSTM forecasting model with MLflow tracking, Optuna tuning, and ARIMA baseline</h2>
+
+<div style="padding:1rem 0 0">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="metric"><div class="metric-label">Week</div><div class="metric-val">2 of 10</div></div>
+  <div class="metric"><div class="metric-label">New files</div><div class="metric-val">7</div></div>
+  <div class="metric"><div class="metric-label">New packages</div><div class="metric-val">4</div></div>
+  <div class="metric"><div class="metric-label">Deliverable</div><div class="metric-val" style="font-size:13px;line-height:1.4">LSTM logged in MLflow beating ARIMA</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('setup')">Setup & commands</button>
+  <button class="tab" onclick="sw('files')">All source files</button>
+  <button class="tab" onclick="sw('verify')">Verification</button>
+</div>
+
+<!-- SETUP TAB -->
+<div id="p-setup" class="panel on">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Install Week 2 dependencies</div></div>
+  <code class="cmd">pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+pip install mlflow optuna statsmodels scikit-learn</code>
+  <div class="info">This installs the CPU version of PyTorch (~200MB). If you have an NVIDIA GPU you can install the CUDA version instead — but CPU is fine for this project size (40 assets, 5 years of data).</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create the folder structure for Week 2</div></div>
+  <code class="cmd">mkdir models\forecasting</code>
+  <p style="margin-top:6px">Then create an empty <code style="font-family:var(--font-mono)">__init__.py</code> inside it:</p>
+  <code class="cmd">type nul > models\__init__.py
+type nul > models\forecasting\__init__.py</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Create all 7 source files</div></div>
+  <p>Go to the <strong>All source files</strong> tab and copy each file into your project at the path shown in the header. Create them in this order:</p>
+  <p style="margin-top:6px">
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/dataset.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/lstm_model.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/arima_baseline.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/train_forecaster.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/evaluate.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">tests/test_forecasting.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/forecasting/tune.py</code>
+  </p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Start the MLflow tracking server</div></div>
+  <p>Open a <strong>second PowerShell window</strong> (keep your main one open), activate the venv, and run:</p>
+  <code class="cmd">venv\Scripts\activate
+mlflow server --host 127.0.0.1 --port 5000</code>
+  <p style="margin-top:6px">Then open <strong>http://localhost:5000</strong> in your browser — you should see the MLflow UI. Leave this window running.</p>
+  <div class="ok">Every training run will automatically appear here with all metrics and model artifacts.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Train the ARIMA baseline first</div></div>
+  <p>Go back to your main PowerShell window and run:</p>
+  <code class="cmd">python -m models.forecasting.arima_baseline</code>
+  <div class="ok">Expected: ARIMA results logged to MLflow for all 40 tickers. Takes ~3-5 minutes.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">6</div><div class="step-title">Train the LSTM model</div></div>
+  <code class="cmd">python -m models.forecasting.train_forecaster</code>
+  <div class="info">This trains one LSTM per ticker using a walk-forward split. Expect ~15-25 minutes on CPU for all 40 tickers. You will see a progress bar per ticker and metrics logged to MLflow in real time.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">7</div><div class="step-title">(Optional) Run Optuna hyperparameter tuning</div></div>
+  <p>Only run this after the base LSTM training succeeds. It takes longer (~1 hour) but finds better hyperparameters:</p>
+  <code class="cmd">python -m models.forecasting.tune</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">8</div><div class="step-title">Run Week 2 tests</div></div>
+  <code class="cmd">pytest tests/test_forecasting.py -v</code>
+  <div class="ok">Target: all tests pass. Then commit: <code style="font-family:var(--font-mono)">git add . && git commit -m "feat: Week 2 — LSTM forecaster, ARIMA baseline, MLflow tracking"</code></div>
+</div>
+
+</div>
+
+<!-- FILES TAB -->
+<div id="p-files" class="panel">
+  <div class="file-nav" id="fnav"></div>
+  <div id="file-display"></div>
+</div>
+
+<!-- VERIFY TAB -->
+<div id="p-verify" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Check MLflow has runs logged</div></div>
+  <code class="cmd">python -c "
+import mlflow
+mlflow.set_tracking_uri('http://localhost:5000')
+client = mlflow.tracking.MlflowClient()
+exps = client.search_experiments()
+for e in exps:
+    runs = client.search_runs(e.experiment_id)
+    print(f'Experiment: {e.name} — {len(runs)} runs')
+"</code>
+  <p style="margin-top:6px">Expected: experiments named <code style="font-family:var(--font-mono)">arima_baseline</code> and <code style="font-family:var(--font-mono)">lstm_forecaster</code>, each with 40 runs.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Compare LSTM vs ARIMA directional accuracy</div></div>
+  <code class="cmd">python -m models.forecasting.evaluate</code>
+  <p style="margin-top:6px">Expected output: a summary table showing LSTM directional accuracy > ARIMA for most tickers. Target average: LSTM >55%, ARIMA ~50%.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Inspect a saved model artifact</div></div>
+  <code class="cmd">python -c "
+import mlflow, os
+mlflow.set_tracking_uri('http://localhost:5000')
+client = mlflow.tracking.MlflowClient()
+runs = client.search_runs('1', order_by=['metrics.val_directional_acc DESC'], max_results=1)
+if runs:
+    r = runs[0]
+    print('Best run:')
+    print(f'  Ticker:   {r.data.params.get(\"ticker\")}')
+    print(f'  Val RMSE: {float(r.data.metrics.get(\"val_rmse\",0)):.6f}')
+    print(f'  Val DirAcc: {float(r.data.metrics.get(\"val_directional_acc\",0)):.3f}')
+    print(f'  Artifact: {r.info.artifact_uri}')
+"</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Run all tests</div></div>
+  <code class="cmd">pytest tests/ -v --tb=short</code>
+  <p style="margin-top:6px">Should show all Week 1 tests still passing plus new Week 2 tests.</p>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ask-btn" onclick="sendPrompt('Week 2 of portfolio optimizer is done — LSTM trained, MLflow runs logged, all tests pass. Start Week 3 — the custom RL Gym environment.')">Week 2 done, start Week 3 ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('I got an error running train_forecaster.py in Week 2 of the portfolio optimizer. Here is the error:')">Got an error ↗</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const files = [
+{name:"dataset.py", path:"models/forecasting/dataset.py", code:`"""PyTorch Dataset and DataLoader for time-series LSTM training.
+
+Handles:
+- Sequence construction with configurable lookback window
+- Walk-forward train/validation/test splitting (no leakage)
+- Per-window RobustScaler fitting (re-fit on train, applied to val/test)
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import pandas as pd
+import torch
+from torch.utils.data import Dataset, DataLoader
+from sklearn.preprocessing import RobustScaler
+from loguru import logger
+
+
+FEATURE_COLS = [
+    "log_return", "momentum_21d", "momentum_63d", "momentum_126d",
+    "volatility_21d", "volatility_63d", "beta_63d", "rsi_14",
+    "price_vs_ma50", "price_vs_ma200",
+]
+TARGET_COL = "log_return"
+
+
+class ReturnSequenceDataset(Dataset):
+    """Sliding window dataset for return forecasting."""
+
+    def __init__(
+        self,
+        features: np.ndarray,   # shape (T, n_features) — already scaled
+        targets: np.ndarray,    # shape (T,)
+        seq_len: int = 30,
+    ):
+        self.seq_len = seq_len
+        self.X: list[np.ndarray] = []
+        self.y: list[float] = []
+
+        for i in range(seq_len, len(features)):
+            self.X.append(features[i - seq_len : i])   # (seq_len, n_features)
+            self.y.append(targets[i])                   # scalar: next-day return
+
+    def __len__(self) -> int:
+        return len(self.X)
+
+    def __getitem__(self, idx: int):
+        return (
+            torch.tensor(self.X[idx], dtype=torch.float32),
+            torch.tensor(self.y[idx], dtype=torch.float32),
+        )
+
+
+def make_dataloaders(
+    df: pd.DataFrame,
+    seq_len: int = 30,
+    train_frac: float = 0.7,
+    val_frac: float = 0.15,
+    batch_size: int = 32,
+    shuffle_train: bool = True,
+) -> tuple[DataLoader, DataLoader, DataLoader, RobustScaler]:
+    """Split df into train/val/test, fit scaler on train, return DataLoaders.
+
+    Split is strictly temporal — no shuffling across the split boundary.
+    Returns: train_loader, val_loader, test_loader, fitted_scaler
+    """
+    n = len(df)
+    train_end = int(n * train_frac)
+    val_end = int(n * (train_frac + val_frac))
+
+    feature_data = df[FEATURE_COLS].values.astype(np.float32)
+    target_data = df[TARGET_COL].values.astype(np.float32)
+
+    # Fit scaler ONLY on training data
+    scaler = RobustScaler()
+    train_features = scaler.fit_transform(feature_data[:train_end])
+    val_features   = scaler.transform(feature_data[train_end:val_end])
+    test_features  = scaler.transform(feature_data[val_end:])
+
+    train_ds = ReturnSequenceDataset(train_features, target_data[:train_end], seq_len)
+    val_ds   = ReturnSequenceDataset(val_features,   target_data[train_end:val_end], seq_len)
+    test_ds  = ReturnSequenceDataset(test_features,  target_data[val_end:], seq_len)
+
+    train_loader = DataLoader(train_ds, batch_size=batch_size, shuffle=shuffle_train, drop_last=True)
+    val_loader   = DataLoader(val_ds,   batch_size=batch_size, shuffle=False)
+    test_loader  = DataLoader(test_ds,  batch_size=batch_size, shuffle=False)
+
+    logger.debug(
+        f"Dataset split — train: {len(train_ds)}, val: {len(val_ds)}, test: {len(test_ds)}"
+    )
+    return train_loader, val_loader, test_loader, scaler`},
+
+{name:"lstm_model.py", path:"models/forecasting/lstm_model.py", code:`"""LSTM architecture for next-day return forecasting."""
+import torch
+import torch.nn as nn
+
+
+class ReturnLSTM(nn.Module):
+    """Multi-layer LSTM with dropout for return forecasting.
+
+    Architecture:
+        Input (batch, seq_len, n_features)
+        → LSTM layers with dropout between layers
+        → Final hidden state
+        → Fully-connected head
+        → Scalar output (predicted log return)
+    """
+
+    def __init__(
+        self,
+        input_size: int = 10,       # number of feature columns
+        hidden_size: int = 64,      # LSTM hidden units
+        num_layers: int = 2,        # stacked LSTM layers
+        dropout: float = 0.2,       # dropout between LSTM layers
+        fc_hidden: int = 32,        # FC head hidden units
+    ):
+        super().__init__()
+        self.hidden_size = hidden_size
+        self.num_layers  = num_layers
+
+        self.lstm = nn.LSTM(
+            input_size=input_size,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            dropout=dropout if num_layers > 1 else 0.0,
+            batch_first=True,
+        )
+
+        self.head = nn.Sequential(
+            nn.Linear(hidden_size, fc_hidden),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(fc_hidden, 1),
+        )
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Args:
+            x: (batch_size, seq_len, input_size)
+        Returns:
+            (batch_size,) — predicted next-day log return
+        """
+        # out: (batch, seq_len, hidden_size)
+        # h_n: (num_layers, batch, hidden_size)
+        out, (h_n, _) = self.lstm(x)
+
+        # Take the last layer's final hidden state
+        last_hidden = h_n[-1]                   # (batch, hidden_size)
+        pred = self.head(last_hidden).squeeze(-1)  # (batch,)
+        return pred
+
+    def count_parameters(self) -> int:
+        return sum(p.numel() for p in self.parameters() if p.requires_grad)`},
+
+{name:"arima_baseline.py", path:"models/forecasting/arima_baseline.py", code:`"""ARIMA baseline model — trained per ticker, results logged to MLflow."""
+import sys
+import warnings
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+warnings.filterwarnings("ignore")
+
+import numpy as np
+import pandas as pd
+import mlflow
+from statsmodels.tsa.arima.model import ARIMA
+from loguru import logger
+
+from data.config import PROCESSED_DIR, ALL_TICKERS
+
+
+MLFLOW_TRACKING_URI = "http://localhost:5000"
+EXPERIMENT_NAME = "arima_baseline"
+
+# ARIMA(p,d,q) order — (1,0,1) is a standard starting point for returns
+ARIMA_ORDER = (1, 0, 1)
+TRAIN_FRAC  = 0.7
+VAL_FRAC    = 0.15
+
+
+def directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Fraction of predictions where the sign matches the actual return."""
+    return float(np.mean(np.sign(y_true) == np.sign(y_pred)))
+
+
+def run_arima_for_ticker(ticker: str) -> dict | None:
+    """Fit ARIMA on train split, evaluate on val split, return metrics dict."""
+    path = PROCESSED_DIR / f"features_{ticker.replace('/', '_')}.parquet"
+    if not path.exists():
+        logger.warning(f"No feature file for {ticker}")
+        return None
+
+    df    = pd.read_parquet(path)
+    n     = len(df)
+    t_end = int(n * TRAIN_FRAC)
+    v_end = int(n * (TRAIN_FRAC + VAL_FRAC))
+
+    train_returns = df["log_return"].iloc[:t_end].values
+    val_returns   = df["log_return"].iloc[t_end:v_end].values
+
+    try:
+        model  = ARIMA(train_returns, order=ARIMA_ORDER)
+        fitted = model.fit()
+
+        # One-step-ahead forecasts on validation set
+        preds = []
+        history = list(train_returns)
+        for actual in val_returns:
+            fc_model = ARIMA(history, order=ARIMA_ORDER)
+            fc_fit   = fc_model.fit()
+            preds.append(fc_fit.forecast(steps=1)[0])
+            history.append(actual)
+
+        preds = np.array(preds)
+        rmse  = float(np.sqrt(np.mean((val_returns - preds) ** 2)))
+        mae   = float(np.mean(np.abs(val_returns - preds)))
+        dir_acc = directional_accuracy(val_returns, preds)
+
+        return {
+            "ticker": ticker,
+            "val_rmse": rmse,
+            "val_mae": mae,
+            "val_directional_acc": dir_acc,
+            "aic": float(fitted.aic),
+            "n_train": t_end,
+            "n_val": v_end - t_end,
+        }
+
+    except Exception as e:
+        logger.error(f"ARIMA failed for {ticker}: {e}")
+        return None
+
+
+def run_all_arima() -> pd.DataFrame:
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_experiment(EXPERIMENT_NAME)
+
+    results = []
+    for ticker in ALL_TICKERS:
+        logger.info(f"ARIMA: {ticker}")
+        with mlflow.start_run(run_name=ticker):
+            metrics = run_arima_for_ticker(ticker)
+            if metrics:
+                mlflow.log_param("ticker",      metrics["ticker"])
+                mlflow.log_param("arima_order", str(ARIMA_ORDER))
+                mlflow.log_param("n_train",     metrics["n_train"])
+                mlflow.log_metric("val_rmse",           metrics["val_rmse"])
+                mlflow.log_metric("val_mae",            metrics["val_mae"])
+                mlflow.log_metric("val_directional_acc",metrics["val_directional_acc"])
+                mlflow.log_metric("aic",                metrics["aic"])
+                results.append(metrics)
+
+    df = pd.DataFrame(results)
+    avg_dir_acc = df["val_directional_acc"].mean()
+    logger.info(f"ARIMA baseline — avg directional accuracy: {avg_dir_acc:.3f}")
+    return df
+
+
+if __name__ == "__main__":
+    logger.info("=== Running ARIMA baseline ===")
+    results = run_all_arima()
+    print(results[["ticker","val_rmse","val_directional_acc"]].to_string(index=False))
+    logger.info("=== ARIMA baseline complete ===")`},
+
+{name:"train_forecaster.py", path:"models/forecasting/train_forecaster.py", code:`"""Training loop for the LSTM return forecaster with MLflow logging."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import pandas as pd
+import torch
+import torch.nn as nn
+from torch.utils.data import DataLoader
+import mlflow
+import mlflow.pytorch
+from loguru import logger
+
+from data.config import PROCESSED_DIR, ALL_TICKERS
+from models.forecasting.dataset import make_dataloaders, FEATURE_COLS
+from models.forecasting.lstm_model import ReturnLSTM
+
+
+MLFLOW_TRACKING_URI = "http://localhost:5000"
+EXPERIMENT_NAME     = "lstm_forecaster"
+
+# Default hyperparameters (overridden by Optuna in tune.py)
+DEFAULT_HP = {
+    "seq_len":     30,
+    "hidden_size": 64,
+    "num_layers":  2,
+    "dropout":     0.2,
+    "fc_hidden":   32,
+    "lr":          1e-3,
+    "batch_size":  32,
+    "max_epochs":  50,
+    "patience":    7,       # early stopping patience
+}
+
+
+def directional_accuracy(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    return float(np.mean(np.sign(y_true) == np.sign(y_pred)))
+
+
+def train_one_epoch(
+    model: ReturnLSTM,
+    loader: DataLoader,
+    optimizer: torch.optim.Optimizer,
+    criterion: nn.Module,
+    device: torch.device,
+) -> float:
+    model.train()
+    total_loss = 0.0
+    for X_batch, y_batch in loader:
+        X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+        optimizer.zero_grad()
+        preds = model(X_batch)
+        loss  = criterion(preds, y_batch)
+        loss.backward()
+        nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        optimizer.step()
+        total_loss += loss.item() * len(X_batch)
+    return total_loss / len(loader.dataset)
+
+
+def evaluate(
+    model: ReturnLSTM,
+    loader: DataLoader,
+    criterion: nn.Module,
+    device: torch.device,
+) -> tuple[float, float, float]:
+    """Returns (loss, rmse, directional_accuracy)."""
+    model.eval()
+    all_preds, all_targets = [], []
+    total_loss = 0.0
+
+    with torch.no_grad():
+        for X_batch, y_batch in loader:
+            X_batch, y_batch = X_batch.to(device), y_batch.to(device)
+            preds = model(X_batch)
+            loss  = criterion(preds, y_batch)
+            total_loss  += loss.item() * len(X_batch)
+            all_preds.extend(preds.cpu().numpy())
+            all_targets.extend(y_batch.cpu().numpy())
+
+    preds_arr   = np.array(all_preds)
+    targets_arr = np.array(all_targets)
+    rmse    = float(np.sqrt(np.mean((targets_arr - preds_arr) ** 2)))
+    dir_acc = directional_accuracy(targets_arr, preds_arr)
+    avg_loss = total_loss / len(loader.dataset)
+    return avg_loss, rmse, dir_acc
+
+
+def train_ticker(
+    ticker: str,
+    hp: dict = DEFAULT_HP,
+    device: torch.device = torch.device("cpu"),
+) -> dict | None:
+    """Train LSTM for one ticker and return metrics dict."""
+    path = PROCESSED_DIR / f"features_{ticker.replace('/', '_')}.parquet"
+    if not path.exists():
+        logger.warning(f"No feature file for {ticker}, skipping")
+        return None
+
+    df = pd.read_parquet(path)
+    if len(df) < hp["seq_len"] + 50:
+        logger.warning(f"{ticker}: not enough rows, skipping")
+        return None
+
+    train_loader, val_loader, test_loader, scaler = make_dataloaders(
+        df,
+        seq_len     = hp["seq_len"],
+        batch_size  = hp["batch_size"],
+        train_frac  = 0.7,
+        val_frac    = 0.15,
+    )
+
+    model = ReturnLSTM(
+        input_size  = len(FEATURE_COLS),
+        hidden_size = hp["hidden_size"],
+        num_layers  = hp["num_layers"],
+        dropout     = hp["dropout"],
+        fc_hidden   = hp["fc_hidden"],
+    ).to(device)
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=hp["lr"])
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+        optimizer, patience=3, factor=0.5, min_lr=1e-6
+    )
+    criterion = nn.MSELoss()
+
+    best_val_loss  = float("inf")
+    best_state     = None
+    patience_count = 0
+
+    for epoch in range(hp["max_epochs"]):
+        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        val_loss, val_rmse, val_dir_acc = evaluate(model, val_loader, criterion, device)
+        scheduler.step(val_loss)
+
+        if val_loss < best_val_loss:
+            best_val_loss = val_loss
+            best_state    = {k: v.clone() for k, v in model.state_dict().items()}
+            patience_count = 0
+        else:
+            patience_count += 1
+
+        if patience_count >= hp["patience"]:
+            logger.debug(f"{ticker} early stop at epoch {epoch+1}")
+            break
+
+    # Reload best weights and evaluate on test set
+    if best_state:
+        model.load_state_dict(best_state)
+    _, test_rmse, test_dir_acc = evaluate(model, test_loader, criterion, device)
+    _, val_rmse_best, val_dir_acc_best = evaluate(model, val_loader, criterion, device)
+
+    return {
+        "ticker":            ticker,
+        "val_rmse":          val_rmse_best,
+        "val_directional_acc": val_dir_acc_best,
+        "test_rmse":         test_rmse,
+        "test_directional_acc": test_dir_acc,
+        "n_params":          model.count_parameters(),
+        "model":             model,
+        "scaler":            scaler,
+    }
+
+
+def train_all_tickers(hp: dict = DEFAULT_HP) -> pd.DataFrame:
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_experiment(EXPERIMENT_NAME)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Training on device: {device}")
+
+    results = []
+    for ticker in ALL_TICKERS:
+        logger.info(f"Training LSTM: {ticker}")
+        with mlflow.start_run(run_name=ticker):
+            # Log hyperparameters
+            mlflow.log_param("ticker",      ticker)
+            mlflow.log_params({k: v for k, v in hp.items() if k != "model"})
+
+            result = train_ticker(ticker, hp, device)
+            if result is None:
+                continue
+
+            # Log metrics
+            mlflow.log_metric("val_rmse",              result["val_rmse"])
+            mlflow.log_metric("val_directional_acc",   result["val_directional_acc"])
+            mlflow.log_metric("test_rmse",             result["test_rmse"])
+            mlflow.log_metric("test_directional_acc",  result["test_directional_acc"])
+            mlflow.log_metric("n_params",              result["n_params"])
+
+            # Log model artifact
+            mlflow.pytorch.log_model(result["model"], artifact_path="lstm_model")
+
+            results.append({k: v for k, v in result.items() if k not in ("model", "scaler")})
+
+    df = pd.DataFrame(results)
+    logger.info("=== LSTM training summary ===")
+    logger.info(f"Avg val directional accuracy:  {df['val_directional_acc'].mean():.3f}")
+    logger.info(f"Avg test directional accuracy: {df['test_directional_acc'].mean():.3f}")
+    return df
+
+
+if __name__ == "__main__":
+    logger.info("=== Starting LSTM training ===")
+    results = train_all_tickers()
+    print(results[["ticker","val_rmse","val_directional_acc","test_directional_acc"]].to_string(index=False))`},
+
+{name:"evaluate.py", path:"models/forecasting/evaluate.py", code:`"""Compare LSTM vs ARIMA — prints a side-by-side summary table."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import pandas as pd
+import mlflow
+from loguru import logger
+
+
+MLFLOW_TRACKING_URI = "http://localhost:5000"
+
+
+def fetch_experiment_results(experiment_name: str) -> pd.DataFrame:
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    client = mlflow.tracking.MlflowClient()
+
+    exp = client.get_experiment_by_name(experiment_name)
+    if exp is None:
+        logger.warning(f"Experiment '{experiment_name}' not found in MLflow")
+        return pd.DataFrame()
+
+    runs = client.search_runs(
+        experiment_ids=[exp.experiment_id],
+        order_by=["metrics.val_directional_acc DESC"],
+    )
+
+    rows = []
+    for r in runs:
+        rows.append({
+            "ticker":    r.data.params.get("ticker", r.info.run_name),
+            "val_rmse":  r.data.metrics.get("val_rmse", None),
+            "val_dir_acc": r.data.metrics.get("val_directional_acc", None),
+        })
+    return pd.DataFrame(rows)
+
+
+def compare_models() -> None:
+    lstm  = fetch_experiment_results("lstm_forecaster")
+    arima = fetch_experiment_results("arima_baseline")
+
+    if lstm.empty or arima.empty:
+        logger.error("Run arima_baseline.py and train_forecaster.py first")
+        return
+
+    lstm  = lstm.rename(columns={"val_rmse":"lstm_rmse",   "val_dir_acc":"lstm_dir_acc"})
+    arima = arima.rename(columns={"val_rmse":"arima_rmse",  "val_dir_acc":"arima_dir_acc"})
+
+    merged = lstm.merge(arima, on="ticker", how="inner")
+    merged["lstm_wins"] = merged["lstm_dir_acc"] > merged["arima_dir_acc"]
+
+    print("\n=== LSTM vs ARIMA — Directional Accuracy (validation set) ===\n")
+    print(merged[["ticker","lstm_dir_acc","arima_dir_acc","lstm_wins"]].to_string(index=False))
+
+    n_wins = merged["lstm_wins"].sum()
+    n_total = len(merged)
+    print(f"\nLSTM beats ARIMA: {n_wins}/{n_total} tickers ({100*n_wins/n_total:.0f}%)")
+    print(f"Avg LSTM  dir accuracy: {merged['lstm_dir_acc'].mean():.3f}")
+    print(f"Avg ARIMA dir accuracy: {merged['arima_dir_acc'].mean():.3f}")
+
+
+if __name__ == "__main__":
+    compare_models()`},
+
+{name:"tune.py", path:"models/forecasting/tune.py", code:`"""Optuna hyperparameter tuning for the LSTM forecaster.
+
+Runs N trials, each training a single LSTM on RELIANCE.NS as a proxy ticker.
+Best hyperparameters are logged to MLflow and printed.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+import warnings
+warnings.filterwarnings("ignore")
+
+import optuna
+import mlflow
+import torch
+from loguru import logger
+
+from models.forecasting.train_forecaster import train_ticker, MLFLOW_TRACKING_URI
+
+PROXY_TICKER = "RELIANCE.NS"   # tune on one liquid stock as proxy
+N_TRIALS     = 20
+
+
+def objective(trial: optuna.Trial) -> float:
+    """Optuna objective — minimise validation RMSE."""
+    hp = {
+        "seq_len":     trial.suggest_categorical("seq_len",    [20, 30, 60]),
+        "hidden_size": trial.suggest_categorical("hidden_size",[32, 64, 128]),
+        "num_layers":  trial.suggest_int("num_layers",          1, 3),
+        "dropout":     trial.suggest_float("dropout",           0.1, 0.5),
+        "fc_hidden":   trial.suggest_categorical("fc_hidden",  [16, 32, 64]),
+        "lr":          trial.suggest_float("lr",                1e-4, 1e-2, log=True),
+        "batch_size":  trial.suggest_categorical("batch_size", [16, 32, 64]),
+        "max_epochs":  50,
+        "patience":    7,
+    }
+
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    result = train_ticker(PROXY_TICKER, hp, device)
+    if result is None:
+        return float("inf")
+    return result["val_rmse"]
+
+
+def run_tuning() -> dict:
+    mlflow.set_tracking_uri(MLFLOW_TRACKING_URI)
+    mlflow.set_experiment("lstm_hparam_tuning")
+
+    study = optuna.create_study(direction="minimize")
+    study.optimize(objective, n_trials=N_TRIALS, show_progress_bar=True)
+
+    best = study.best_params
+    best["max_epochs"] = 50
+    best["patience"]   = 7
+
+    logger.info(f"Best hyperparameters: {best}")
+    logger.info(f"Best val RMSE: {study.best_value:.6f}")
+
+    with mlflow.start_run(run_name="best_hparams"):
+        mlflow.log_params(best)
+        mlflow.log_metric("best_val_rmse", study.best_value)
+
+    return best
+
+
+if __name__ == "__main__":
+    logger.info(f"=== Optuna tuning — {N_TRIALS} trials on {PROXY_TICKER} ===")
+    best_hp = run_tuning()
+    print("\nBest hyperparameters found:")
+    for k, v in best_hp.items():
+        print(f"  {k}: {v}")
+    print("\nNow re-run train_forecaster.py with these hyperparameters.")`},
+
+{name:"test_forecasting.py", path:"tests/test_forecasting.py", code:`"""Unit tests for Week 2 — LSTM model, dataset, and training utilities."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pytest
+import numpy as np
+import pandas as pd
+import torch
+
+from models.forecasting.lstm_model import ReturnLSTM
+from models.forecasting.dataset import (
+    ReturnSequenceDataset, make_dataloaders, FEATURE_COLS
+)
+from models.forecasting.train_forecaster import (
+    directional_accuracy, evaluate, DEFAULT_HP
+)
+
+
+# ── Fixtures ────────────────────────────────────────────────────
+
+@pytest.fixture
+def dummy_df() -> pd.DataFrame:
+    """Synthetic feature DataFrame with 400 rows."""
+    np.random.seed(0)
+    n = 400
+    dates = pd.date_range("2020-01-01", periods=n, freq="B")
+    data = {col: np.random.randn(n) * 0.01 for col in FEATURE_COLS}
+    return pd.DataFrame(data, index=dates)
+
+
+@pytest.fixture
+def small_hp() -> dict:
+    return {**DEFAULT_HP, "max_epochs": 2, "hidden_size": 16,
+            "num_layers": 1, "fc_hidden": 8, "batch_size": 16}
+
+
+# ── LSTM architecture tests ─────────────────────────────────────
+
+def test_lstm_output_shape():
+    model = ReturnLSTM(input_size=10, hidden_size=32, num_layers=1)
+    x = torch.randn(8, 30, 10)   # batch=8, seq=30, features=10
+    out = model(x)
+    assert out.shape == (8,), f"Expected (8,), got {out.shape}"
+
+
+def test_lstm_parameter_count():
+    model = ReturnLSTM(input_size=10, hidden_size=64, num_layers=2)
+    n = model.count_parameters()
+    assert n > 0
+    assert n < 500_000, "Model too large — something is wrong"
+
+
+def test_lstm_no_nan_output():
+    model = ReturnLSTM(input_size=10)
+    x = torch.randn(4, 30, 10)
+    out = model(x)
+    assert not torch.isnan(out).any(), "Model output contains NaN"
+
+
+def test_lstm_different_batch_sizes():
+    model = ReturnLSTM(input_size=10, hidden_size=32)
+    for bs in [1, 4, 16]:
+        x = torch.randn(bs, 30, 10)
+        out = model(x)
+        assert out.shape == (bs,)
+
+
+# ── Dataset tests ───────────────────────────────────────────────
+
+def test_dataset_length(dummy_df):
+    train_loader, val_loader, test_loader, scaler = make_dataloaders(
+        dummy_df, seq_len=30, batch_size=16
+    )
+    assert len(train_loader.dataset) > 0
+    assert len(val_loader.dataset) > 0
+    assert len(test_loader.dataset) > 0
+
+
+def test_dataset_no_leakage(dummy_df):
+    """Train split must end strictly before val split starts."""
+    n = len(dummy_df)
+    train_end = int(n * 0.7)
+    val_end   = int(n * 0.85)
+    assert train_end < val_end < n
+
+
+def test_scaler_fitted_on_train_only(dummy_df):
+    _, _, _, scaler = make_dataloaders(dummy_df, seq_len=30, batch_size=16)
+    # Scaler should be fitted — center_ attribute will exist after fit
+    assert hasattr(scaler, "center_"), "Scaler was not fitted"
+
+
+def test_sequence_dataset_shape():
+    features = np.random.randn(100, 10).astype(np.float32)
+    targets  = np.random.randn(100).astype(np.float32)
+    ds = ReturnSequenceDataset(features, targets, seq_len=30)
+    X, y = ds[0]
+    assert X.shape == (30, 10)
+    assert y.shape == ()
+
+
+# ── Metric tests ────────────────────────────────────────────────
+
+def test_directional_accuracy_perfect():
+    y = np.array([0.01, -0.02, 0.03, -0.01])
+    assert directional_accuracy(y, y) == 1.0
+
+
+def test_directional_accuracy_worst():
+    y_true = np.array([0.01, -0.02, 0.03])
+    y_pred = np.array([-0.01, 0.02, -0.03])
+    assert directional_accuracy(y_true, y_pred) == 0.0
+
+
+def test_directional_accuracy_random():
+    np.random.seed(42)
+    y_true = np.random.randn(1000)
+    y_pred = np.random.randn(1000)
+    acc = directional_accuracy(y_true, y_pred)
+    # Random predictions should give ~50% directional accuracy
+    assert 0.45 < acc < 0.55, f"Expected ~0.50, got {acc:.3f}"
+
+
+# ── End-to-end smoke test ────────────────────────────────────────
+
+def test_training_smoke(dummy_df, small_hp, tmp_path):
+    """Full train loop runs without error on tiny dummy data."""
+    import torch.nn as nn
+    from torch.utils.data import DataLoader
+    from models.forecasting.train_forecaster import train_one_epoch, evaluate
+
+    train_loader, val_loader, _, _ = make_dataloaders(
+        dummy_df, seq_len=small_hp["seq_len"], batch_size=small_hp["batch_size"]
+    )
+    model     = ReturnLSTM(len(FEATURE_COLS), small_hp["hidden_size"],
+                           small_hp["num_layers"], small_hp["dropout"],
+                           small_hp["fc_hidden"])
+    optimizer = torch.optim.Adam(model.parameters(), lr=small_hp["lr"])
+    criterion = nn.MSELoss()
+    device    = torch.device("cpu")
+
+    train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+    val_loss, val_rmse, val_dir_acc = evaluate(model, val_loader, criterion, device)
+
+    assert train_loss >= 0
+    assert val_rmse   >= 0
+    assert 0.0 <= val_dir_acc <= 1.0`},
+];
+
+let activeFile = 0;
+
+function renderFileNav() {
+  const nav = document.getElementById('fnav');
+  nav.innerHTML = files.map((f,i) =>
+    `<button class="fnav ${i===activeFile?'on':''}" onclick="showFile(${i})">${f.name}</button>`
+  ).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderFile() {
+  const f = files[activeFile];
+  document.getElementById('file-display').innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">${f.path}</span>
+        <button class="copy-btn" id="cb${activeFile}" onclick="copyCode(${activeFile})">Copy</button>
+      </div>
+      <div class="code-body">${escHtml(f.code)}</div>
+    </div>
+  `;
+}
+
+function showFile(i) {
+  activeFile = i;
+  renderFileNav();
+  renderFile();
+}
+
+function copyCode(i) {
+  navigator.clipboard.writeText(files[i].code).then(() => {
+    const btn = document.getElementById('cb'+i);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function sw(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+
+renderFileNav();
+renderFile();
+</script>

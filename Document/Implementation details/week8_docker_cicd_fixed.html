@@ -1,0 +1,219 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .15s}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.fnav-bar{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+</style>
+
+<div style="padding:1rem 0 0">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div><div style="font-size:18px;font-weight:500">8 of 10</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New files</div><div style="font-size:18px;font-weight:500">8</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New tools</div><div style="font-size:18px;font-weight:500">Docker + GH Actions</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div><div style="font-size:14px;font-weight:500;line-height:1.4">docker-compose up runs full stack</div></div>
+</div>
+
+<div class="tabs" id="main-tabs">
+  <button class="tab on" id="tab-setup" onclick="showTab('setup')">Setup & commands</button>
+  <button class="tab" id="tab-files" onclick="showTab('files')">All source files</button>
+  <button class="tab" id="tab-verify" onclick="showTab('verify')">Verification</button>
+</div>
+
+<!-- SETUP -->
+<div id="p-setup" class="panel on">
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Install Docker Desktop for Windows</div></div>
+  <p>Download from <strong>docker.com/products/docker-desktop</strong>. After install, open Docker Desktop and wait for the whale icon in the system tray to turn green.</p>
+  <div class="warn">In Docker Desktop → Settings → General: enable "Use WSL 2 based engine". Required for Windows.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Verify Docker is working</div></div>
+  <code class="cmd">docker --version
+docker compose version</code>
+  <div class="ok">Expected: Docker version 27.x.x and Docker Compose version v2.x.x</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Create folder for GitHub Actions</div></div>
+  <code class="cmd">mkdir .github\workflows</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Create all 8 files from the source files tab</div></div>
+  <p>Click <strong>All source files</strong> above and copy each file to its path. Order:</p>
+  <code class="cmd">serving\Dockerfile
+dashboard\Dockerfile
+docker-compose.yml
+.dockerignore
+.github\workflows\ci.yml
+.github\workflows\cd.yml
+pyproject.toml  (merge ruff config)
+Makefile        (replace with updated version)</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Generate requirements.txt</div></div>
+  <code class="cmd">pip freeze > requirements.txt</code>
+  <div class="warn">Open requirements.txt and change <code style="font-family:var(--font-mono)">torch==2.11.0+cpu</code> to <code style="font-family:var(--font-mono)">torch==2.11.0</code> — the +cpu suffix breaks pip inside Docker.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">6</div><div class="step-title">Build and start the full stack</div></div>
+  <code class="cmd">docker compose build
+docker compose up</code>
+  <div class="info">First build takes 8-12 minutes — downloads base images and installs all packages. Subsequent builds are fast due to layer caching.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">7</div><div class="step-title">Set up GitHub Secrets for CD</div></div>
+  <p>Go to your GitHub repo → Settings → Secrets and variables → Actions → New repository secret:</p>
+  <code class="cmd">DOCKER_HUB_USERNAME   your_dockerhub_username
+DOCKER_HUB_TOKEN      your_dockerhub_access_token
+API_KEY               portfolio-secret-key-change-in-production</code>
+  <p style="margin-top:6px">Get your DockerHub token at hub.docker.com → Account Settings → Security → New Access Token</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">8</div><div class="step-title">Push to GitHub and watch CI run</div></div>
+  <code class="cmd">git add .
+git commit -m "feat: Week 8 — Docker, docker-compose, GitHub Actions CI/CD"
+git push origin main</code>
+  <div class="ok">Go to your repo → Actions tab. Watch lint → test → build run. Green checkmarks = CI passing.</div>
+</div>
+</div>
+
+<!-- FILES -->
+<div id="p-files" class="panel">
+  <div class="fnav-bar" id="fnav-bar"></div>
+  <div id="file-display"></div>
+</div>
+
+<!-- VERIFY -->
+<div id="p-verify" class="panel">
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Check all containers are running</div></div>
+  <code class="cmd">docker compose ps</code>
+  <code class="cmd" style="color:var(--color-text-tertiary)">NAME                  STATUS     PORTS
+portfolio-mlflow      healthy    0.0.0.0:5000->5000/tcp
+portfolio-api         healthy    0.0.0.0:8000->8000/tcp
+portfolio-dashboard   healthy    0.0.0.0:8501->8501/tcp</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Test API from outside the container</div></div>
+  <code class="cmd">curl http://localhost:8000/health
+curl http://localhost:8000/ready</code>
+  <div class="ok">Both should return JSON with status ok/ready. Then open http://localhost:8501 for the dashboard.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Check image sizes</div></div>
+  <code class="cmd">docker images | findstr portfolio</code>
+  <p style="margin-top:6px">API image should be under 1.5GB. If larger, the multi-stage build may not have run correctly.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">View logs per service</div></div>
+  <code class="cmd">docker compose logs api --tail=30
+docker compose logs dashboard --tail=20</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Stop everything cleanly</div></div>
+  <code class="cmd">docker compose down</code>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ask-btn" onclick="sendPrompt('Week 8 of portfolio optimizer is done — Docker builds, docker-compose up runs full stack, GitHub Actions CI passing. Start Week 9 — monitoring and automated retraining.')">Week 8 done, start Week 9 ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('I got a Docker error in Week 8 of portfolio optimizer. Here is the error:')">Got a Docker error ↗</button>
+</div>
+</div>
+</div>
+
+<script>
+// ── Tab switching — no event.target, uses explicit id ──────────
+function showTab(id) {
+  ['setup','files','verify'].forEach(function(t) {
+    document.getElementById('p-' + t).classList.remove('on');
+    document.getElementById('tab-' + t).classList.remove('on');
+  });
+  document.getElementById('p-' + id).classList.add('on');
+  document.getElementById('tab-' + id).classList.add('on');
+}
+
+// ── File viewer ────────────────────────────────────────────────
+var files = [
+  {name:'serving/Dockerfile', path:'serving/Dockerfile', code:'# Multi-stage build for the FastAPI serving container\n\n# Stage 1: builder\nFROM python:3.11-slim AS builder\nWORKDIR /build\nRUN apt-get update && apt-get install -y --no-install-recommends \\\\\n    gcc g++ curl git \\\\\n    && rm -rf /var/lib/apt/lists/*\nCOPY requirements.txt ./\nRUN pip install --upgrade pip && \\\\\n    pip install --prefix=/install --no-cache-dir -r requirements.txt\n\n# Stage 2: runtime\nFROM python:3.11-slim AS runtime\nWORKDIR /app\nCOPY --from=builder /install /usr/local\nRUN groupadd -r appuser && useradd -r -g appuser -u 1000 appuser\nCOPY data/        ./data/\nCOPY models/      ./models/\nCOPY serving/     ./serving/\nCOPY backtesting/ ./backtesting/\nCOPY .env         ./.env\nRUN mkdir -p mlruns mlartifacts && chown -R appuser:appuser /app\nUSER appuser\nHEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \\\\\n    CMD curl -f http://localhost:8000/health || exit 1\nEXPOSE 8000\nCMD ["uvicorn", "serving.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]'},
+  {name:'dashboard/Dockerfile', path:'dashboard/Dockerfile', code:'FROM python:3.11-slim\nWORKDIR /app\nRUN apt-get update && apt-get install -y --no-install-recommends curl \\\\\n    && rm -rf /var/lib/apt/lists/*\nCOPY requirements.txt ./\nRUN pip install --upgrade pip && \\\\\n    pip install --no-cache-dir streamlit plotly pandas numpy httpx python-dotenv\nCOPY data/        ./data/\nCOPY dashboard/   ./dashboard/\nCOPY backtesting/ ./backtesting/\nCOPY models/      ./models/\nCOPY .env         ./.env\nCOPY .streamlit/  ./.streamlit/\nRUN groupadd -r appuser && useradd -r -g appuser -u 1000 appuser && \\\\\n    chown -R appuser:appuser /app\nUSER appuser\nHEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \\\\\n    CMD curl -f http://localhost:8501/_stcore/health || exit 1\nEXPOSE 8501\nCMD ["streamlit", "run", "dashboard/app.py", "--server.address=0.0.0.0", "--server.port=8501", "--server.headless=true"]'},
+  {name:'docker-compose.yml', path:'docker-compose.yml', code:'services:\n\n  mlflow:\n    image: ghcr.io/mlflow/mlflow:latest\n    container_name: portfolio-mlflow\n    ports:\n      - "5000:5000"\n    volumes:\n      - ./mlruns:/mlruns\n      - ./mlartifacts:/mlartifacts\n      - ./mlflow.db:/mlflow.db\n    command: >\n      mlflow server\n      --host 0.0.0.0\n      --port 5000\n      --backend-store-uri sqlite:////mlflow.db\n      --default-artifact-root /mlartifacts\n    healthcheck:\n      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]\n      interval: 30s\n      timeout: 10s\n      retries: 5\n      start_period: 20s\n    restart: unless-stopped\n\n  api:\n    build:\n      context: .\n      dockerfile: serving/Dockerfile\n    container_name: portfolio-api\n    ports:\n      - "8000:8000"\n    env_file:\n      - .env\n    environment:\n      - MLFLOW_TRACKING_URI=http://mlflow:5000\n    volumes:\n      - ./mlruns:/app/mlruns\n      - ./mlartifacts:/app/mlartifacts\n      - ./mlflow.db:/app/mlflow.db\n      - ./models/rl_agent/saved_models:/app/models/rl_agent/saved_models\n      - ./data:/app/data\n      - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json\n    depends_on:\n      mlflow:\n        condition: service_healthy\n    healthcheck:\n      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]\n      interval: 30s\n      timeout: 10s\n      retries: 3\n      start_period: 60s\n    restart: unless-stopped\n\n  dashboard:\n    build:\n      context: .\n      dockerfile: dashboard/Dockerfile\n    container_name: portfolio-dashboard\n    ports:\n      - "8501:8501"\n    env_file:\n      - .env\n    environment:\n      - API_BASE_URL=http://api:8000\n    volumes:\n      - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json\n      - ./data:/app/data\n    depends_on:\n      api:\n        condition: service_healthy\n    restart: unless-stopped'},
+  {name:'.dockerignore', path:'.dockerignore', code:'__pycache__/\n*.py[cod]\n*.pyo\n.pytest_cache/\nvenv/\n.venv/\nportvenv/\n.git/\n.gitignore\n*.ipynb\n.ipynb_checkpoints/\nhtmlcov/\n.coverage\n.idea/\n.vscode/\n.DS_Store\nThumbs.db\ndata/raw/\ndata/processed/\nmlruns/\nmlartifacts/\nmlflow.db\n*.log\ndocs/\n*.md'},
+  {name:'ci.yml', path:'.github/workflows/ci.yml', code:'name: CI\n\non:\n  push:\n    branches: ["**"]\n  pull_request:\n    branches: [main]\n\njobs:\n  lint-and-test:\n    name: Lint and Test\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Python 3.11\n        uses: actions/setup-python@v5\n        with:\n          python-version: "3.11"\n          cache: "pip"\n\n      - name: Install dependencies\n        run: |\n          pip install --upgrade pip\n          pip install ruff pytest pytest-cov\n          pip install torch --index-url https://download.pytorch.org/whl/cpu\n          pip install -r requirements.txt\n\n      - name: Lint with ruff\n        run: ruff check . --select E,F,I --ignore E501\n\n      - name: Run unit tests\n        run: |\n          pytest tests/test_data_pipeline.py \\\n                 tests/test_forecasting.py \\\n                 tests/test_env.py \\\n                 tests/test_agent.py \\\n                 tests/test_backtesting.py \\\n                 -v --tb=short\n        env:\n          PYTHONPATH: .\n\n      - name: Run API integration tests\n        run: pytest tests/test_api.py -v --tb=short\n        env:\n          PYTHONPATH: .\n          API_KEY: test-key\n\n  docker-build:\n    name: Docker Build Check\n    runs-on: ubuntu-latest\n    needs: lint-and-test\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Create dummy .env\n        run: |\n          echo "API_KEY=ci-test-key" > .env\n          echo "START_DATE=2019-01-01" >> .env\n          echo "END_DATE=2024-12-31" >> .env\n          echo "RAW_DATA_DIR=data/raw" >> .env\n          echo "PROCESSED_DATA_DIR=data/processed" >> .env\n\n      - name: Build API Docker image\n        run: docker build -f serving/Dockerfile -t portfolio-api:ci . --no-cache\n\n      - name: Verify image\n        run: docker images portfolio-api:ci'},
+  {name:'cd.yml', path:'.github/workflows/cd.yml', code:'name: CD\n\non:\n  push:\n    branches: [main]\n  workflow_dispatch:\n\njobs:\n  build-and-push:\n    name: Build and Push to Docker Hub\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n\n      - name: Set up Docker Buildx\n        uses: docker/setup-buildx-action@v3\n\n      - name: Log in to Docker Hub\n        uses: docker/login-action@v3\n        with:\n          username: ${{ secrets.DOCKER_HUB_USERNAME }}\n          password: ${{ secrets.DOCKER_HUB_TOKEN }}\n\n      - name: Extract metadata\n        id: meta\n        uses: docker/metadata-action@v5\n        with:\n          images: ${{ secrets.DOCKER_HUB_USERNAME }}/portfolio-api\n          tags: |\n            type=sha,prefix=sha-\n            type=ref,event=branch\n            latest\n\n      - name: Create dummy .env\n        run: |\n          echo "API_KEY=placeholder" > .env\n          echo "START_DATE=2019-01-01" >> .env\n          echo "END_DATE=2024-12-31" >> .env\n\n      - name: Build and push\n        uses: docker/build-push-action@v5\n        with:\n          context: .\n          file: serving/Dockerfile\n          push: true\n          tags: ${{ steps.meta.outputs.tags }}\n          cache-from: type=gha\n          cache-to: type=gha,mode=max\n\n      - name: Summary\n        run: |\n          echo "## Deploy Summary" >> $GITHUB_STEP_SUMMARY\n          echo "**Image:** ${{ secrets.DOCKER_HUB_USERNAME }}/portfolio-api" >> $GITHUB_STEP_SUMMARY\n          echo "**Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY'},
+  {name:'Makefile', path:'Makefile', code:'.PHONY: install lint test data train backtest serve dashboard up down logs clean\n\ninstall:\n\tpip install -e ".[dev]"\n\nlint:\n\truff check . --fix\n\ntest:\n\tpytest tests/ -v --tb=short\n\ndata:\n\tpython -m data.ingestion.fetch_data\n\tpython -m data.ingestion.feature_engineering\n\tpython -m data.ingestion.macro_features\n\ntrain:\n\tpython -m models.rl_agent.train_agent --algo ppo\n\tpython -m models.rl_agent.train_agent --algo sac\n\nbacktest:\n\tpython -m backtesting.walk_forward\n\tpython -m backtesting.report\n\nserve:\n\tuvicorn serving.main:app --host 0.0.0.0 --port 8000 --reload\n\ndashboard:\n\tstreamlit run dashboard/app.py\n\nup:\n\tdocker compose up --build\n\ndown:\n\tdocker compose down\n\nlogs:\n\tdocker compose logs -f\n\nclean:\n\tdocker compose down -v\n\tdocker system prune -f'},
+];
+
+var activeFile = 0;
+
+function renderFileNav() {
+  var bar = document.getElementById('fnav-bar');
+  bar.innerHTML = files.map(function(f, i) {
+    return '<button class="fnav ' + (i === activeFile ? 'on' : '') + '" onclick="showFile(' + i + ')">' + f.name + '</button>';
+  }).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderFile() {
+  var f = files[activeFile];
+  document.getElementById('file-display').innerHTML =
+    '<div class="code-block">' +
+      '<div class="code-header">' +
+        '<span class="code-filename">' + f.path + '</span>' +
+        '<button class="copy-btn" id="cb' + activeFile + '" onclick="copyCode(' + activeFile + ')">Copy</button>' +
+      '</div>' +
+      '<div class="code-body">' + escHtml(f.code) + '</div>' +
+    '</div>';
+}
+
+function showFile(i) {
+  activeFile = i;
+  renderFileNav();
+  renderFile();
+}
+
+function copyCode(i) {
+  navigator.clipboard.writeText(files[i].code).then(function() {
+    var b = document.getElementById('cb' + i);
+    b.textContent = 'Copied!';
+    setTimeout(function() { b.textContent = 'Copy'; }, 1500);
+  });
+}
+
+renderFileNav();
+renderFile();
+</script>

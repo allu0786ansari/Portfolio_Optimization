@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.cb{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.cfn{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.cpb{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.cbo{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.sh{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.sn{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.st{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.fnb{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fn{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fn.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ab{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.mt{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.cr{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:8px;margin-bottom:1rem}
+.cc{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.ct{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.cv{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+</style>
+</head>
+<body>
+<div style="padding:1rem 0 0">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="mt"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div><div style="font-size:18px;font-weight:500">9 of 10</div></div>
+  <div class="mt"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New files</div><div style="font-size:18px;font-weight:500">7</div></div>
+  <div class="mt"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New tools</div><div style="font-size:18px;font-weight:500">Prometheus+Airflow</div></div>
+  <div class="mt"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div><div style="font-size:14px;font-weight:500;line-height:1.4">Grafana live + DAG runs</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on"  id="T0" onclick="sw(0)">Key concepts</button>
+  <button class="tab"     id="T1" onclick="sw(1)">Setup &amp; commands</button>
+  <button class="tab"     id="T2" onclick="sw(2)">All source files</button>
+  <button class="tab"     id="T3" onclick="sw(3)">Verification</button>
+</div>
+
+<div id="P0" class="panel on">
+<p style="margin-bottom:1rem">This week's work is what interviewers mean when they ask "how do you handle model drift in production?"</p>
+<div class="cr">
+  <div class="cc"><div class="ct">What metrics we export</div><div class="cv">From FastAPI via prometheus_client: request_count (counter), request_latency_ms (histogram), portfolio_return_daily (gauge), rolling_sharpe_30d (gauge). The rolling Sharpe is the drift signal — when it drops below 0.5, we trigger retraining.</div></div>
+  <div class="cc"><div class="ct">Prometheus pull model</div><div class="cv">Prometheus is pull-based — it calls GET /metrics on your FastAPI every 15 seconds and stores the time series. You never push metrics. This is the opposite of logging and interviewers specifically ask about this distinction.</div></div>
+  <div class="cc"><div class="ct">Grafana alert → retraining</div><div class="cv">Grafana monitors rolling_sharpe_30d. When it drops below 0.5 for 10 consecutive minutes, a webhook fires to alert_trigger.py. That server calls airflow dags trigger. Fully automated — zero human intervention.</div></div>
+  <div class="cc"><div class="ct">Airflow DAG structure</div><div class="cv">5 tasks in sequence: fetch_new_data → engineer_features → train_models → evaluate_champion → notify_result. Each is a PythonOperator. If the challenger beats the champion by 5% Sharpe, it gets promoted in MLflow registry automatically.</div></div>
+  <div class="cc"><div class="ct">Champion-challenger logic</div><div class="cv">evaluate_champion loads current champion val_sharpe from MLflow, trains challenger, compares. If challenger_sharpe > champion_sharpe × 1.05, the challenger gets the "champion" alias. FastAPI hot-reload picks it up within 5 minutes.</div></div>
+  <div class="cc"><div class="ct">Why a 5% threshold?</div><div class="cv">Retraining is expensive and a worse model could be promoted. The threshold prevents model churn — we only replace when there is statistically meaningful improvement. This is standard champion-challenger strategy in production ML.</div></div>
+</div>
+</div>
+
+<div id="P1" class="panel">
+<div class="step"><div class="sh"><div class="sn">1</div><div class="st">Install Week 9 dependencies</div></div>
+<code class="cmd">pip install prometheus-client flask</code>
+<p style="margin-top:6px">For Airflow (install separately to avoid conflicts):</p>
+<code class="cmd">pip install apache-airflow --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-2.9.0/constraints-3.11.txt"</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">2</div><div class="st">Create folder structure</div></div>
+<code class="cmd">mkdir mlops\airflow\dags
+mkdir mlops\monitoring
+type nul > mlops\__init__.py
+type nul > mlops\airflow\__init__.py</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">3</div><div class="st">Create all 7 files from the source files tab</div></div>
+<p>Copy each file from the <strong>All source files</strong> tab in this order:</p>
+<code class="cmd">serving/metrics.py
+mlops/airflow/dags/retrain_dag.py
+mlops/monitoring/prometheus.yml
+mlops/monitoring/alert_trigger.py
+docker-compose.yml  (replace with updated version)
+tests/test_monitoring.py</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">4</div><div class="st">Add 3 lines to serving/main.py</div></div>
+<p>Add to imports at the top:</p>
+<code class="cmd">from serving.metrics import record_request, update_rolling_sharpe, load_sharpe_from_backtest, metrics_endpoint</code>
+<p style="margin-top:8px">Add inside the lifespan function after registry.load():</p>
+<code class="cmd">load_sharpe_from_backtest()</code>
+<p style="margin-top:8px">Add after the predict endpoint returns successfully (inside the try block, after result = predict_weights(...)):</p>
+<code class="cmd">record_request(latency_ms=result["latency_ms"], success=True)</code>
+<p style="margin-top:8px">Add a new endpoint at the bottom of main.py:</p>
+<code class="cmd">@app.get("/metrics", tags=["Ops"], include_in_schema=False)
+async def metrics():
+    return metrics_endpoint()</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">5</div><div class="st">Start full stack with Prometheus and Grafana</div></div>
+<code class="cmd">docker compose up --build</code>
+<div class="ok">Updated docker-compose.yml adds Prometheus (port 9090) and Grafana (port 3000).</div>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">6</div><div class="st">Initialise and start Airflow</div></div>
+<p>Open a new terminal (venv activated):</p>
+<code class="cmd">set AIRFLOW_HOME=%cd%\mlops\airflow
+airflow db init
+airflow users create --username admin --password admin --firstname AI --lastname Engineer --role Admin --email admin@example.com</code>
+<p style="margin-top:8px">Then two more terminals:</p>
+<code class="cmd">Terminal A: set AIRFLOW_HOME=%cd%\mlops\airflow && airflow webserver --port 8080
+Terminal B: set AIRFLOW_HOME=%cd%\mlops\airflow && airflow scheduler</code>
+<div class="ok">Open http://localhost:8080 — login admin/admin. Toggle retrain_portfolio_agent DAG on and hit Play to test it.</div>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">7</div><div class="st">Set up Grafana</div></div>
+<p>Open http://localhost:3000 (admin/admin):</p>
+<code class="cmd">1. Connections → Add → Prometheus → URL: http://prometheus:9090 → Save & Test
+2. Dashboards → New → Import → paste the grafana_dashboard.json content
+3. You will see: request rate, latency histogram, rolling Sharpe, portfolio return</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">8</div><div class="st">Run tests and commit</div></div>
+<code class="cmd">pytest tests/test_monitoring.py -v
+git add .
+git commit -m "feat: Week 9 — Prometheus metrics, Grafana, Airflow retraining DAG"</code>
+</div>
+</div>
+
+<div id="P2" class="panel">
+<div class="fnb" id="fnb"></div>
+<div id="fd"></div>
+</div>
+
+<div id="P3" class="panel">
+<div class="step"><div class="sh"><div class="sn">1</div><div class="st">Check /metrics exports Prometheus format</div></div>
+<code class="cmd">curl http://localhost:8000/metrics</code>
+<code class="cmd" style="color:var(--color-text-tertiary)"># HELP portfolio_requests_total Total prediction requests
+# TYPE portfolio_requests_total counter
+portfolio_requests_total{status="success"} 12.0
+# HELP portfolio_rolling_sharpe_30d Rolling 30-day Sharpe ratio
+# TYPE portfolio_rolling_sharpe_30d gauge
+portfolio_rolling_sharpe_30d 1.203</code>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">2</div><div class="st">Check Prometheus is scraping</div></div>
+<p>Open http://localhost:9090/targets — portfolio-api should show as UP (green).</p>
+<p style="margin-top:6px">In the query box type <code style="font-family:var(--font-mono)">portfolio_rolling_sharpe_30d</code> and click Execute.</p>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">3</div><div class="st">Trigger Airflow DAG manually</div></div>
+<code class="cmd">set AIRFLOW_HOME=%cd%\mlops\airflow
+airflow dags trigger retrain_portfolio_agent</code>
+<p style="margin-top:6px">Watch the run in the Airflow UI at http://localhost:8080. Each task turns green as it completes. Full run takes 20-30 minutes.</p>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">4</div><div class="st">Run monitoring tests</div></div>
+<code class="cmd">pytest tests/test_monitoring.py -v --tb=short</code>
+<div class="ok">All 8 tests should pass. These test the metrics module in isolation without needing Prometheus running.</div>
+</div>
+
+<div class="step"><div class="sh"><div class="sn">5</div><div class="st">Verify all 5 services healthy</div></div>
+<code class="cmd">docker compose ps</code>
+<code class="cmd" style="color:var(--color-text-tertiary)">portfolio-mlflow      healthy   :5000
+portfolio-api         healthy   :8000
+portfolio-dashboard   healthy   :8501
+portfolio-prometheus  running   :9090
+portfolio-grafana     running   :3000</code>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ab" onclick="sendPrompt('Week 9 of portfolio optimizer is done — Prometheus metrics live, Grafana showing rolling Sharpe, Airflow DAG runs successfully. Start Week 10 — polish, documentation and demo prep.')">Week 9 done, start Week 10 ↗</button>
+  <button class="ab" onclick="sendPrompt('I got an error in Week 9 of portfolio optimizer. Here is the error:')">Got an error ↗</button>
+</div>
+</div>
+
+</div>
+
+<script>
+var TABS = ['T0','T1','T2','T3'];
+var PANELS = ['P0','P1','P2','P3'];
+
+function sw(i) {
+  for (var k=0;k<TABS.length;k++) {
+    document.getElementById(TABS[k]).classList.remove('on');
+    document.getElementById(PANELS[k]).classList.remove('on');
+  }
+  document.getElementById(TABS[i]).classList.add('on');
+  document.getElementById(PANELS[i]).classList.add('on');
+}
+
+var FILES = [
+{n:'serving/metrics.py', p:'serving/metrics.py', c:'"""Prometheus metrics exported from FastAPI.\n\nMetrics:\n  portfolio_requests_total     - counter\n  portfolio_request_latency_ms - histogram\n  portfolio_return_daily       - gauge\n  portfolio_rolling_sharpe_30d - gauge (drift signal)\n"""\nimport json\nfrom pathlib import Path\nfrom collections import deque\nimport numpy as np\nfrom fastapi.responses import PlainTextResponse\nfrom prometheus_client import (\n    Counter, Histogram, Gauge,\n    generate_latest, CONTENT_TYPE_LATEST,\n)\n\nREQUEST_COUNT = Counter(\n    "portfolio_requests_total",\n    "Total prediction requests",\n    ["status"],\n)\nREQUEST_LATENCY = Histogram(\n    "portfolio_request_latency_ms",\n    "Request latency in milliseconds",\n    buckets=[10, 25, 50, 100, 200, 500, 1000],\n)\nPORTFOLIO_RETURN = Gauge(\n    "portfolio_return_daily",\n    "Most recent daily portfolio return",\n)\nROLLING_SHARPE = Gauge(\n    "portfolio_rolling_sharpe_30d",\n    "Rolling 30-day annualised Sharpe ratio",\n)\n\n_return_buffer: deque = deque(maxlen=30)\n\n\ndef record_request(latency_ms: float, success: bool = True) -> None:\n    REQUEST_COUNT.labels(status="success" if success else "error").inc()\n    REQUEST_LATENCY.observe(latency_ms)\n\n\ndef record_portfolio_return(daily_return: float) -> None:\n    _return_buffer.append(daily_return)\n    PORTFOLIO_RETURN.set(daily_return)\n    _update_rolling_sharpe()\n\n\ndef update_rolling_sharpe(sharpe: float) -> None:\n    ROLLING_SHARPE.set(sharpe)\n\n\ndef _update_rolling_sharpe() -> None:\n    if len(_return_buffer) < 5:\n        return\n    r = np.array(list(_return_buffer))\n    std = r.std()\n    if std > 1e-10:\n        ROLLING_SHARPE.set(float(r.mean() / std * np.sqrt(252)))\n\n\ndef load_sharpe_from_backtest() -> None:\n    try:\n        path = Path("backtesting/backtest_results.json")\n        if path.exists():\n            results = json.loads(path.read_text())\n            sharpe = results.get("strategies", {}).get("rl", {}).get("sharpe", 0.0)\n            ROLLING_SHARPE.set(sharpe)\n    except Exception:\n        pass\n\n\ndef metrics_endpoint() -> PlainTextResponse:\n    return PlainTextResponse(\n        generate_latest().decode("utf-8"),\n        media_type=CONTENT_TYPE_LATEST,\n    )'},
+
+{n:'retrain_dag.py', p:'mlops/airflow/dags/retrain_dag.py', c:'"""Airflow DAG: nightly portfolio agent retraining.\n\nSchedule: 18:00 IST Mon-Fri (12:30 UTC)\nTasks: fetch_new_data -> engineer_features -> train_models\n       -> evaluate_champion -> notify_result\n"""\nfrom __future__ import annotations\nfrom datetime import datetime, timedelta\nfrom airflow import DAG\nfrom airflow.operators.python import PythonOperator\n\nDEFAULT_ARGS = {\n    "owner": "ai-engineer",\n    "depends_on_past": False,\n    "retries": 1,\n    "retry_delay": timedelta(minutes=5),\n    "email_on_failure": False,\n}\nIMPROVEMENT_THRESHOLD = 0.05\n\n\ndef task_fetch_data(**context):\n    import sys; sys.path.insert(0, ".")\n    from data.ingestion.fetch_data import fetch_all_tickers, fetch_benchmarks\n    from data.config import ALL_TICKERS, RAW_DIR\n    from loguru import logger\n    import time\n    cutoff = time.time() - 86400\n    for f in RAW_DIR.glob("*.parquet"):\n        if f.stat().st_mtime < cutoff:\n            f.unlink()\n    fetch_all_tickers(ALL_TICKERS)\n    fetch_benchmarks()\n    logger.info("DAG: Data fetch complete")\n\n\ndef task_engineer_features(**context):\n    import sys; sys.path.insert(0, ".")\n    from data.ingestion.feature_engineering import engineer_all_features\n    from data.config import PROCESSED_DIR\n    from loguru import logger\n    for f in PROCESSED_DIR.glob("features_*.parquet"):\n        f.unlink()\n    engineer_all_features()\n    logger.info("DAG: Feature engineering complete")\n\n\ndef task_train_models(**context):\n    import sys; sys.path.insert(0, ".")\n    from models.rl_agent.train_agent import train\n    from loguru import logger\n    logger.info("DAG: Training PPO...")\n    train("ppo")\n    logger.info("DAG: Training SAC...")\n    train("sac")\n\n\ndef task_evaluate_champion(**context):\n    import sys; sys.path.insert(0, ".")\n    import mlflow\n    from loguru import logger\n    mlflow.set_tracking_uri("http://localhost:5000")\n    client = mlflow.tracking.MlflowClient()\n    try:\n        mv = client.get_model_version_by_alias("PortfolioAgent", "champion")\n        run = client.get_run(mv.run_id)\n        champ_sh = float(run.data.metrics.get("val_sharpe", 0.0))\n    except Exception:\n        champ_sh = 0.0\n    exp = client.get_experiment_by_name("rl_agent_training")\n    runs = client.search_runs(exp.experiment_id,\n        order_by=["metrics.val_sharpe DESC"], max_results=5)\n    best_run, best_sh = None, 0.0\n    for r in runs:\n        sh = float(r.data.metrics.get("val_sharpe", 0.0))\n        if sh > best_sh:\n            best_sh, best_run = sh, r\n    promoted = False\n    if best_run and best_sh > champ_sh * (1 + IMPROVEMENT_THRESHOLD):\n        versions = client.search_model_versions("name=\'PortfolioAgent\'")\n        latest = sorted(versions, key=lambda v: int(v.version))[-1]\n        client.set_registered_model_alias("PortfolioAgent", "champion", latest.version)\n        promoted = True\n        logger.info(f"NEW CHAMPION v{latest.version} Sharpe {best_sh:.3f}")\n    else:\n        logger.info(f"No promotion: {best_sh:.3f} vs threshold {champ_sh*1.05:.3f}")\n    context["ti"].xcom_push(key="promoted", value=promoted)\n    context["ti"].xcom_push(key="new_sharpe", value=best_sh)\n    context["ti"].xcom_push(key="champ_sharpe", value=champ_sh)\n\n\ndef task_notify_result(**context):\n    from loguru import logger\n    ti = context["ti"]\n    promoted = ti.xcom_pull(key="promoted", task_ids="evaluate_champion")\n    new_sh = ti.xcom_pull(key="new_sharpe", task_ids="evaluate_champion")\n    champ_sh = ti.xcom_pull(key="champ_sharpe", task_ids="evaluate_champion")\n    logger.info("=" * 50)\n    logger.info(f"DAG COMPLETE — {\'PROMOTED\' if promoted else \'NO CHANGE\'}")\n    logger.info(f"  New Sharpe:    {new_sh:.3f}")\n    logger.info(f"  Champ Sharpe:  {champ_sh:.3f}")\n    logger.info("=" * 50)\n\n\nwith DAG(\n    dag_id="retrain_portfolio_agent",\n    default_args=DEFAULT_ARGS,\n    description="Nightly retraining for portfolio RL agent",\n    schedule="30 12 * * 1-5",\n    start_date=datetime(2024, 1, 1),\n    catchup=False,\n    tags=["portfolio", "mlops"],\n    max_active_runs=1,\n) as dag:\n    fetch    = PythonOperator(task_id="fetch_new_data",     python_callable=task_fetch_data)\n    engineer = PythonOperator(task_id="engineer_features",  python_callable=task_engineer_features)\n    train    = PythonOperator(task_id="train_models",       python_callable=task_train_models, execution_timeout=timedelta(hours=2))\n    evaluate = PythonOperator(task_id="evaluate_champion",  python_callable=task_evaluate_champion)\n    notify   = PythonOperator(task_id="notify_result",      python_callable=task_notify_result)\n    fetch >> engineer >> train >> evaluate >> notify'},
+
+{n:'prometheus.yml', p:'mlops/monitoring/prometheus.yml', c:'global:\n  scrape_interval:     15s\n  evaluation_interval: 15s\n\nscrape_configs:\n  - job_name: "portfolio-api"\n    static_configs:\n      - targets: ["api:8000"]\n    metrics_path: "/metrics"\n    scrape_interval: 15s\n\n  - job_name: "prometheus"\n    static_configs:\n      - targets: ["localhost:9090"]'},
+
+{n:'alert_trigger.py', p:'mlops/monitoring/alert_trigger.py', c:'"""Webhook server: receives Grafana alerts and triggers Airflow DAG.\n\nRun: python mlops/monitoring/alert_trigger.py\nListens: http://localhost:5001/alert\nGrafana webhook URL: http://host.docker.internal:5001/alert\n"""\nimport subprocess\nimport os\nfrom pathlib import Path\nfrom flask import Flask, request, jsonify\nfrom loguru import logger\n\napp = Flask(__name__)\nAIRFLOW_HOME = str(Path("mlops/airflow").resolve())\nDAG_ID = "retrain_portfolio_agent"\n\n\n@app.route("/alert", methods=["POST"])\ndef receive_alert():\n    data  = request.get_json(silent=True) or {}\n    state = data.get("state", "alerting")\n    logger.info(f"Alert: state={state}")\n    if state == "alerting":\n        result = subprocess.run(\n            ["airflow", "dags", "trigger", DAG_ID],\n            env={**os.environ, "AIRFLOW_HOME": AIRFLOW_HOME},\n            capture_output=True, text=True,\n        )\n        if result.returncode == 0:\n            logger.info("DAG triggered successfully")\n            return jsonify({"status": "triggered"}), 200\n        logger.error(f"Trigger failed: {result.stderr}")\n        return jsonify({"status": "error"}), 500\n    return jsonify({"status": "ignored"}), 200\n\n\n@app.route("/health")\ndef health():\n    return jsonify({"status": "ok"}), 200\n\n\nif __name__ == "__main__":\n    app.run(host="0.0.0.0", port=5001, debug=False)'},
+
+{n:'docker-compose.yml (updated)', p:'docker-compose.yml', c:'# Full stack with Prometheus + Grafana added\nservices:\n\n  mlflow:\n    image: ghcr.io/mlflow/mlflow:latest\n    container_name: portfolio-mlflow\n    ports: ["5000:5000"]\n    volumes:\n      - ./mlruns:/mlruns\n      - ./mlartifacts:/mlartifacts\n      - ./mlflow.db:/mlflow.db\n    command: >\n      mlflow server --host 0.0.0.0 --port 5000\n      --backend-store-uri sqlite:////mlflow.db\n      --default-artifact-root /mlartifacts\n    healthcheck:\n      test: ["CMD","curl","-f","http://localhost:5000/health"]\n      interval: 30s\n      timeout: 10s\n      retries: 5\n      start_period: 20s\n    restart: unless-stopped\n\n  api:\n    build:\n      context: .\n      dockerfile: serving/Dockerfile\n    container_name: portfolio-api\n    ports: ["8000:8000"]\n    env_file: [.env]\n    environment:\n      - MLFLOW_TRACKING_URI=http://mlflow:5000\n    volumes:\n      - ./mlruns:/app/mlruns\n      - ./mlartifacts:/app/mlartifacts\n      - ./mlflow.db:/app/mlflow.db\n      - ./models/rl_agent/saved_models:/app/models/rl_agent/saved_models\n      - ./data:/app/data\n      - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json\n    depends_on:\n      mlflow:\n        condition: service_healthy\n    healthcheck:\n      test: ["CMD","curl","-f","http://localhost:8000/health"]\n      interval: 30s\n      timeout: 10s\n      retries: 3\n      start_period: 60s\n    restart: unless-stopped\n\n  dashboard:\n    build:\n      context: .\n      dockerfile: dashboard/Dockerfile\n    container_name: portfolio-dashboard\n    ports: ["8501:8501"]\n    env_file: [.env]\n    environment:\n      - API_BASE_URL=http://api:8000\n    volumes:\n      - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json\n      - ./data:/app/data\n    depends_on:\n      api:\n        condition: service_healthy\n    restart: unless-stopped\n\n  prometheus:\n    image: prom/prometheus:latest\n    container_name: portfolio-prometheus\n    ports: ["9090:9090"]\n    volumes:\n      - ./mlops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro\n      - prometheus_data:/prometheus\n    command:\n      - "--config.file=/etc/prometheus/prometheus.yml"\n      - "--storage.tsdb.path=/prometheus"\n      - "--storage.tsdb.retention.time=30d"\n    depends_on:\n      api:\n        condition: service_healthy\n    restart: unless-stopped\n\n  grafana:\n    image: grafana/grafana:latest\n    container_name: portfolio-grafana\n    ports: ["3000:3000"]\n    environment:\n      - GF_SECURITY_ADMIN_PASSWORD=admin\n      - GF_USERS_ALLOW_SIGN_UP=false\n    volumes:\n      - grafana_data:/var/lib/grafana\n    depends_on: [prometheus]\n    restart: unless-stopped\n\nvolumes:\n  prometheus_data:\n  grafana_data:'},
+
+{n:'test_monitoring.py', p:'tests/test_monitoring.py', c:'"""Unit tests for Week 9 Prometheus metrics."""\nimport sys\nfrom pathlib import Path\nsys.path.insert(0, str(Path(__file__).parent.parent))\n\nfrom serving.metrics import (\n    record_request, record_portfolio_return,\n    update_rolling_sharpe, _return_buffer,\n    ROLLING_SHARPE, REQUEST_COUNT,\n)\n\n\ndef test_record_request_increments_counter():\n    before = REQUEST_COUNT.labels(status="success")._value.get()\n    record_request(latency_ms=42.0, success=True)\n    after = REQUEST_COUNT.labels(status="success")._value.get()\n    assert after == before + 1\n\n\ndef test_record_request_error_status():\n    before = REQUEST_COUNT.labels(status="error")._value.get()\n    record_request(latency_ms=10.0, success=False)\n    after = REQUEST_COUNT.labels(status="error")._value.get()\n    assert after == before + 1\n\n\ndef test_record_request_does_not_raise():\n    record_request(latency_ms=123.4, success=True)\n\n\ndef test_record_portfolio_return_updates_buffer():\n    before = len(_return_buffer)\n    record_portfolio_return(0.005)\n    assert len(_return_buffer) == min(before + 1, 30)\n\n\ndef test_rolling_sharpe_positive_for_positive_returns():\n    for _ in range(10):\n        record_portfolio_return(0.001)\n    assert ROLLING_SHARPE._value.get() > 0\n\n\ndef test_update_rolling_sharpe_directly():\n    update_rolling_sharpe(1.42)\n    assert abs(ROLLING_SHARPE._value.get() - 1.42) < 1e-6\n\n\ndef test_rolling_sharpe_negative_for_negative_returns():\n    for _ in range(10):\n        record_portfolio_return(-0.002)\n    assert ROLLING_SHARPE._value.get() < 0\n\n\ndef test_return_buffer_max_size():\n    for _ in range(50):\n        record_portfolio_return(0.001)\n    assert len(_return_buffer) <= 30'},
+];
+
+var AF = 0;
+
+function rfn() {
+  var b = document.getElementById('fnb');
+  b.innerHTML = FILES.map(function(f,i){
+    return '<button class="fn '+(i===AF?'on':'')+'" onclick="sf('+i+')">'+f.n+'</button>';
+  }).join('');
+}
+
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function rfd() {
+  var f = FILES[AF];
+  document.getElementById('fd').innerHTML =
+    '<div class="cb"><div class="ch"><span class="cfn">'+f.p+'</span>'+
+    '<button class="cpb" id="cpb'+AF+'" onclick="cc('+AF+')">Copy</button></div>'+
+    '<div class="cbo">'+esc(f.c)+'</div></div>';
+}
+
+function sf(i){AF=i;rfn();rfd();}
+
+function cc(i){
+  navigator.clipboard.writeText(FILES[i].c).then(function(){
+    var b=document.getElementById('cpb'+i);
+    b.textContent='Copied!';
+    setTimeout(function(){b.textContent='Copy';},1500);
+  });
+}
+
+rfn(); rfd();
+</script>
+</body>
+</html>

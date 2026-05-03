@@ -1,0 +1,968 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.file-tree{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:1rem;font-family:var(--font-mono);font-size:12px;line-height:1.9;margin-bottom:1rem}
+.dir{color:#185FA5;font-weight:500}.file{color:var(--color-text-primary)}.cmt{color:var(--color-text-tertiary);font-style:italic}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;overflow-x:auto;position:relative;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.copy-btn:hover{background:var(--color-background-primary)}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary)}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.step p{font-size:13px;color:var(--color-text-secondary);line-height:1.6}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary)}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;margin:2px}
+.b-blue{background:#E6F1FB;color:#0C447C}
+.b-teal{background:#E1F5EE;color:#085041}
+.b-amber{background:#FAEEDA;color:#633806}
+.b-purple{background:#EEEDFE;color:#3C3489}
+.b-green{background:#EAF3DE;color:#27500A}
+.b-coral{background:#FAECE7;color:#712B13}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.success{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.file-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+</style>
+
+<h2 class="sr-only">Week 1 implementation guide: project setup, folder structure, and all source files for the portfolio optimization engine</h2>
+
+<div style="padding:1rem 0 0">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div>
+    <div style="font-size:18px;font-weight:500">1 of 10</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Files to create</div>
+    <div style="font-size:18px;font-weight:500">14</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Est. time</div>
+    <div style="font-size:18px;font-weight:500">5–7 hrs</div>
+  </div>
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px">
+    <div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div>
+    <div style="font-size:14px;font-weight:500;line-height:1.4">Clean data pipeline + tests passing</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('setup')">Setup & commands</button>
+  <button class="tab" onclick="sw('files')">All source files</button>
+  <button class="tab" onclick="sw('verify')">Verification</button>
+</div>
+
+<div id="p-setup" class="panel on">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Create project folder</div></div>
+  <p>Open PowerShell or Windows Terminal and run these commands one by one.</p>
+  <code class="cmd">mkdir portfolio-optimizer
+cd portfolio-optimizer
+mkdir data\raw data\processed data\ingestion models backtesting serving dashboard mlops\airflow\dags mlops\monitoring tests .github\workflows</code>
+  <p style="margin-top:8px">Then initialise Git:</p>
+  <code class="cmd">git init
+git checkout -b main</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create virtual environment</div></div>
+  <code class="cmd">python -m venv venv
+venv\Scripts\activate</code>
+  <div class="warn">Every time you open a new terminal you must run <code style="font-family:var(--font-mono)">venv\Scripts\activate</code> first. You will see (venv) in your prompt when it is active.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Install all Week 1 dependencies</div></div>
+  <code class="cmd">pip install yfinance pandas numpy scikit-learn requests python-dotenv loguru pytest pytest-cov dvc pyarrow fastparquet ta-lib-binary</code>
+  <div class="warn">If ta-lib-binary fails on Windows, run this instead: <code style="font-family:var(--font-mono)">pip install ta</code> — the code uses the <code style="font-family:var(--font-mono)">ta</code> library which is pip-friendly on Windows.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Create all files</div></div>
+  <p>Copy every file from the "All source files" tab into your project. The file path is shown at the top of each code block. Create the files in that exact location relative to your <code style="font-family:var(--font-mono)">portfolio-optimizer/</code> root.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Initialise DVC (data version control)</div></div>
+  <code class="cmd">pip install dvc
+dvc init
+dvc add data/raw
+echo "data/raw.dvc" >> .gitignore</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">6</div><div class="step-title">Run the data pipeline</div></div>
+  <code class="cmd">python -m data.ingestion.fetch_data
+python -m data.ingestion.feature_engineering
+python -m data.ingestion.macro_features</code>
+  <div class="success">After running, you should see Parquet files appearing in data/raw/ and data/processed/. Check the verification tab to confirm everything is correct.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">7</div><div class="step-title">Run tests</div></div>
+  <code class="cmd">pytest tests/ -v --cov=data --cov-report=term-missing</code>
+  <div class="success">Target: all 8 tests pass, coverage above 80% for the data module.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">8</div><div class="step-title">First Git commit</div></div>
+  <code class="cmd">git add .
+git commit -m "feat: Week 1 — data pipeline, feature engineering, tests"</code>
+</div>
+
+</div>
+
+<div id="p-files" class="panel">
+  <div class="file-nav" id="fnav"></div>
+  <div id="file-display"></div>
+</div>
+
+<div id="p-verify" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Check raw data was downloaded</div></div>
+  <code class="cmd">python -c "import os; files = os.listdir('data/raw'); print(f'{len(files)} files in data/raw:'); [print(' ', f) for f in files]"</code>
+  <p style="margin-top:6px">You should see one Parquet file per ticker — around 40 files total (20 Nifty50 + 20 S&P500 + macro).</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Inspect a processed feature file</div></div>
+  <code class="cmd">python -c "
+import pandas as pd
+df = pd.read_parquet('data/processed/features_RELIANCE.NS.parquet')
+print(df.shape)
+print(df.columns.tolist())
+print(df.tail(3))
+"</code>
+  <p style="margin-top:6px">Expected output: a DataFrame with ~1250 rows (5 years of daily data) and columns for price, returns, momentum, volatility, and beta features.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Check macro features</div></div>
+  <code class="cmd">python -c "
+import pandas as pd
+df = pd.read_parquet('data/processed/macro_features.parquet')
+print(df.columns.tolist())
+print(df.tail(3))
+"</code>
+  <p style="margin-top:6px">Expected columns: vix, us_10y_yield, india_vix, sector ETF returns.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Run tests with coverage</div></div>
+  <code class="cmd">pytest tests/test_data_pipeline.py -v --tb=short</code>
+  <p style="margin-top:6px">All 8 tests should pass. If any fail, the error message will tell you exactly which assertion failed.</p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Verify folder structure</div></div>
+  <code class="cmd">python -c "
+import os
+for root, dirs, files in os.walk('.'):
+    dirs[:] = [d for d in dirs if d not in ['venv','__pycache__','.git','.dvc']]
+    level = root.replace('.', '').count(os.sep)
+    indent = ' ' * 2 * level
+    print(f'{indent}{os.path.basename(root)}/')
+    for f in files:
+        print(f'{indent}  {f}')
+"</code>
+</div>
+
+<div style="margin-top:1.5rem">
+  <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:8px">Stuck on something?</p>
+  <button class="ask-btn" onclick="sendPrompt('I got an error running the data pipeline in Week 1 of the portfolio optimizer project. Help me debug it.')">Debug an error ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('Week 1 of portfolio optimizer is done and all tests pass. Start Week 2 — the LSTM forecasting model.')">Start Week 2 ↗</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const files = [
+  {
+    name:".env",path:".env",
+    code:`# .env — never commit this file to Git
+# Copy this to .env and fill in your values
+
+# Alpaca API (free at alpaca.markets — only needed for live data)
+ALPACA_API_KEY=your_alpaca_key_here
+ALPACA_SECRET_KEY=your_alpaca_secret_here
+
+# Data settings
+START_DATE=2019-01-01
+END_DATE=2024-12-31
+RAW_DATA_DIR=data/raw
+PROCESSED_DATA_DIR=data/processed
+
+# Logging
+LOG_LEVEL=INFO`
+  },
+  {
+    name:"pyproject.toml",path:"pyproject.toml",
+    code:`[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "portfolio-optimizer"
+version = "0.1.0"
+requires-python = ">=3.10"
+dependencies = [
+    "yfinance>=0.2.36",
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "scikit-learn>=1.4",
+    "ta>=0.11",
+    "pyarrow>=14.0",
+    "python-dotenv>=1.0",
+    "loguru>=0.7",
+    "requests>=2.31",
+    "dvc>=3.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "pytest-cov>=5.0", "ruff>=0.4", "mypy>=1.9"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"`
+  },
+  {
+    name:"Makefile",path:"Makefile",
+    code:`# Run these commands from the project root with: make <target>
+# On Windows: install make via  winget install GnuWin32.Make
+# Or just copy-paste the commands directly from the recipes below.
+
+.PHONY: install lint test data clean
+
+install:
+\tpip install -e ".[dev]"
+
+lint:
+\truff check . --fix
+\tmypy data/ --ignore-missing-imports
+
+test:
+\tpytest tests/ -v --cov=data --cov-report=term-missing
+
+data:
+\tpython -m data.ingestion.fetch_data
+\tpython -m data.ingestion.feature_engineering
+\tpython -m data.ingestion.macro_features
+
+clean:
+\tfind . -type d -name __pycache__ -exec rmdir /s /q {} + 2>nul || true
+\tfind . -name "*.pyc" -delete 2>nul || true`
+  },
+  {
+    name:"config.py",path:"data/config.py",
+    code:`"""Central configuration loaded from .env file."""
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# ── Directories ─────────────────────────────────────────────────
+ROOT_DIR = Path(__file__).parent.parent
+RAW_DIR = ROOT_DIR / os.getenv("RAW_DATA_DIR", "data/raw")
+PROCESSED_DIR = ROOT_DIR / os.getenv("PROCESSED_DATA_DIR", "data/processed")
+
+RAW_DIR.mkdir(parents=True, exist_ok=True)
+PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+
+# ── Date range ───────────────────────────────────────────────────
+START_DATE: str = os.getenv("START_DATE", "2019-01-01")
+END_DATE: str = os.getenv("END_DATE", "2024-12-31")
+
+# ── Asset universe ───────────────────────────────────────────────
+# Top 20 Nifty50 constituents by market cap
+NIFTY50_TICKERS: list[str] = [
+    "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",
+    "HINDUNILVR.NS", "SBIN.NS", "BAJFINANCE.NS", "BHARTIARTL.NS", "KOTAKBANK.NS",
+    "LT.NS", "AXISBANK.NS", "ASIANPAINT.NS", "MARUTI.NS", "TITAN.NS",
+    "NESTLEIND.NS", "WIPRO.NS", "ULTRACEMCO.NS", "POWERGRID.NS", "NTPC.NS",
+]
+
+# Top 20 S&P500 constituents by market cap
+SP500_TICKERS: list[str] = [
+    "AAPL", "MSFT", "NVDA", "AMZN", "GOOGL",
+    "META", "BERKB", "LLY", "TSLA", "AVGO",
+    "JPM", "V", "UNH", "XOM", "MA",
+    "PG", "COST", "HD", "JNJ", "ABBV",
+]
+
+ALL_TICKERS: list[str] = NIFTY50_TICKERS + SP500_TICKERS
+
+# ── Benchmark indices ────────────────────────────────────────────
+BENCHMARKS: dict[str, str] = {
+    "nifty50": "^NSEI",
+    "sp500": "^GSPC",
+}
+
+# ── Feature engineering settings ────────────────────────────────
+MOMENTUM_WINDOWS: list[int] = [21, 63, 126]   # ~1M, 3M, 6M trading days
+VOLATILITY_WINDOW: int = 21                    # 1-month rolling vol
+BETA_WINDOW: int = 63                          # 3-month rolling beta
+MIN_HISTORY_DAYS: int = 252                    # 1 year minimum to compute features`
+  },
+  {
+    name:"fetch_data.py",path:"data/ingestion/fetch_data.py",
+    code:`"""Downloads OHLCV price data for all tickers and saves as Parquet files."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import yfinance as yf
+import pandas as pd
+from loguru import logger
+
+from data.config import (
+    RAW_DIR, START_DATE, END_DATE,
+    ALL_TICKERS, BENCHMARKS
+)
+
+
+def fetch_ticker(ticker: str, start: str, end: str) -> pd.DataFrame | None:
+    """Download OHLCV data for a single ticker. Returns None on failure."""
+    try:
+        df = yf.download(
+            ticker,
+            start=start,
+            end=end,
+            auto_adjust=True,   # adjusted close — handles splits + dividends
+            progress=False,
+        )
+        if df.empty or len(df) < 50:
+            logger.warning(f"Skipping {ticker}: insufficient data ({len(df)} rows)")
+            return None
+
+        # Flatten multi-level columns if present
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+
+        df.index = pd.to_datetime(df.index)
+        df.index.name = "date"
+        logger.info(f"Downloaded {ticker}: {len(df)} rows ({df.index[0].date()} to {df.index[-1].date()})")
+        return df
+
+    except Exception as e:
+        logger.error(f"Failed to download {ticker}: {e}")
+        return None
+
+
+def fetch_all_tickers(
+    tickers: list[str],
+    start: str = START_DATE,
+    end: str = END_DATE,
+    output_dir: Path = RAW_DIR,
+) -> dict[str, pd.DataFrame]:
+    """Fetch all tickers and save each as a Parquet file. Returns dict of successful downloads."""
+    results: dict[str, pd.DataFrame] = {}
+
+    for ticker in tickers:
+        out_path = output_dir / f"{ticker.replace('/', '_')}.parquet"
+
+        if out_path.exists():
+            logger.info(f"Cache hit: {ticker} — loading from disk")
+            results[ticker] = pd.read_parquet(out_path)
+            continue
+
+        df = fetch_ticker(ticker, start, end)
+        if df is not None:
+            df.to_parquet(out_path, index=True)
+            results[ticker] = df
+
+    logger.info(f"Fetched {len(results)}/{len(tickers)} tickers successfully")
+    return results
+
+
+def fetch_benchmarks(
+    start: str = START_DATE,
+    end: str = END_DATE,
+    output_dir: Path = RAW_DIR,
+) -> dict[str, pd.DataFrame]:
+    """Fetch benchmark index data (Nifty50, S&P500)."""
+    results = {}
+    for name, ticker in BENCHMARKS.items():
+        out_path = output_dir / f"benchmark_{name}.parquet"
+        if out_path.exists():
+            results[name] = pd.read_parquet(out_path)
+            continue
+        df = fetch_ticker(ticker, start, end)
+        if df is not None:
+            df.to_parquet(out_path, index=True)
+            results[name] = df
+            logger.info(f"Saved benchmark {name} ({ticker})")
+    return results
+
+
+if __name__ == "__main__":
+    logger.info("=== Starting data fetch ===")
+    logger.info(f"Date range: {START_DATE} to {END_DATE}")
+    logger.info(f"Total tickers: {len(ALL_TICKERS)}")
+
+    fetch_all_tickers(ALL_TICKERS)
+    fetch_benchmarks()
+
+    logger.info("=== Data fetch complete ===")`
+  },
+  {
+    name:"feature_engineering.py",path:"data/ingestion/feature_engineering.py",
+    code:`"""Computes technical and price-based features for all downloaded tickers."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import pandas as pd
+import numpy as np
+from loguru import logger
+
+from data.config import (
+    RAW_DIR, PROCESSED_DIR, ALL_TICKERS,
+    MOMENTUM_WINDOWS, VOLATILITY_WINDOW, BETA_WINDOW, MIN_HISTORY_DAYS, BENCHMARKS
+)
+
+
+def compute_returns(df: pd.DataFrame) -> pd.Series:
+    """Log returns: ln(P_t / P_{t-1})."""
+    return np.log(df["Close"] / df["Close"].shift(1))
+
+
+def compute_momentum(returns: pd.Series, windows: list[int]) -> pd.DataFrame:
+    """Cumulative log return over each lookback window (momentum signal)."""
+    feats = {}
+    for w in windows:
+        feats[f"momentum_{w}d"] = returns.rolling(w).sum()
+    return pd.DataFrame(feats, index=returns.index)
+
+
+def compute_volatility(returns: pd.Series, window: int) -> pd.Series:
+    """Annualised rolling volatility."""
+    return returns.rolling(window).std() * np.sqrt(252)
+
+
+def compute_beta(
+    asset_returns: pd.Series,
+    benchmark_returns: pd.Series,
+    window: int,
+) -> pd.Series:
+    """Rolling market beta against a benchmark index."""
+    def _rolling_beta(idx: int) -> float:
+        if idx < window:
+            return np.nan
+        a = asset_returns.iloc[idx - window : idx].values
+        b = benchmark_returns.iloc[idx - window : idx].values
+        mask = ~(np.isnan(a) | np.isnan(b))
+        if mask.sum() < 20:
+            return np.nan
+        cov = np.cov(a[mask], b[mask])
+        var_b = cov[1, 1]
+        return cov[0, 1] / var_b if var_b > 1e-10 else np.nan
+
+    betas = [_rolling_beta(i) for i in range(len(asset_returns))]
+    return pd.Series(betas, index=asset_returns.index, name=f"beta_{window}d")
+
+
+def compute_rsi(returns: pd.Series, window: int = 14) -> pd.Series:
+    """Relative Strength Index."""
+    gain = returns.clip(lower=0).rolling(window).mean()
+    loss = (-returns.clip(upper=0)).rolling(window).mean()
+    rs = gain / (loss + 1e-10)
+    return 100 - (100 / (1 + rs))
+
+
+def compute_features_for_ticker(
+    ticker: str,
+    benchmark_returns: pd.Series,
+) -> pd.DataFrame | None:
+    """Load raw data for one ticker and compute all features."""
+    raw_path = RAW_DIR / f"{ticker.replace('/', '_')}.parquet"
+    if not raw_path.exists():
+        logger.warning(f"No raw data for {ticker}, skipping feature engineering")
+        return None
+
+    df = pd.read_parquet(raw_path)
+    if len(df) < MIN_HISTORY_DAYS:
+        logger.warning(f"{ticker}: only {len(df)} rows — skipping (min {MIN_HISTORY_DAYS})")
+        return None
+
+    # Align benchmark to same dates
+    bench = benchmark_returns.reindex(df.index)
+
+    returns = compute_returns(df)
+    features = pd.DataFrame(index=df.index)
+
+    # Price and volume
+    features["close"] = df["Close"]
+    features["volume"] = df.get("Volume", pd.Series(np.nan, index=df.index))
+    features["log_return"] = returns
+
+    # Momentum features
+    mom = compute_momentum(returns, MOMENTUM_WINDOWS)
+    features = pd.concat([features, mom], axis=1)
+
+    # Volatility
+    features["volatility_21d"] = compute_volatility(returns, VOLATILITY_WINDOW)
+    features["volatility_63d"] = compute_volatility(returns, 63)
+
+    # Beta
+    features["beta_63d"] = compute_beta(returns, bench, BETA_WINDOW)
+
+    # RSI
+    features["rsi_14"] = compute_rsi(returns, 14)
+
+    # Price vs moving averages
+    features["price_vs_ma50"] = df["Close"] / df["Close"].rolling(50).mean() - 1
+    features["price_vs_ma200"] = df["Close"] / df["Close"].rolling(200).mean() - 1
+
+    # Drop rows where features cannot be computed (beginning of series)
+    features = features.dropna(subset=["momentum_126d", "beta_63d"])
+
+    logger.info(f"Features for {ticker}: {features.shape} — {features.index[0].date()} to {features.index[-1].date()}")
+    return features
+
+
+def engineer_all_features(
+    tickers: list[str] = ALL_TICKERS,
+    output_dir: Path = PROCESSED_DIR,
+) -> dict[str, pd.DataFrame]:
+    """Run feature engineering for all tickers. Returns dict of feature DataFrames."""
+    # Load benchmark returns for beta calculation
+    nifty_path = RAW_DIR / "benchmark_nifty50.parquet"
+    sp500_path = RAW_DIR / "benchmark_sp500.parquet"
+
+    if not nifty_path.exists() or not sp500_path.exists():
+        raise FileNotFoundError(
+            "Benchmark files missing. Run fetch_data.py first."
+        )
+
+    nifty_returns = compute_returns(pd.read_parquet(nifty_path))
+    sp500_returns = compute_returns(pd.read_parquet(sp500_path))
+
+    results: dict[str, pd.DataFrame] = {}
+
+    for ticker in tickers:
+        # Use appropriate benchmark
+        bench = nifty_returns if ticker.endswith(".NS") else sp500_returns
+        feats = compute_features_for_ticker(ticker, bench)
+
+        if feats is not None:
+            out_path = output_dir / f"features_{ticker.replace('/', '_')}.parquet"
+            feats.to_parquet(out_path, index=True)
+            results[ticker] = feats
+
+    logger.info(f"Feature engineering complete: {len(results)}/{len(tickers)} tickers")
+    return results
+
+
+if __name__ == "__main__":
+    logger.info("=== Starting feature engineering ===")
+    engineer_all_features()
+    logger.info("=== Feature engineering complete ===")`
+  },
+  {
+    name:"macro_features.py",path:"data/ingestion/macro_features.py",
+    code:`"""Downloads macroeconomic indicators: VIX, US 10Y yield, sector ETFs."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import yfinance as yf
+import pandas as pd
+import numpy as np
+from loguru import logger
+
+from data.config import RAW_DIR, PROCESSED_DIR, START_DATE, END_DATE
+
+
+# Macro tickers available via yfinance
+MACRO_TICKERS: dict[str, str] = {
+    "vix": "^VIX",              # CBOE Volatility Index
+    "us_10y_yield": "^TNX",     # US 10-year treasury yield
+    "india_vix": "^INDIAVIX",   # India VIX (may be unavailable — handled gracefully)
+    "gold": "GC=F",             # Gold futures (safe-haven signal)
+    "dxy": "DX-Y.NYB",          # US Dollar Index
+}
+
+# US sector ETFs (useful regime signals)
+SECTOR_ETFS: dict[str, str] = {
+    "sector_tech": "XLK",
+    "sector_finance": "XLF",
+    "sector_energy": "XLE",
+    "sector_health": "XLV",
+}
+
+
+def fetch_series(ticker: str, name: str, start: str, end: str) -> pd.Series | None:
+    """Download a single time series and return as a named Series."""
+    try:
+        df = yf.download(ticker, start=start, end=end, auto_adjust=True, progress=False)
+        if df.empty:
+            logger.warning(f"No data for macro ticker {ticker} ({name})")
+            return None
+
+        if isinstance(df.columns, pd.MultiIndex):
+            df.columns = df.columns.get_level_values(0)
+
+        close = df["Close"].squeeze()
+        close.name = name
+        close.index = pd.to_datetime(close.index)
+        return close
+    except Exception as e:
+        logger.warning(f"Could not fetch {ticker} ({name}): {e}")
+        return None
+
+
+def build_macro_features(
+    start: str = START_DATE,
+    end: str = END_DATE,
+) -> pd.DataFrame:
+    """Download all macro series, compute derived features, return aligned DataFrame."""
+    series_list = []
+
+    # Download all macro tickers
+    for name, ticker in {**MACRO_TICKERS, **SECTOR_ETFS}.items():
+        s = fetch_series(ticker, name, start, end)
+        if s is not None:
+            series_list.append(s)
+
+    if not series_list:
+        raise RuntimeError("No macro data could be downloaded")
+
+    macro = pd.concat(series_list, axis=1)
+    macro = macro.sort_index()
+    macro.index.name = "date"
+
+    # Derived features
+    if "vix" in macro.columns:
+        macro["vix_change_1d"] = macro["vix"].pct_change()
+        macro["vix_ma10"] = macro["vix"].rolling(10).mean()
+        macro["vix_regime"] = (macro["vix"] > macro["vix"].rolling(63).mean()).astype(int)
+
+    if "us_10y_yield" in macro.columns:
+        macro["yield_change_1d"] = macro["us_10y_yield"].diff()
+
+    # Sector ETF returns
+    for col in SECTOR_ETFS:
+        if col in macro.columns:
+            macro[f"{col}_return_5d"] = np.log(
+                macro[col] / macro[col].shift(5)
+            )
+
+    # Forward-fill weekends and holidays, then drop NaN rows
+    macro = macro.ffill().dropna(how="all")
+
+    logger.info(f"Macro features: {macro.shape} — columns: {macro.columns.tolist()}")
+    return macro
+
+
+if __name__ == "__main__":
+    logger.info("=== Fetching macro features ===")
+    macro = build_macro_features()
+
+    out_path = PROCESSED_DIR / "macro_features.parquet"
+    macro.to_parquet(out_path, index=True)
+    logger.info(f"Saved macro features to {out_path}")
+    logger.info("=== Macro features complete ===")`
+  },
+  {
+    name:"__init__.py files",path:"data/__init__.py",
+    code:`# data/__init__.py  — empty, marks directory as Python package
+# Also create these empty __init__.py files:
+#   data/ingestion/__init__.py
+#   tests/__init__.py
+#
+# Run this command to create all of them at once:
+#   type nul > data\\__init__.py
+#   type nul > data\\ingestion\\__init__.py
+#   type nul > tests\\__init__.py`
+  },
+  {
+    name:"test_data_pipeline.py",path:"tests/test_data_pipeline.py",
+    code:`"""Unit tests for the Week 1 data pipeline."""
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pytest
+import pandas as pd
+import numpy as np
+
+from data.ingestion.feature_engineering import (
+    compute_returns,
+    compute_momentum,
+    compute_volatility,
+    compute_beta,
+    compute_rsi,
+)
+from data.config import NIFTY50_TICKERS, SP500_TICKERS, ALL_TICKERS, MOMENTUM_WINDOWS
+
+
+# ── Fixtures ─────────────────────────────────────────────────────
+
+@pytest.fixture
+def sample_prices() -> pd.Series:
+    """300 days of synthetic price data following a random walk."""
+    np.random.seed(42)
+    returns = np.random.normal(0.0005, 0.015, 300)
+    prices = 100 * np.exp(np.cumsum(returns))
+    dates = pd.date_range("2022-01-01", periods=300, freq="B")
+    df = pd.DataFrame({"Close": prices}, index=dates)
+    return df
+
+
+@pytest.fixture
+def sample_returns(sample_prices) -> pd.Series:
+    return compute_returns(sample_prices)
+
+
+# ── Config tests ──────────────────────────────────────────────────
+
+def test_ticker_lists_non_empty():
+    assert len(NIFTY50_TICKERS) == 20, "Expected 20 Nifty50 tickers"
+    assert len(SP500_TICKERS) == 20, "Expected 20 S&P500 tickers"
+    assert len(ALL_TICKERS) == 40
+
+
+def test_no_duplicate_tickers():
+    assert len(ALL_TICKERS) == len(set(ALL_TICKERS)), "Duplicate tickers found"
+
+
+def test_nifty_tickers_have_ns_suffix():
+    for t in NIFTY50_TICKERS:
+        assert t.endswith(".NS"), f"{t} should end with .NS for NSE"
+
+
+# ── Feature computation tests ─────────────────────────────────────
+
+def test_compute_returns_shape(sample_prices, sample_returns):
+    assert len(sample_returns) == len(sample_prices)
+
+
+def test_compute_returns_first_is_nan(sample_returns):
+    assert pd.isna(sample_returns.iloc[0]), "First log return must be NaN"
+
+
+def test_compute_returns_reasonable_range(sample_returns):
+    valid = sample_returns.dropna()
+    assert valid.abs().max() < 0.5, "Daily returns > 50% are suspicious"
+
+
+def test_momentum_columns(sample_returns):
+    mom = compute_momentum(sample_returns, MOMENTUM_WINDOWS)
+    assert set(mom.columns) == {f"momentum_{w}d" for w in MOMENTUM_WINDOWS}
+
+
+def test_momentum_shape(sample_returns):
+    mom = compute_momentum(sample_returns, MOMENTUM_WINDOWS)
+    assert len(mom) == len(sample_returns)
+
+
+def test_volatility_non_negative(sample_returns):
+    vol = compute_volatility(sample_returns, 21)
+    assert (vol.dropna() >= 0).all(), "Volatility must be non-negative"
+
+
+def test_beta_calculation(sample_returns):
+    # Use same series as benchmark — beta should converge to 1.0
+    beta = compute_beta(sample_returns, sample_returns, window=63)
+    valid = beta.dropna()
+    assert len(valid) > 0, "No valid beta values computed"
+    # Beta of an asset against itself should be ~1.0
+    assert abs(valid.mean() - 1.0) < 0.05, f"Self-beta should be ~1.0, got {valid.mean():.3f}"
+
+
+def test_rsi_bounded(sample_returns):
+    rsi = compute_rsi(sample_returns, 14)
+    valid = rsi.dropna()
+    assert (valid >= 0).all() and (valid <= 100).all(), "RSI must be in [0, 100]"
+
+
+# ── File existence tests (run after pipeline executes) ────────────
+
+def test_raw_data_files_exist():
+    from data.config import RAW_DIR
+    parquet_files = list(RAW_DIR.glob("*.parquet"))
+    # Lenient check — at least some files should exist after running fetch_data.py
+    # Skip this test if data hasn't been downloaded yet
+    if len(parquet_files) == 0:
+        pytest.skip("Raw data not downloaded yet — run fetch_data.py first")
+    assert len(parquet_files) >= 5, f"Expected at least 5 Parquet files, found {len(parquet_files)}"
+
+
+def test_processed_features_schema():
+    from data.config import PROCESSED_DIR
+    feature_files = list(PROCESSED_DIR.glob("features_*.parquet"))
+    if len(feature_files) == 0:
+        pytest.skip("Processed features not generated yet — run feature_engineering.py first")
+
+    df = pd.read_parquet(feature_files[0])
+    required_cols = ["close", "log_return", "momentum_21d", "volatility_21d", "beta_63d", "rsi_14"]
+    for col in required_cols:
+        assert col in df.columns, f"Missing expected column: {col}"
+
+    # No NaNs in the final processed file (we dropped them in feature engineering)
+    assert df.isnull().sum().sum() == 0, "Processed features should have no NaN values"`
+  },
+  {
+    name:".gitignore",path:".gitignore",
+    code:`# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables — NEVER commit this
+.env
+
+# Data — tracked by DVC not Git
+data/raw/
+data/processed/
+data/raw.dvc
+data/processed.dvc
+
+# DVC internals
+.dvc/tmp/
+.dvc/cache/
+
+# MLflow
+mlruns/
+mlartifacts/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# IDE
+.idea/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Test and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Docker
+*.tar
+
+# Logs
+*.log`
+  },
+  {
+    name:".pre-commit-config.yaml",path:".pre-commit-config.yaml",
+    code:`repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.4
+    hooks:
+      - id: ruff
+        args: [--fix]
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: ["--maxkb=500"]
+      - id: check-merge-conflict
+      - id: debug-statements`
+  },
+];
+
+let activeFile = 0;
+
+function renderFileNav() {
+  const nav = document.getElementById('fnav');
+  nav.innerHTML = files.map((f,i) =>
+    `<button class="fnav ${i===activeFile?'on':''}" onclick="showFile(${i})">${f.name}</button>`
+  ).join('');
+}
+
+function renderFile() {
+  const f = files[activeFile];
+  document.getElementById('file-display').innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">${f.path}</span>
+        <button class="copy-btn" onclick="copyCode(${activeFile})">Copy</button>
+      </div>
+      <div class="code-body" id="code-body-${activeFile}">${escHtml(f.code)}</div>
+    </div>
+  `;
+}
+
+function showFile(i) {
+  activeFile = i;
+  renderFileNav();
+  renderFile();
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function copyCode(i) {
+  navigator.clipboard.writeText(files[i].code).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function sw(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+
+renderFileNav();
+renderFile();
+</script>

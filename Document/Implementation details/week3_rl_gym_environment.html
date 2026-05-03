@@ -1,0 +1,911 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.copy-btn:hover{background:var(--color-background-primary)}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.file-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.concept-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:1rem}
+.concept{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.concept-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.concept-val{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+</style>
+
+<h2 class="sr-only">Week 3 implementation: custom OpenAI Gym environment for portfolio trading with RL</h2>
+
+<div style="padding:1rem 0 0">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div><div style="font-size:18px;font-weight:500">3 of 10</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New files</div><div style="font-size:18px;font-weight:500">5</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New packages</div><div style="font-size:18px;font-weight:500">2</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div><div style="font-size:14px;font-weight:500;line-height:1.4">Gym env passes SB3 checker</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('concept')">Key concepts</button>
+  <button class="tab" onclick="sw('setup')">Setup & commands</button>
+  <button class="tab" onclick="sw('files')">All source files</button>
+  <button class="tab" onclick="sw('verify')">Verification</button>
+</div>
+
+<!-- CONCEPT TAB -->
+<div id="p-concept" class="panel on">
+  <p style="margin-bottom:1rem">Before touching code, understand these 4 design decisions — interviewers will ask every one of them.</p>
+  <div class="concept-row">
+    <div class="concept">
+      <div class="concept-title">State space</div>
+      <div class="concept-val">For each of N assets: log_return, momentum (3 windows), volatility (2 windows), beta, RSI, price_vs_ma50, price_vs_ma200 = 10 features. Plus current portfolio weights (N values). Total: N×10 + N = N×11 floats. Flattened to a 1D vector.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Action space</div>
+      <div class="concept-val">Continuous vector of N floats in [-1, 1] (Box space). We apply softmax to project onto the simplex — all weights sum to 1, all non-negative. The agent learns raw logits; softmax handles the constraint.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Reward function</div>
+      <div class="concept-val">Sortino ratio of the episode window, minus a transaction cost penalty proportional to portfolio turnover. We use Sortino (not Sharpe) because it only penalises downside deviation — the agent learns to avoid drawdowns, not just reduce total volatility.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Episode structure</div>
+      <div class="concept-val">252 trading days (1 year). Random start date sampled from training window on each reset() call. This prevents the agent from memorising a specific market path and forces generalisation across market regimes.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Transaction costs</div>
+      <div class="concept-val">0.1% per unit of portfolio turnover. Turnover = sum of absolute weight changes. A full reallocation costs 0.1% × 2 = 0.2%. This discourages excessive trading and forces the agent to find stable allocations.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Why not use price directly?</div>
+      <div class="concept-val">Prices are non-stationary — they trend upward over time. Log returns are stationary and scale-invariant across assets. Using returns makes the state representation consistent across Nifty and S&P500 stocks with very different price levels.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP TAB -->
+<div id="p-setup" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Install Week 3 dependencies</div></div>
+  <code class="cmd">pip install gymnasium stable-baselines3</code>
+  <div class="info">gymnasium is the maintained fork of OpenAI Gym (gym is deprecated). stable-baselines3 provides the env checker utility we use to validate our environment.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create folder structure</div></div>
+  <code class="cmd">mkdir models\rl_agent
+type nul > models\rl_agent\__init__.py</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Create all 5 source files</div></div>
+  <p>Copy files from the <strong>All source files</strong> tab in this order:</p>
+  <p style="margin-top:6px">
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/portfolio_env.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/reward.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/data_loader.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/env_checker.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">tests/test_env.py</code>
+  </p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Run the environment checker</div></div>
+  <code class="cmd">python -m models.rl_agent.env_checker</code>
+  <div class="ok">Expected output: "Environment check passed!" from stable-baselines3 checker + a 5-episode sanity test showing episode rewards and final portfolio weights.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Run Week 3 tests</div></div>
+  <code class="cmd">pytest tests/test_env.py -v</code>
+  <div class="ok">Target: all tests pass. Then commit:
+git add . && git commit -m "feat: Week 3 — custom PortfolioEnv Gym environment"</div>
+</div>
+
+</div>
+
+<!-- FILES TAB -->
+<div id="p-files" class="panel">
+  <div class="file-nav" id="fnav"></div>
+  <div id="file-display"></div>
+</div>
+
+<!-- VERIFY TAB -->
+<div id="p-verify" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Run env checker and inspect output</div></div>
+  <code class="cmd">python -m models.rl_agent.env_checker</code>
+  <p style="margin-top:6px">Expected output looks like this:</p>
+  <code class="cmd" style="color:var(--color-text-tertiary)">Loaded 38 tickers with 1191 overlapping trading days
+State shape : (418,)   [38 assets x 11 features]
+Action shape: (38,)
+Environment check passed!
+
+--- 5-episode sanity test ---
+Ep 1 | steps=252 | total_reward= 0.847 | final_weights sum=1.000
+Ep 2 | steps=252 | total_reward= 1.203 | final_weights sum=1.000
+Ep 3 | steps=252 | total_reward=-0.312 | final_weights sum=1.000
+Ep 4 | steps=252 | total_reward= 0.654 | final_weights sum=1.000
+Ep 5 | steps=252 | total_reward= 0.921 | final_weights sum=1.000
+
+All checks passed. Ready for Week 4 RL training.</code>
+  <div class="info">Rewards will vary — positive and negative episodes are both normal. What matters is weights always sum to 1.0 and episodes run exactly 252 steps.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Manually step through the environment</div></div>
+  <code class="cmd">python -c "
+import sys; sys.path.insert(0, '.')
+from models.rl_agent.portfolio_env import PortfolioEnv
+import numpy as np
+
+env = PortfolioEnv()
+obs, info = env.reset()
+print('Obs shape:', obs.shape)
+print('Obs range: [{:.3f}, {:.3f}]'.format(obs.min(), obs.max()))
+
+# Random action
+action = env.action_space.sample()
+obs, reward, terminated, truncated, info = env.step(action)
+print('Step reward:', round(reward, 4))
+print('Weights sum:', round(info['weights'].sum(), 6))
+print('Turnover:   ', round(info['turnover'], 4))
+print('Port return:', round(info['portfolio_return'], 4))
+"</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Run full test suite</div></div>
+  <code class="cmd">pytest tests/ -v --tb=short</code>
+  <p style="margin-top:6px">All Week 1, 2, and 3 tests should pass together.</p>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ask-btn" onclick="sendPrompt('Week 3 of portfolio optimizer is done — PortfolioEnv passes SB3 checker, all tests pass. Start Week 4 — RL agent training with PPO and SAC.')">Week 3 done, start Week 4 ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('I got an error running env_checker.py in Week 3 of the portfolio optimizer. Here is the error:')">Got an error ↗</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const files = [
+{name:"reward.py", path:"models/rl_agent/reward.py", code:`"""Reward functions for the portfolio RL environment.
+
+We use Sortino ratio as the primary reward signal:
+- Rewards positive returns
+- Penalises downside deviation only (not all volatility like Sharpe)
+- Subtracts transaction cost proportional to portfolio turnover
+
+Why Sortino over Sharpe?
+  Sharpe penalises both upside and downside volatility equally.
+  Sortino only penalises downside — the agent learns to cut losses
+  without being punished for large positive returns.
+"""
+import numpy as np
+
+
+TRANSACTION_COST_RATE = 0.001   # 0.1% per unit of turnover
+RISK_FREE_DAILY       = 0.0     # simplification: 0% daily risk-free rate
+MIN_DOWNSIDE_STD      = 1e-8    # avoid division by zero
+
+
+def sortino_reward(
+    returns: np.ndarray,
+    weights_prev: np.ndarray,
+    weights_curr: np.ndarray,
+    annualise: bool = False,
+) -> tuple[float, dict]:
+    """Compute Sortino-based reward for one episode window.
+
+    Args:
+        returns:      array of daily portfolio returns during the episode
+        weights_prev: portfolio weights at start of episode
+        weights_curr: portfolio weights at end of episode
+        annualise:    if True, scale to annual Sortino
+
+    Returns:
+        reward: scalar reward value
+        info:   dict with breakdown components
+    """
+    if len(returns) == 0:
+        return 0.0, {}
+
+    # Portfolio return components
+    mean_return   = float(np.mean(returns))
+    total_return  = float(np.sum(returns))
+
+    # Downside deviation (only negative returns)
+    excess = returns - RISK_FREE_DAILY
+    downside = excess[excess < 0]
+    if len(downside) > 0:
+        downside_std = float(np.sqrt(np.mean(downside ** 2)))
+    else:
+        downside_std = MIN_DOWNSIDE_STD   # no negative days = great episode
+
+    # Sortino ratio
+    scale = np.sqrt(252) if annualise else 1.0
+    sortino = scale * (mean_return - RISK_FREE_DAILY) / max(downside_std, MIN_DOWNSIDE_STD)
+
+    # Transaction cost penalty
+    turnover = float(np.sum(np.abs(weights_curr - weights_prev)))
+    tc_penalty = TRANSACTION_COST_RATE * turnover
+
+    reward = float(sortino - tc_penalty)
+
+    info = {
+        "sortino":       sortino,
+        "mean_return":   mean_return,
+        "total_return":  total_return,
+        "downside_std":  downside_std,
+        "turnover":      turnover,
+        "tc_penalty":    tc_penalty,
+        "reward":        reward,
+    }
+    return reward, info
+
+
+def step_reward(
+    portfolio_return: float,
+    weights_prev: np.ndarray,
+    weights_curr: np.ndarray,
+) -> tuple[float, dict]:
+    """Per-step reward: log return minus transaction cost.
+
+    Used at each individual time step (as opposed to episode-level Sortino).
+    Simpler signal that works well with PPO's per-step advantage estimation.
+    """
+    tc_penalty = TRANSACTION_COST_RATE * float(np.sum(np.abs(weights_curr - weights_prev)))
+    reward = portfolio_return - tc_penalty
+
+    info = {
+        "portfolio_return": portfolio_return,
+        "turnover":         float(np.sum(np.abs(weights_curr - weights_prev))),
+        "tc_penalty":       tc_penalty,
+        "reward":           reward,
+    }
+    return reward, info`},
+
+{name:"data_loader.py", path:"models/rl_agent/data_loader.py", code:`"""Loads and aligns processed feature files for the RL environment.
+
+The environment needs all assets aligned to the same trading dates.
+This module handles the alignment and returns a clean dict of DataFrames.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import pandas as pd
+from loguru import logger
+
+from data.config import PROCESSED_DIR, ALL_TICKERS
+from models.forecasting.dataset import FEATURE_COLS
+
+
+def load_aligned_features(
+    tickers: list[str] = ALL_TICKERS,
+    feature_cols: list[str] = FEATURE_COLS,
+    min_overlap_days: int = 500,
+) -> tuple[dict[str, pd.DataFrame], list[str], pd.DatetimeIndex]:
+    """Load feature files for all tickers, align to common trading dates.
+
+    Returns:
+        features_dict : {ticker -> DataFrame(dates, features)}
+        valid_tickers : list of tickers that had sufficient data
+        common_dates  : DatetimeIndex of overlapping trading days
+    """
+    raw: dict[str, pd.DataFrame] = {}
+
+    for ticker in tickers:
+        path = PROCESSED_DIR / f"features_{ticker.replace('/', '_')}.parquet"
+        if not path.exists():
+            logger.warning(f"Missing feature file for {ticker}")
+            continue
+        df = pd.read_parquet(path)[feature_cols]
+        if df.isnull().any().any():
+            df = df.dropna()
+        raw[ticker] = df
+
+    if not raw:
+        raise RuntimeError("No feature files found. Run feature_engineering.py first.")
+
+    # Find common date index across all tickers
+    common_dates = None
+    for df in raw.values():
+        idx = df.index
+        common_dates = idx if common_dates is None else common_dates.intersection(idx)
+
+    if len(common_dates) < min_overlap_days:
+        raise RuntimeError(
+            f"Only {len(common_dates)} overlapping days — need {min_overlap_days}. "
+            "Check your date range and feature files."
+        )
+
+    # Align all DataFrames to common dates
+    aligned: dict[str, pd.DataFrame] = {}
+    for ticker, df in raw.items():
+        aligned[ticker] = df.loc[common_dates].copy()
+
+    valid_tickers = list(aligned.keys())
+    logger.info(
+        f"Loaded {len(valid_tickers)} tickers with "
+        f"{len(common_dates)} overlapping trading days "
+        f"({common_dates[0].date()} to {common_dates[-1].date()})"
+    )
+    return aligned, valid_tickers, common_dates
+
+
+def build_return_matrix(
+    features_dict: dict[str, pd.DataFrame],
+    tickers: list[str],
+) -> np.ndarray:
+    """Stack log_return series into (T, N) matrix for portfolio return calc."""
+    returns = [features_dict[t]["log_return"].values for t in tickers]
+    return np.stack(returns, axis=1)   # shape (T, N)`},
+
+{name:"portfolio_env.py", path:"models/rl_agent/portfolio_env.py", code:`"""Custom Gymnasium environment for portfolio allocation.
+
+Implements the OpenAI Gym interface:
+    reset()  -> (observation, info)
+    step()   -> (observation, reward, terminated, truncated, info)
+    render() -> None
+    close()  -> None
+
+Design decisions (asked in interviews):
+- Action space: Box(-1, 1, N) — agent outputs raw logits, softmax projects
+  onto the simplex. Weights always sum to 1, all non-negative.
+- State space: flattened (N assets x 11 features) + current weights = N*12
+- Reward: per-step log return minus transaction cost penalty
+- Episode length: 252 steps (1 trading year)
+- Random start: each reset() samples a random start date from the
+  training window — prevents memorisation of specific market paths
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import gymnasium as gym
+from gymnasium import spaces
+from loguru import logger
+
+from data.config import ALL_TICKERS
+from models.rl_agent.data_loader import load_aligned_features, build_return_matrix
+from models.rl_agent.reward import step_reward
+from models.forecasting.dataset import FEATURE_COLS
+
+
+EPISODE_LENGTH   = 252          # trading days per episode (1 year)
+N_FEATURES       = len(FEATURE_COLS)   # features per asset (10)
+SOFTMAX_TEMP     = 1.0          # temperature for softmax projection
+
+
+def softmax(x: np.ndarray, temperature: float = SOFTMAX_TEMP) -> np.ndarray:
+    """Numerically stable softmax — projects action vector onto simplex."""
+    x = x / temperature
+    x = x - np.max(x)   # stability: subtract max before exp
+    e = np.exp(x)
+    return e / e.sum()
+
+
+class PortfolioEnv(gym.Env):
+    """Portfolio allocation environment.
+
+    The agent learns to allocate capital across N assets to maximise
+    risk-adjusted returns while controlling transaction costs.
+
+    Attributes:
+        n_assets      : number of assets in the universe
+        observation_space : Box(N * (n_features + 1),)
+        action_space      : Box(-1, 1, N) — softmaxed to weights
+    """
+
+    metadata = {"render_modes": ["human"]}
+
+    def __init__(
+        self,
+        tickers: list[str] = ALL_TICKERS,
+        episode_length: int = EPISODE_LENGTH,
+        train_frac: float = 0.7,
+        seed: int | None = None,
+    ):
+        super().__init__()
+
+        # Load and align feature data
+        self.features_dict, self.tickers, self.dates = load_aligned_features(tickers)
+        self.n_assets        = len(self.tickers)
+        self.episode_length  = episode_length
+        self.return_matrix   = build_return_matrix(self.features_dict, self.tickers)
+
+        # Feature matrix: shape (T, N, F)
+        self.feature_matrix = np.stack(
+            [self.features_dict[t][FEATURE_COLS].values for t in self.tickers],
+            axis=1,
+        ).astype(np.float32)   # (T, N, F)
+
+        # Training window boundary (no leakage into val/test)
+        self.train_end_idx = int(len(self.dates) * train_frac) - episode_length - 1
+        if self.train_end_idx < episode_length:
+            raise ValueError("Not enough training data for episode length")
+
+        # Gymnasium spaces
+        obs_dim = self.n_assets * (N_FEATURES + 1)   # features + current weights
+        self.observation_space = spaces.Box(
+            low=-np.inf, high=np.inf,
+            shape=(obs_dim,), dtype=np.float32,
+        )
+        self.action_space = spaces.Box(
+            low=-1.0, high=1.0,
+            shape=(self.n_assets,), dtype=np.float32,
+        )
+
+        # Episode state
+        self._start_idx    : int        = 0
+        self._current_step : int        = 0
+        self._weights      : np.ndarray = np.ones(self.n_assets) / self.n_assets
+        self._portfolio_value : float   = 1.0
+        self._episode_returns : list[float] = []
+
+        # RNG
+        self.np_random, _ = gym.utils.seeding.np_random(seed)
+
+        logger.info(
+            f"PortfolioEnv ready: {self.n_assets} assets, "
+            f"obs={obs_dim}, action={self.n_assets}, "
+            f"episode_length={episode_length}"
+        )
+
+    # ── Gym interface ───────────────────────────────────────────────
+
+    def reset(
+        self,
+        seed: int | None = None,
+        options: dict | None = None,
+    ) -> tuple[np.ndarray, dict]:
+        super().reset(seed=seed)
+
+        # Random start index within training window
+        self._start_idx    = int(self.np_random.integers(
+            low=0, high=max(1, self.train_end_idx)
+        ))
+        self._current_step = 0
+        self._weights      = np.ones(self.n_assets, dtype=np.float32) / self.n_assets
+        self._portfolio_value = 1.0
+        self._episode_returns = []
+
+        obs = self._get_observation()
+        return obs, {"start_date": str(self.dates[self._start_idx])}
+
+    def step(
+        self, action: np.ndarray
+    ) -> tuple[np.ndarray, float, bool, bool, dict]:
+        """Execute one trading day.
+
+        1. Project action (raw logits) -> portfolio weights via softmax
+        2. Compute portfolio return for this day
+        3. Compute reward: step return - transaction cost
+        4. Update state
+        5. Return (obs, reward, terminated, truncated, info)
+        """
+        # Project action onto simplex
+        new_weights = softmax(action.astype(np.float32))
+
+        # Current market step
+        t = self._start_idx + self._current_step
+        asset_returns = self.return_matrix[t]   # shape (N,)
+
+        # Portfolio log return = weighted sum of asset returns
+        portfolio_return = float(np.dot(new_weights, asset_returns))
+        self._episode_returns.append(portfolio_return)
+
+        # Update portfolio value (compound)
+        self._portfolio_value *= np.exp(portfolio_return)
+
+        # Reward
+        reward, reward_info = step_reward(
+            portfolio_return = portfolio_return,
+            weights_prev     = self._weights,
+            weights_curr     = new_weights,
+        )
+
+        # Advance state
+        self._weights      = new_weights
+        self._current_step += 1
+
+        terminated = False
+        truncated  = self._current_step >= self.episode_length
+
+        obs  = self._get_observation()
+        info = {
+            "weights":          new_weights,
+            "portfolio_return":  portfolio_return,
+            "portfolio_value":  self._portfolio_value,
+            "step":             self._current_step,
+            **reward_info,
+        }
+        return obs, reward, terminated, truncated, info
+
+    def render(self, mode: str = "human") -> None:
+        t = self._start_idx + self._current_step
+        date_str = str(self.dates[t]) if t < len(self.dates) else "N/A"
+        top3 = sorted(
+            zip(self.tickers, self._weights),
+            key=lambda x: x[1], reverse=True
+        )[:3]
+        top3_str = ", ".join(f"{t}:{w:.2f}" for t, w in top3)
+        print(
+            f"Step {self._current_step:3d} | {date_str[:10]} | "
+            f"Value={self._portfolio_value:.4f} | Top3: {top3_str}"
+        )
+
+    def close(self) -> None:
+        pass
+
+    # ── Internal helpers ────────────────────────────────────────────
+
+    def _get_observation(self) -> np.ndarray:
+        """Build flat observation vector: [asset_features | current_weights]."""
+        t = self._start_idx + self._current_step
+        t = min(t, len(self.dates) - 1)   # clamp to valid range
+
+        # Feature slice: (N, F) -> flatten to (N*F,)
+        features = self.feature_matrix[t]             # (N, F)
+        features_flat = features.flatten()            # (N*F,)
+
+        # Clip extreme values (outliers in returns / vol)
+        features_flat = np.clip(features_flat, -10.0, 10.0)
+
+        obs = np.concatenate([features_flat, self._weights]).astype(np.float32)
+        return obs
+
+    @property
+    def episode_sharpe(self) -> float:
+        """Sharpe ratio of current/last episode (for logging)."""
+        if len(self._episode_returns) < 2:
+            return 0.0
+        r = np.array(self._episode_returns)
+        std = r.std()
+        return float(r.mean() / std * np.sqrt(252)) if std > 1e-8 else 0.0
+
+    @property
+    def episode_sortino(self) -> float:
+        """Sortino ratio of current/last episode (for logging)."""
+        if len(self._episode_returns) < 2:
+            return 0.0
+        r = np.array(self._episode_returns)
+        downside = r[r < 0]
+        if len(downside) == 0:
+            return float(r.mean() * np.sqrt(252) / 1e-8)
+        downside_std = np.sqrt(np.mean(downside ** 2))
+        return float(r.mean() / downside_std * np.sqrt(252)) if downside_std > 1e-8 else 0.0`},
+
+{name:"env_checker.py", path:"models/rl_agent/env_checker.py", code:`"""Validates the PortfolioEnv using stable-baselines3 environment checker.
+
+Run this script to confirm the environment is correctly implemented
+before starting RL agent training in Week 4.
+
+Expected output:
+  - "Environment check passed!" from SB3 checker
+  - 5-episode sanity test showing consistent weights sum = 1.0
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+from stable_baselines3.common.env_checker import check_env
+from loguru import logger
+
+from models.rl_agent.portfolio_env import PortfolioEnv
+
+
+def run_env_checker() -> None:
+    logger.info("Initialising PortfolioEnv...")
+    env = PortfolioEnv(seed=42)
+
+    print(f"State shape : {env.observation_space.shape}")
+    print(f"Action shape: {env.action_space.shape}")
+    print(f"N assets    : {env.n_assets}")
+    print(f"Tickers     : {env.tickers[:5]} ... (showing first 5)")
+    print()
+
+    # SB3 environment checker — validates all Gym interface requirements
+    logger.info("Running stable-baselines3 environment checker...")
+    check_env(env, warn=True)
+    print("Environment check passed!")
+    print()
+
+    # 5-episode sanity test
+    print("--- 5-episode sanity test ---")
+    for ep in range(1, 6):
+        obs, info = env.reset(seed=ep)
+        assert obs.shape == env.observation_space.shape, "Obs shape mismatch"
+
+        total_reward = 0.0
+        final_weights = None
+
+        for _ in range(env.episode_length):
+            action = env.action_space.sample()
+            obs, reward, terminated, truncated, info = env.step(action)
+            total_reward += reward
+            final_weights = info["weights"]
+
+            assert not np.isnan(reward),       "Reward is NaN"
+            assert not np.isnan(obs).any(),    "Obs contains NaN"
+            assert abs(info["weights"].sum() - 1.0) < 1e-5, \
+                f"Weights don't sum to 1: {info['weights'].sum()}"
+
+            if terminated or truncated:
+                break
+
+        sharpe = env.episode_sharpe
+        print(
+            f"Ep {ep} | steps={env._current_step} | "
+            f"total_reward={total_reward:+.3f} | "
+            f"sharpe={sharpe:+.3f} | "
+            f"weights_sum={final_weights.sum():.6f}"
+        )
+
+    print()
+    print("All checks passed. Ready for Week 4 RL training.")
+    env.close()
+
+
+if __name__ == "__main__":
+    run_env_checker()`},
+
+{name:"test_env.py", path:"tests/test_env.py", code:`"""Unit tests for Week 3 — PortfolioEnv Gym environment."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pytest
+import numpy as np
+
+from models.rl_agent.portfolio_env import PortfolioEnv, softmax
+from models.rl_agent.reward import step_reward, sortino_reward
+
+
+# ── Fixtures ────────────────────────────────────────────────────
+
+@pytest.fixture(scope="module")
+def env():
+    """Shared env instance — loading data once is slow, reuse across tests."""
+    e = PortfolioEnv(seed=0)
+    yield e
+    e.close()
+
+
+# ── Softmax tests ────────────────────────────────────────────────
+
+def test_softmax_sums_to_one():
+    x = np.array([1.0, 2.0, -1.0, 0.5])
+    w = softmax(x)
+    assert abs(w.sum() - 1.0) < 1e-6
+
+
+def test_softmax_all_positive():
+    x = np.random.randn(20)
+    w = softmax(x)
+    assert (w > 0).all()
+
+
+def test_softmax_numerical_stability():
+    # Large values should not produce inf or nan
+    x = np.array([1000.0, -1000.0, 500.0])
+    w = softmax(x)
+    assert not np.isnan(w).any()
+    assert not np.isinf(w).any()
+
+
+# ── Space tests ──────────────────────────────────────────────────
+
+def test_observation_space_shape(env):
+    obs, _ = env.reset()
+    assert obs.shape == env.observation_space.shape
+
+
+def test_action_space_shape(env):
+    assert env.action_space.shape == (env.n_assets,)
+
+
+def test_observation_no_nan(env):
+    obs, _ = env.reset()
+    assert not np.isnan(obs).any(), "Observation contains NaN after reset"
+
+
+def test_observation_no_inf(env):
+    obs, _ = env.reset()
+    assert not np.isinf(obs).any(), "Observation contains Inf after reset"
+
+
+# ── Step tests ───────────────────────────────────────────────────
+
+def test_step_returns_correct_types(env):
+    env.reset()
+    action = env.action_space.sample()
+    obs, reward, terminated, truncated, info = env.step(action)
+    assert isinstance(obs,        np.ndarray)
+    assert isinstance(reward,     float)
+    assert isinstance(terminated, bool)
+    assert isinstance(truncated,  bool)
+    assert isinstance(info,       dict)
+
+
+def test_weights_sum_to_one(env):
+    env.reset()
+    for _ in range(10):
+        action = env.action_space.sample()
+        _, _, _, _, info = env.step(action)
+        assert abs(info["weights"].sum() - 1.0) < 1e-5, \
+            f"Weights sum to {info['weights'].sum()}, expected 1.0"
+
+
+def test_weights_all_non_negative(env):
+    env.reset()
+    for _ in range(10):
+        action = env.action_space.sample()
+        _, _, _, _, info = env.step(action)
+        assert (info["weights"] >= 0).all()
+
+
+def test_episode_terminates_at_252_steps(env):
+    env.reset()
+    steps = 0
+    while True:
+        action = env.action_space.sample()
+        _, _, terminated, truncated, _ = env.step(action)
+        steps += 1
+        if terminated or truncated:
+            break
+    assert steps == 252, f"Episode length should be 252, got {steps}"
+
+
+def test_portfolio_value_positive(env):
+    env.reset()
+    for _ in range(50):
+        action = env.action_space.sample()
+        _, _, _, _, info = env.step(action)
+        assert info["portfolio_value"] > 0
+
+
+def test_reward_finite(env):
+    env.reset()
+    for _ in range(20):
+        action = env.action_space.sample()
+        _, reward, _, _, _ = env.step(action)
+        assert np.isfinite(reward), f"Reward is not finite: {reward}"
+
+
+# ── Reset tests ──────────────────────────────────────────────────
+
+def test_reset_resets_step_counter(env):
+    env.reset()
+    for _ in range(10):
+        env.step(env.action_space.sample())
+    env.reset()
+    assert env._current_step == 0
+
+
+def test_reset_resets_weights_to_equal(env):
+    env.reset()
+    expected = np.ones(env.n_assets) / env.n_assets
+    np.testing.assert_allclose(env._weights, expected, atol=1e-6)
+
+
+def test_multiple_resets_stable(env):
+    for seed in range(5):
+        obs, info = env.reset(seed=seed)
+        assert not np.isnan(obs).any()
+        assert "start_date" in info
+
+
+# ── Reward function tests ────────────────────────────────────────
+
+def test_step_reward_no_transaction_cost():
+    n = 5
+    w = np.ones(n) / n   # equal weights — same before and after
+    r, info = step_reward(0.01, w, w)
+    # No turnover means no transaction cost
+    assert info["tc_penalty"] == 0.0
+    assert abs(r - 0.01) < 1e-8
+
+
+def test_step_reward_penalises_turnover():
+    n = 4
+    w_prev = np.array([0.25, 0.25, 0.25, 0.25])
+    w_curr = np.array([1.00, 0.00, 0.00, 0.00])
+    r_with_cost, info = step_reward(0.01, w_prev, w_curr)
+    r_no_cost = 0.01
+    assert r_with_cost < r_no_cost
+    assert info["tc_penalty"] > 0
+
+
+def test_sortino_positive_returns():
+    returns = np.abs(np.random.randn(252)) * 0.01  # all positive returns
+    n = 5
+    w = np.ones(n) / n
+    reward, info = sortino_reward(returns, w, w)
+    # No downside -> high Sortino -> positive reward
+    assert reward > 0
+
+
+def test_sortino_all_negative():
+    returns = -np.abs(np.random.randn(252)) * 0.01  # all negative
+    n = 5
+    w = np.ones(n) / n
+    reward, info = sortino_reward(returns, w, w)
+    assert reward < 0`},
+];
+
+let activeFile = 0;
+
+function renderFileNav() {
+  const nav = document.getElementById('fnav');
+  nav.innerHTML = files.map((f,i) =>
+    `<button class="fnav ${i===activeFile?'on':''}" onclick="showFile(${i})">${f.name}</button>`
+  ).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderFile() {
+  const f = files[activeFile];
+  document.getElementById('file-display').innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">${f.path}</span>
+        <button class="copy-btn" id="cb${activeFile}" onclick="copyCode(${activeFile})">Copy</button>
+      </div>
+      <div class="code-body">${escHtml(f.code)}</div>
+    </div>
+  `;
+}
+
+function showFile(i) {
+  activeFile = i;
+  renderFileNav();
+  renderFile();
+}
+
+function copyCode(i) {
+  navigator.clipboard.writeText(files[i].code).then(() => {
+    const btn = document.getElementById('cb'+i);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function sw(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+
+renderFileNav();
+renderFile();
+</script>

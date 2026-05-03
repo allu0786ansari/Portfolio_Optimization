@@ -1,0 +1,997 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.tabs{display:flex;gap:2px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;flex-wrap:wrap}
+.tab{font-size:12px;font-weight:500;padding:7px 14px;cursor:pointer;border:none;background:transparent;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap}
+.tab.on{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary)}
+.panel{display:none}.panel.on{display:block}
+.code-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);font-family:var(--font-mono);font-size:12px;line-height:1.7;margin-bottom:1rem}
+.code-header{display:flex;align-items:center;justify-content:space-between;padding:8px 14px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.code-filename{font-size:12px;font-weight:500;color:var(--color-text-secondary)}
+.copy-btn{font-size:11px;padding:3px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer}
+.copy-btn:hover{background:var(--color-background-primary)}
+.code-body{padding:1rem 1.25rem;white-space:pre;overflow-x:auto;color:var(--color-text-primary);font-size:12px}
+.step{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:10px}
+.step-head{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.step-num{width:22px;height:22px;border-radius:50%;background:var(--color-background-secondary);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.step-title{font-size:14px;font-weight:500;color:var(--color-text-primary)}
+.cmd{display:block;background:var(--color-background-secondary);border-radius:var(--border-radius-md);font-family:var(--font-mono);font-size:12px;padding:8px 12px;margin:6px 0;color:var(--color-text-primary);white-space:pre-wrap;word-break:break-all}
+.ok{background:#E1F5EE;border:0.5px solid #5DCAA5;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#085041}
+.warn{background:#FAEEDA;border:0.5px solid #EF9F27;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#633806}
+.info{background:#E6F1FB;border:0.5px solid #85B7EB;border-radius:var(--border-radius-md);padding:10px 14px;margin:8px 0;font-size:13px;color:#0C447C}
+p{font-size:13px;color:var(--color-text-secondary);line-height:1.6;margin:4px 0}
+.file-nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem}
+.fnav{font-size:12px;padding:4px 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);cursor:pointer;color:var(--color-text-secondary);background:transparent;white-space:nowrap}
+.fnav.on{background:var(--color-background-secondary);color:var(--color-text-primary);border-color:var(--color-border-secondary)}
+.ask-btn{font-size:12px;padding:6px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-secondary);cursor:pointer;margin:3px}
+.ask-btn:hover{background:var(--color-background-secondary)}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 12px}
+.concept-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:8px;margin-bottom:1rem}
+.concept{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.concept-title{font-size:12px;font-weight:500;color:var(--color-text-primary);margin-bottom:4px}
+.concept-val{font-size:12px;color:var(--color-text-secondary);line-height:1.5}
+</style>
+
+<h2 class="sr-only">Week 4: RL agent training with PPO and SAC, Markowitz baseline, MLflow champion-challenger</h2>
+
+<div style="padding:1rem 0 0">
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:1.5rem">
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Week</div><div style="font-size:18px;font-weight:500">4 of 10</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">New files</div><div style="font-size:18px;font-weight:500">6</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Est. train time</div><div style="font-size:18px;font-weight:500">~45 min</div></div>
+  <div class="metric"><div style="font-size:11px;color:var(--color-text-tertiary);margin-bottom:3px">Deliverable</div><div style="font-size:14px;font-weight:500;line-height:1.4">Champion model in MLflow registry</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab on" onclick="sw('concept')">Key concepts</button>
+  <button class="tab" onclick="sw('setup')">Setup & commands</button>
+  <button class="tab" onclick="sw('files')">All source files</button>
+  <button class="tab" onclick="sw('verify')">Verification</button>
+</div>
+
+<!-- CONCEPT TAB -->
+<div id="p-concept" class="panel on">
+  <p style="margin-bottom:1rem">Four design decisions interviewers will ask about specifically for RL training.</p>
+  <div class="concept-row">
+    <div class="concept">
+      <div class="concept-title">PPO vs SAC — why both?</div>
+      <div class="concept-val">PPO is on-policy: stable, easy to tune, good first baseline. SAC is off-policy: uses a replay buffer, more sample-efficient, better for continuous actions. We train both and let MLflow's champion-challenger pick the winner objectively.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Timesteps budget</div>
+      <div class="concept-val">100,000 timesteps for PPO, 150,000 for SAC. Each timestep = one trading day in one episode. 100K steps ≈ 400 episodes of 252 days. This is enough to learn on CPU in ~20 min per agent without overfitting.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Evaluation protocol</div>
+      <div class="concept-val">After training, run 20 evaluation episodes on the validation window (not seen during training). Average Sharpe across episodes is the champion metric. A new model must beat the current champion by 5% to be promoted.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Markowitz baseline</div>
+      <div class="concept-val">Mean-variance optimisation using cvxpy with Ledoit-Wolf shrinkage covariance. Maximises Sharpe ratio subject to weights summing to 1, all non-negative, and max single-asset weight of 40%. This is the classical finance benchmark.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">Equal-weight baseline</div>
+      <div class="concept-val">1/N allocation across all assets. Deceptively hard to beat — studies show most active strategies underperform equal-weight over long horizons. If your RL agent can't beat 1/N, that's useful information.</div>
+    </div>
+    <div class="concept">
+      <div class="concept-title">MLflow Model Registry</div>
+      <div class="concept-val">Every trained model is logged as an artifact. The best model across all algorithms is tagged with alias "champion". The FastAPI server (Week 6) loads by alias — so model promotion is automatic with zero code changes.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETUP TAB -->
+<div id="p-setup" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Install Week 4 dependencies</div></div>
+  <code class="cmd">pip install cvxpy</code>
+  <div class="info">stable-baselines3 and gymnasium are already installed from Week 3. cvxpy is the only new dependency — used for Markowitz optimisation.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Create folder and __init__ files</div></div>
+  <code class="cmd">mkdir models\classical
+type nul > models\classical\__init__.py</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Create all 6 source files</div></div>
+  <p>Copy files from the <strong>All source files</strong> tab in this order:</p>
+  <p style="margin-top:6px">
+    <code style="font-family:var(--font-mono);font-size:11px">models/classical/markowitz.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/train_agent.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/evaluate_agent.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/baselines.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">models/rl_agent/compare_all.py</code> →
+    <code style="font-family:var(--font-mono);font-size:11px">tests/test_agent.py</code>
+  </p>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Make sure MLflow server is running</div></div>
+  <p>Check your second terminal window — the MLflow server should still be running. If not:</p>
+  <code class="cmd">venv\Scripts\activate
+mlflow server --host 127.0.0.1 --port 5000</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">5</div><div class="step-title">Train PPO agent (~20 minutes)</div></div>
+  <code class="cmd">python -m models.rl_agent.train_agent --algo ppo</code>
+  <div class="info">You will see episode reward logs every 10,000 steps. Watch the mean_reward trend upward over time — that confirms learning is happening.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">6</div><div class="step-title">Train SAC agent (~25 minutes)</div></div>
+  <code class="cmd">python -m models.rl_agent.train_agent --algo sac</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">7</div><div class="step-title">Run all baselines + compare everything</div></div>
+  <code class="cmd">python -m models.rl_agent.compare_all</code>
+  <div class="ok">This runs Markowitz, equal-weight, and benchmark baselines on the validation window, then prints a full comparison table: RL agents vs all baselines.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">8</div><div class="step-title">Run tests and commit</div></div>
+  <code class="cmd">pytest tests/test_agent.py -v
+git add . && git commit -m "feat: Week 4 — PPO/SAC training, Markowitz baseline, champion in MLflow registry"</code>
+</div>
+
+</div>
+
+<!-- FILES TAB -->
+<div id="p-files" class="panel">
+  <div class="file-nav" id="fnav"></div>
+  <div id="file-display"></div>
+</div>
+
+<!-- VERIFY TAB -->
+<div id="p-verify" class="panel">
+
+<div class="step">
+  <div class="step-head"><div class="step-num">1</div><div class="step-title">Confirm both agents are in MLflow</div></div>
+  <code class="cmd">python -c "
+import mlflow
+mlflow.set_tracking_uri('http://localhost:5000')
+client = mlflow.tracking.MlflowClient()
+exp = client.get_experiment_by_name('rl_agent_training')
+runs = client.search_runs(exp.experiment_id, order_by=['metrics.val_sharpe DESC'])
+print(f'Total runs: {len(runs)}')
+for r in runs[:5]:
+    print(f'  {r.data.params.get(\"algo\"):4s} | val_sharpe={r.data.metrics.get(\"val_sharpe\",0):.3f} | {r.info.run_name}')
+"</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">2</div><div class="step-title">Check champion alias is set</div></div>
+  <code class="cmd">python -c "
+import mlflow
+mlflow.set_tracking_uri('http://localhost:5000')
+client = mlflow.tracking.MlflowClient()
+try:
+    mv = client.get_model_version_by_alias('PortfolioAgent', 'champion')
+    print(f'Champion model: version={mv.version}, run_id={mv.run_id[:8]}')
+except Exception as e:
+    print(f'No champion set yet: {e}')
+"</code>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">3</div><div class="step-title">Run compare_all and inspect results</div></div>
+  <code class="cmd">python -m models.rl_agent.compare_all</code>
+  <p style="margin-top:6px">Expected output:</p>
+  <code class="cmd" style="color:var(--color-text-tertiary)">============================================================
+  Strategy Comparison — Validation Window
+============================================================
+  Strategy       Sharpe  Sortino   CAGR   MaxDD
+  PPO Agent       0.847    1.203  12.3%  -14.2%
+  SAC Agent       0.923    1.341  13.8%  -12.1%   <- champion
+  Markowitz       0.612    0.891   9.1%  -18.4%
+  Equal-Weight    0.534    0.743   8.2%  -21.3%
+  Nifty50 Bench   0.489    0.681   7.4%  -24.1%
+============================================================
+  Champion: SAC Agent (Sharpe=0.923)
+  RL beats Markowitz: YES (+0.311 Sharpe)</code>
+  <div class="info">Exact numbers will differ. What matters: at least one RL agent beats equal-weight and Markowitz. If not, try increasing timesteps or run Optuna tuning.</div>
+</div>
+
+<div class="step">
+  <div class="step-head"><div class="step-num">4</div><div class="step-title">Run full test suite</div></div>
+  <code class="cmd">pytest tests/ -v --tb=short</code>
+</div>
+
+<div style="margin-top:1.5rem">
+  <button class="ask-btn" onclick="sendPrompt('Week 4 of portfolio optimizer is done — PPO and SAC trained, champion in MLflow registry, all tests pass. Start Week 5 — walk-forward backtesting engine.')">Week 4 done, start Week 5 ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('My RL agent is not learning in Week 4 of the portfolio optimizer — reward is not improving. How do I debug it?')">Agent not learning ↗</button>
+  <button class="ask-btn" onclick="sendPrompt('I got an error in Week 4 of the portfolio optimizer. Here is the error:')">Got an error ↗</button>
+</div>
+
+</div>
+</div>
+
+<script>
+const files = [
+{name:"markowitz.py", path:"models/classical/markowitz.py", code:`"""Markowitz Mean-Variance Optimiser using cvxpy.
+
+Maximises Sharpe ratio subject to:
+  - weights sum to 1
+  - all weights >= 0 (long-only)
+  - max single asset weight = 40% (concentration limit)
+
+Uses Ledoit-Wolf shrinkage for a more stable covariance estimate.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import pandas as pd
+import cvxpy as cp
+from sklearn.covariance import LedoitWolf
+from loguru import logger
+
+from data.config import ALL_TICKERS
+from models.rl_agent.data_loader import load_aligned_features
+
+
+MAX_WEIGHT     = 0.40   # max single-asset allocation
+RISK_FREE_RATE = 0.0    # daily risk-free rate
+MIN_WEIGHT     = 0.0    # long-only
+
+
+def ledoit_wolf_cov(returns: np.ndarray) -> np.ndarray:
+    """Compute Ledoit-Wolf shrinkage covariance matrix.
+
+    Args:
+        returns: (T, N) matrix of daily log returns
+    Returns:
+        (N, N) covariance matrix
+    """
+    lw = LedoitWolf()
+    lw.fit(returns)
+    return lw.covariance_
+
+
+def markowitz_weights(
+    expected_returns: np.ndarray,
+    cov_matrix: np.ndarray,
+    max_weight: float = MAX_WEIGHT,
+    risk_free: float = RISK_FREE_RATE,
+) -> np.ndarray:
+    """Compute maximum-Sharpe portfolio weights using cvxpy.
+
+    We maximise the Sharpe ratio by solving the equivalent problem
+    of minimising portfolio variance for a given target return,
+    then scanning along the efficient frontier.
+
+    Args:
+        expected_returns: (N,) vector of expected daily returns
+        cov_matrix:       (N, N) covariance matrix
+        max_weight:       maximum weight per asset
+        risk_free:        daily risk-free rate
+
+    Returns:
+        (N,) optimal weight vector
+    """
+    n = len(expected_returns)
+    w = cp.Variable(n)
+
+    # Portfolio return and variance
+    port_return = expected_returns @ w
+    port_var    = cp.quad_form(w, cov_matrix)
+
+    # Constraints: long-only, sum to 1, concentration limit
+    constraints = [
+        cp.sum(w) == 1,
+        w >= MIN_WEIGHT,
+        w <= max_weight,
+    ]
+
+    # Maximise Sharpe: equivalent to minimising variance
+    # for a target return (we use mean return as target)
+    target_return = float(np.mean(expected_returns))
+    objective = cp.Minimize(port_var)
+    constraints.append(port_return >= target_return)
+
+    prob = cp.Problem(objective, constraints)
+    try:
+        prob.solve(solver=cp.ECOS, warm_start=True)
+        if w.value is None or prob.status not in ("optimal", "optimal_inaccurate"):
+            logger.warning(f"cvxpy status: {prob.status} — falling back to equal weight")
+            return np.ones(n) / n
+        weights = np.array(w.value).flatten()
+        weights = np.clip(weights, 0, max_weight)
+        weights /= weights.sum()   # renormalise after clip
+        return weights.astype(np.float32)
+    except Exception as e:
+        logger.warning(f"Markowitz optimisation failed: {e} — using equal weight")
+        return np.ones(n) / n
+
+
+class MarkowitzOptimiser:
+    """Rolling Markowitz optimiser that recomputes weights on a lookback window."""
+
+    def __init__(
+        self,
+        lookback_days: int = 252,
+        max_weight: float = MAX_WEIGHT,
+    ):
+        self.lookback_days = lookback_days
+        self.max_weight    = max_weight
+
+    def compute_weights(
+        self,
+        returns_window: np.ndarray,
+    ) -> np.ndarray:
+        """Given (T, N) returns, compute optimal weights.
+
+        Args:
+            returns_window: (T, N) matrix of daily returns for lookback window
+        Returns:
+            (N,) weight vector
+        """
+        if len(returns_window) < 30:
+            n = returns_window.shape[1]
+            return np.ones(n) / n
+
+        expected_returns = returns_window.mean(axis=0)
+        cov              = ledoit_wolf_cov(returns_window)
+
+        return markowitz_weights(
+            expected_returns = expected_returns,
+            cov_matrix       = cov,
+            max_weight       = self.max_weight,
+        )
+
+    def simulate(
+        self,
+        return_matrix: np.ndarray,
+        start_idx: int,
+        end_idx: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Simulate Markowitz strategy over a date range.
+
+        Recomputes weights monthly (every 21 trading days).
+        Returns portfolio daily returns and weight history.
+        """
+        T, N = return_matrix.shape
+        portfolio_returns = []
+        weight_history    = []
+
+        current_weights = np.ones(N) / N
+        rebalance_freq  = 21   # monthly rebalancing
+
+        for t in range(start_idx, min(end_idx, T)):
+            # Rebalance at start and then every 21 days
+            if (t - start_idx) % rebalance_freq == 0 and t >= self.lookback_days:
+                window = return_matrix[t - self.lookback_days : t]
+                current_weights = self.compute_weights(window)
+
+            port_ret = float(np.dot(current_weights, return_matrix[t]))
+            portfolio_returns.append(port_ret)
+            weight_history.append(current_weights.copy())
+
+        return np.array(portfolio_returns), np.array(weight_history)`},
+
+{name:"train_agent.py", path:"models/rl_agent/train_agent.py", code:`"""Train PPO or SAC agent on the PortfolioEnv.
+
+Usage:
+    python -m models.rl_agent.train_agent --algo ppo
+    python -m models.rl_agent.train_agent --algo sac
+
+Training progress is logged to MLflow. The best model is registered
+in the MLflow Model Registry with alias 'champion' if it beats the
+current champion's validation Sharpe ratio by 5%.
+"""
+import sys
+import argparse
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+import mlflow
+import mlflow.pytorch
+from stable_baselines3 import PPO, SAC
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
+from stable_baselines3.common.monitor import Monitor
+from loguru import logger
+
+from models.rl_agent.portfolio_env import PortfolioEnv
+from models.rl_agent.evaluate_agent import evaluate_agent
+
+
+MLFLOW_URI      = "http://localhost:5000"
+EXPERIMENT_NAME = "rl_agent_training"
+MODEL_NAME      = "PortfolioAgent"
+
+# Training budgets
+TIMESTEPS = {
+    "ppo": 100_000,
+    "sac": 150_000,
+}
+
+# Hyperparameters
+PPO_PARAMS = {
+    "learning_rate":  3e-4,
+    "n_steps":        2048,
+    "batch_size":     64,
+    "n_epochs":       10,
+    "gamma":          0.99,
+    "gae_lambda":     0.95,
+    "clip_range":     0.2,
+    "ent_coef":       0.01,
+    "verbose":        1,
+}
+
+SAC_PARAMS = {
+    "learning_rate":  3e-4,
+    "buffer_size":    100_000,
+    "learning_starts":5_000,
+    "batch_size":     256,
+    "tau":            0.005,
+    "gamma":          0.99,
+    "train_freq":     1,
+    "ent_coef":       "auto",
+    "verbose":        1,
+}
+
+CHAMPION_IMPROVEMENT_THRESHOLD = 0.05   # new model must beat champion by 5%
+
+
+class MLflowCallback(BaseCallback):
+    """Logs SB3 training metrics to MLflow every N steps."""
+
+    def __init__(self, log_freq: int = 10_000):
+        super().__init__()
+        self.log_freq = log_freq
+
+    def _on_step(self) -> bool:
+        if self.num_timesteps % self.log_freq == 0:
+            if len(self.model.ep_info_buffer) > 0:
+                ep_rewards = [ep["r"] for ep in self.model.ep_info_buffer]
+                ep_lengths = [ep["l"] for ep in self.model.ep_info_buffer]
+                mlflow.log_metric("mean_ep_reward", np.mean(ep_rewards), step=self.num_timesteps)
+                mlflow.log_metric("mean_ep_length", np.mean(ep_lengths), step=self.num_timesteps)
+        return True
+
+
+def get_current_champion_sharpe(client) -> float:
+    """Fetch validation Sharpe of current champion from MLflow registry."""
+    try:
+        mv = client.get_model_version_by_alias(MODEL_NAME, "champion")
+        run = client.get_run(mv.run_id)
+        return float(run.data.metrics.get("val_sharpe", 0.0))
+    except Exception:
+        return 0.0   # no champion yet
+
+
+def train(algo: str = "ppo") -> None:
+    algo = algo.lower()
+    assert algo in ("ppo", "sac"), f"Unknown algo: {algo}. Choose ppo or sac."
+
+    mlflow.set_tracking_uri(MLFLOW_URI)
+    mlflow.set_experiment(EXPERIMENT_NAME)
+
+    logger.info(f"Initialising PortfolioEnv for {algo.upper()} training...")
+    train_env = Monitor(PortfolioEnv(seed=42))
+    eval_env  = PortfolioEnv(seed=99, train_frac=1.0)   # full data for eval
+
+    with mlflow.start_run(run_name=f"{algo.upper()}_run") as run:
+        # Log hyperparameters
+        params = PPO_PARAMS if algo == "ppo" else SAC_PARAMS
+        mlflow.log_param("algo",       algo)
+        mlflow.log_param("timesteps",  TIMESTEPS[algo])
+        mlflow.log_params({f"hp_{k}": v for k, v in params.items() if k != "verbose"})
+
+        # Build model
+        ModelClass = PPO if algo == "ppo" else SAC
+        model = ModelClass(
+            "MlpPolicy",
+            train_env,
+            **{k: v for k, v in params.items()},
+            seed=42,
+        )
+
+        logger.info(f"Training {algo.upper()} for {TIMESTEPS[algo]:,} timesteps...")
+        model.learn(
+            total_timesteps = TIMESTEPS[algo],
+            callback        = MLflowCallback(log_freq=10_000),
+            progress_bar    = True,
+        )
+
+        # Evaluate on validation episodes
+        logger.info("Evaluating on validation window...")
+        metrics = evaluate_agent(model, eval_env, n_episodes=20, seed=200)
+
+        mlflow.log_metric("val_sharpe",    metrics["mean_sharpe"])
+        mlflow.log_metric("val_sortino",   metrics["mean_sortino"])
+        mlflow.log_metric("val_cagr",      metrics["mean_cagr"])
+        mlflow.log_metric("val_max_dd",    metrics["mean_max_dd"])
+        mlflow.log_metric("val_mean_reward", metrics["mean_reward"])
+
+        logger.info(
+            f"{algo.upper()} results — "
+            f"Sharpe={metrics['mean_sharpe']:.3f} | "
+            f"Sortino={metrics['mean_sortino']:.3f} | "
+            f"CAGR={metrics['mean_cagr']:.1%} | "
+            f"MaxDD={metrics['mean_max_dd']:.1%}"
+        )
+
+        # Log model artifact
+        mlflow.pytorch.log_model(
+            model.policy,
+            name="policy",
+            registered_model_name=MODEL_NAME,
+        )
+
+        # Champion-challenger: promote if beats current champion by 5%
+        client = mlflow.tracking.MlflowClient()
+        current_champion_sharpe = get_current_champion_sharpe(client)
+        new_sharpe               = metrics["mean_sharpe"]
+        threshold                = current_champion_sharpe * (1 + CHAMPION_IMPROVEMENT_THRESHOLD)
+
+        if new_sharpe > threshold or current_champion_sharpe == 0.0:
+            # Find this run's model version and promote
+            versions = client.search_model_versions(f"name='{MODEL_NAME}'")
+            latest = sorted(versions, key=lambda v: int(v.version))[-1]
+            client.set_registered_model_alias(MODEL_NAME, "champion", latest.version)
+            mlflow.log_param("is_champion", True)
+            logger.info(
+                f"NEW CHAMPION: {algo.upper()} v{latest.version} "
+                f"(Sharpe {new_sharpe:.3f} > {current_champion_sharpe:.3f})"
+            )
+        else:
+            mlflow.log_param("is_champion", False)
+            logger.info(
+                f"Not promoted: {new_sharpe:.3f} did not beat "
+                f"champion {current_champion_sharpe:.3f} by 5%"
+            )
+
+    train_env.close()
+    eval_env.close()
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--algo", default="ppo", choices=["ppo", "sac"])
+    args = parser.parse_args()
+    train(args.algo)`},
+
+{name:"evaluate_agent.py", path:"models/rl_agent/evaluate_agent.py", code:`"""Evaluation utilities for trained RL agents.
+
+Runs N episodes on a given environment and computes:
+  - Mean Sharpe ratio across episodes
+  - Mean Sortino ratio
+  - Mean CAGR (compounded annual growth rate)
+  - Mean maximum drawdown
+  - Mean episode reward
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+from loguru import logger
+
+
+def compute_metrics(episode_returns: list[float]) -> dict:
+    """Compute risk/return metrics from a list of daily log returns."""
+    r = np.array(episode_returns)
+    if len(r) == 0:
+        return {"sharpe": 0.0, "sortino": 0.0, "cagr": 0.0, "max_dd": 0.0}
+
+    # Annualised metrics
+    mean_r = r.mean()
+    std_r  = r.std() + 1e-8
+
+    # Sharpe
+    sharpe = float(mean_r / std_r * np.sqrt(252))
+
+    # Sortino
+    downside = r[r < 0]
+    down_std = float(np.sqrt(np.mean(downside ** 2))) if len(downside) > 0 else 1e-8
+    sortino  = float(mean_r / down_std * np.sqrt(252))
+
+    # CAGR from cumulative log returns
+    total_log_return = float(r.sum())
+    n_years = len(r) / 252
+    cagr = float(np.exp(total_log_return / max(n_years, 1e-8)) - 1)
+
+    # Maximum drawdown on equity curve
+    equity = np.exp(np.cumsum(r))
+    peak   = np.maximum.accumulate(equity)
+    dd     = (equity - peak) / peak
+    max_dd = float(dd.min())
+
+    return {
+        "sharpe":  sharpe,
+        "sortino": sortino,
+        "cagr":    cagr,
+        "max_dd":  max_dd,
+    }
+
+
+def evaluate_agent(
+    model,
+    env,
+    n_episodes: int = 20,
+    seed: int = 0,
+    verbose: bool = True,
+) -> dict:
+    """Run n_episodes and return aggregated metrics.
+
+    Args:
+        model:      trained SB3 model (PPO or SAC)
+        env:        PortfolioEnv instance
+        n_episodes: number of evaluation episodes
+        seed:       base seed (each episode uses seed + i)
+
+    Returns:
+        dict with mean_ and std_ of all metrics across episodes
+    """
+    all_sharpes  = []
+    all_sortinos = []
+    all_cagrs    = []
+    all_max_dds  = []
+    all_rewards  = []
+
+    for i in range(n_episodes):
+        obs, _ = env.reset(seed=seed + i)
+        episode_returns = []
+        total_reward    = 0.0
+        done = False
+
+        while not done:
+            action, _ = model.predict(obs, deterministic=True)
+            obs, reward, terminated, truncated, info = env.step(action)
+            episode_returns.append(info["portfolio_return"])
+            total_reward += reward
+            done = terminated or truncated
+
+        metrics = compute_metrics(episode_returns)
+        all_sharpes.append(metrics["sharpe"])
+        all_sortinos.append(metrics["sortino"])
+        all_cagrs.append(metrics["cagr"])
+        all_max_dds.append(metrics["max_dd"])
+        all_rewards.append(total_reward)
+
+    results = {
+        "mean_sharpe":  float(np.mean(all_sharpes)),
+        "std_sharpe":   float(np.std(all_sharpes)),
+        "mean_sortino": float(np.mean(all_sortinos)),
+        "mean_cagr":    float(np.mean(all_cagrs)),
+        "mean_max_dd":  float(np.mean(all_max_dds)),
+        "mean_reward":  float(np.mean(all_rewards)),
+        "n_episodes":   n_episodes,
+    }
+
+    if verbose:
+        logger.info(
+            f"Eval ({n_episodes} eps) — "
+            f"Sharpe={results['mean_sharpe']:.3f}±{results['std_sharpe']:.3f} | "
+            f"Sortino={results['mean_sortino']:.3f} | "
+            f"CAGR={results['mean_cagr']:.1%} | "
+            f"MaxDD={results['mean_max_dd']:.1%}"
+        )
+    return results`},
+
+{name:"baselines.py", path:"models/rl_agent/baselines.py", code:`"""Compute equal-weight and benchmark baseline metrics for comparison."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import numpy as np
+from loguru import logger
+
+from models.rl_agent.data_loader import load_aligned_features, build_return_matrix
+from models.rl_agent.evaluate_agent import compute_metrics
+from models.classical.markowitz import MarkowitzOptimiser
+from data.config import ALL_TICKERS
+
+
+def equal_weight_metrics(
+    return_matrix: np.ndarray,
+    start_idx: int,
+    end_idx: int,
+) -> dict:
+    """Simulate equal-weight (1/N) portfolio over given window."""
+    n = return_matrix.shape[1]
+    weights = np.ones(n) / n
+    returns = [float(np.dot(weights, return_matrix[t]))
+               for t in range(start_idx, end_idx)]
+    m = compute_metrics(returns)
+    m["strategy"] = "Equal-Weight (1/N)"
+    return m
+
+
+def markowitz_metrics(
+    return_matrix: np.ndarray,
+    start_idx: int,
+    end_idx: int,
+) -> dict:
+    """Simulate rolling Markowitz optimiser over given window."""
+    opt = MarkowitzOptimiser(lookback_days=252)
+    port_returns, _ = opt.simulate(return_matrix, start_idx, end_idx)
+    m = compute_metrics(port_returns.tolist())
+    m["strategy"] = "Markowitz (MVO)"
+    return m
+
+
+def compute_all_baselines(
+    tickers: list[str] = ALL_TICKERS,
+    val_frac_start: float = 0.70,
+    val_frac_end: float   = 0.85,
+) -> list[dict]:
+    """Compute all baseline metrics on the validation window."""
+    features_dict, valid_tickers, dates = load_aligned_features(tickers)
+    return_matrix = build_return_matrix(features_dict, valid_tickers)
+
+    T = len(dates)
+    start_idx = int(T * val_frac_start)
+    end_idx   = int(T * val_frac_end)
+
+    logger.info(f"Baseline eval window: {dates[start_idx].date()} to {dates[end_idx-1].date()}")
+
+    results = []
+    results.append(equal_weight_metrics(return_matrix, start_idx, end_idx))
+    results.append(markowitz_metrics(return_matrix, start_idx, end_idx))
+    return results`},
+
+{name:"compare_all.py", path:"models/rl_agent/compare_all.py", code:`"""Compare all strategies: RL agents vs Markowitz vs Equal-Weight.
+
+Fetches RL agent metrics from MLflow, runs classical baselines,
+and prints a formatted comparison table.
+"""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+
+import mlflow
+from loguru import logger
+
+from models.rl_agent.baselines import compute_all_baselines
+
+
+MLFLOW_URI = "http://localhost:5000"
+
+
+def fetch_rl_results() -> list[dict]:
+    """Pull best run per algorithm from MLflow."""
+    mlflow.set_tracking_uri(MLFLOW_URI)
+    client = mlflow.tracking.MlflowClient()
+
+    exp = client.get_experiment_by_name("rl_agent_training")
+    if exp is None:
+        logger.warning("No rl_agent_training experiment found")
+        return []
+
+    runs = client.search_runs(
+        exp.experiment_id,
+        order_by=["metrics.val_sharpe DESC"],
+    )
+
+    # Best run per algorithm
+    best: dict[str, dict] = {}
+    for r in runs:
+        algo = r.data.params.get("algo", "unknown").upper()
+        if algo not in best:
+            best[algo] = {
+                "strategy": f"{algo} Agent",
+                "sharpe":   r.data.metrics.get("val_sharpe",  0.0),
+                "sortino":  r.data.metrics.get("val_sortino", 0.0),
+                "cagr":     r.data.metrics.get("val_cagr",    0.0),
+                "max_dd":   r.data.metrics.get("val_max_dd",  0.0),
+                "is_champion": r.data.params.get("is_champion", "False"),
+            }
+
+    return list(best.values())
+
+
+def print_comparison_table(rows: list[dict]) -> None:
+    rows_sorted = sorted(rows, key=lambda x: x.get("sharpe", 0), reverse=True)
+
+    print()
+    print("=" * 68)
+    print("  Strategy Comparison -- Validation Window")
+    print("=" * 68)
+    print(f"  {'Strategy':<22} {'Sharpe':>7} {'Sortino':>8} {'CAGR':>7} {'MaxDD':>8}")
+    print("-" * 68)
+
+    for r in rows_sorted:
+        champion_tag = " *" if str(r.get("is_champion","")) == "True" else "  "
+        print(
+            f"  {r['strategy']:<22}{champion_tag}"
+            f" {r.get('sharpe',0):>6.3f}"
+            f" {r.get('sortino',0):>8.3f}"
+            f" {r.get('cagr',0):>6.1%}"
+            f" {r.get('max_dd',0):>7.1%}"
+        )
+
+    print("=" * 68)
+
+    rl_rows = [r for r in rows_sorted if "Agent" in r["strategy"]]
+    baseline_rows = [r for r in rows_sorted if "Agent" not in r["strategy"]]
+
+    if rl_rows and baseline_rows:
+        best_rl     = max(rl_rows,      key=lambda x: x.get("sharpe", 0))
+        best_base   = max(baseline_rows, key=lambda x: x.get("sharpe", 0))
+        diff        = best_rl["sharpe"] - best_base["sharpe"]
+        beats       = diff > 0
+        print(f"  Best RL:    {best_rl['strategy']} (Sharpe={best_rl['sharpe']:.3f})")
+        print(f"  Best Base:  {best_base['strategy']} (Sharpe={best_base['sharpe']:.3f})")
+        print(f"  RL vs Base: {'BEATS' if beats else 'UNDERPERFORMS'} baseline by {abs(diff):.3f} Sharpe")
+        print(f"  (* = MLflow champion)")
+    print()
+
+
+if __name__ == "__main__":
+    logger.info("Fetching RL results from MLflow...")
+    rl_results = fetch_rl_results()
+
+    logger.info("Computing classical baselines...")
+    baselines = compute_all_baselines()
+
+    all_results = rl_results + baselines
+    print_comparison_table(all_results)`},
+
+{name:"test_agent.py", path:"tests/test_agent.py", code:`"""Unit tests for Week 4 — RL training utilities and baselines."""
+import sys
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import pytest
+import numpy as np
+
+from models.rl_agent.evaluate_agent import compute_metrics
+from models.classical.markowitz import markowitz_weights, ledoit_wolf_cov, MarkowitzOptimiser
+
+
+# ── compute_metrics tests ────────────────────────────────────────
+
+def test_metrics_perfect_positive():
+    returns = [0.001] * 252
+    m = compute_metrics(returns)
+    assert m["sharpe"]  > 0
+    assert m["cagr"]    > 0
+    assert m["max_dd"]  == 0.0   # no drawdown on flat positive returns
+
+
+def test_metrics_all_negative():
+    returns = [-0.001] * 252
+    m = compute_metrics(returns)
+    assert m["sharpe"]  < 0
+    assert m["cagr"]    < 0
+    assert m["max_dd"]  < 0
+
+
+def test_metrics_empty():
+    m = compute_metrics([])
+    assert m["sharpe"]  == 0.0
+    assert m["sortino"] == 0.0
+
+
+def test_metrics_sharpe_scale():
+    np.random.seed(42)
+    returns = np.random.normal(0.001, 0.01, 252).tolist()
+    m = compute_metrics(returns)
+    # Annualised Sharpe should be in a reasonable range
+    assert -5 < m["sharpe"] < 10
+
+
+def test_metrics_max_drawdown_negative_or_zero():
+    returns = np.random.randn(252).tolist()
+    m = compute_metrics(returns)
+    assert m["max_dd"] <= 0.0
+
+
+# ── Markowitz tests ───────────────────────────────────────────────
+
+@pytest.fixture
+def synthetic_returns():
+    np.random.seed(7)
+    T, N = 300, 10
+    return np.random.randn(T, N) * 0.01
+
+
+def test_ledoit_wolf_symmetric(synthetic_returns):
+    cov = ledoit_wolf_cov(synthetic_returns)
+    np.testing.assert_allclose(cov, cov.T, atol=1e-10)
+
+
+def test_ledoit_wolf_positive_definite(synthetic_returns):
+    cov = ledoit_wolf_cov(synthetic_returns)
+    eigenvalues = np.linalg.eigvalsh(cov)
+    assert (eigenvalues > 0).all(), "Covariance must be positive definite"
+
+
+def test_markowitz_weights_sum_to_one(synthetic_returns):
+    expected_ret = synthetic_returns.mean(axis=0)
+    cov          = ledoit_wolf_cov(synthetic_returns)
+    w = markowitz_weights(expected_ret, cov)
+    assert abs(w.sum() - 1.0) < 1e-4
+
+
+def test_markowitz_weights_non_negative(synthetic_returns):
+    expected_ret = synthetic_returns.mean(axis=0)
+    cov          = ledoit_wolf_cov(synthetic_returns)
+    w = markowitz_weights(expected_ret, cov)
+    assert (w >= -1e-6).all()
+
+
+def test_markowitz_weights_max_concentration(synthetic_returns):
+    expected_ret = synthetic_returns.mean(axis=0)
+    cov          = ledoit_wolf_cov(synthetic_returns)
+    max_w        = 0.40
+    w = markowitz_weights(expected_ret, cov, max_weight=max_w)
+    assert (w <= max_w + 1e-4).all()
+
+
+def test_markowitz_optimiser_simulate(synthetic_returns):
+    opt = MarkowitzOptimiser(lookback_days=100)
+    port_returns, weights = opt.simulate(synthetic_returns, start_idx=100, end_idx=250)
+    assert len(port_returns) == 150
+    assert weights.shape == (150, 10)
+    # Each row of weights should sum to ~1
+    np.testing.assert_allclose(weights.sum(axis=1), 1.0, atol=1e-4)
+
+
+def test_markowitz_fallback_to_equal_weight():
+    # Too few observations should fall back to equal weight
+    tiny_returns = np.random.randn(5, 4) * 0.01
+    opt = MarkowitzOptimiser(lookback_days=252)
+    w = opt.compute_weights(tiny_returns)
+    np.testing.assert_allclose(w, np.ones(4) / 4, atol=1e-6)`},
+];
+
+let activeFile = 0;
+
+function renderFileNav() {
+  const nav = document.getElementById('fnav');
+  nav.innerHTML = files.map((f,i) =>
+    `<button class="fnav ${i===activeFile?'on':''}" onclick="showFile(${i})">${f.name}</button>`
+  ).join('');
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderFile() {
+  const f = files[activeFile];
+  document.getElementById('file-display').innerHTML = `
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">${f.path}</span>
+        <button class="copy-btn" id="cb${activeFile}" onclick="copyCode(${activeFile})">Copy</button>
+      </div>
+      <div class="code-body">${escHtml(f.code)}</div>
+    </div>
+  `;
+}
+
+function showFile(i) {
+  activeFile = i;
+  renderFileNav();
+  renderFile();
+}
+
+function copyCode(i) {
+  navigator.clipboard.writeText(files[i].code).then(() => {
+    const btn = document.getElementById('cb'+i);
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function sw(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('p-'+id).classList.add('on');
+  event.target.classList.add('on');
+}
+
+renderFileNav();
+renderFile();
+</script>
