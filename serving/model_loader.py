@@ -59,14 +59,29 @@ class ModelRegistry:
             return self._algo
 
     def predict(self, obs_array) -> object:
-        """Run inference. Thread-safe."""
+        """Run inference. Thread-safe. Handles both PPO and SAC policies."""
         with self._lock:
             if self._policy is None:
                 raise RuntimeError("Model not loaded yet")
             import torch
+            import numpy as np
             with torch.no_grad():
                 obs_tensor = torch.FloatTensor(obs_array).unsqueeze(0)
-                action = self._policy.actor(obs_tensor).squeeze(0).numpy()
+
+                # SAC has .actor attribute
+                # PPO (ActorCriticPolicy) uses ._predict or forward directly
+                if hasattr(self._policy, "actor"):
+                    # SAC
+                    action = self._policy.actor(obs_tensor).squeeze(0).numpy()
+                elif hasattr(self._policy, "_predict"):
+                    # PPO — use the built-in _predict method
+                    action = self._policy._predict(obs_tensor, deterministic=True)
+                    action = action.squeeze(0).numpy()
+                else:
+                    # Fallback: use forward pass and take the action head output
+                    features = self._policy.extract_features(obs_tensor)
+                    latent   = self._policy.mlp_extractor(features)[0]
+                    action   = self._policy.action_net(latent).squeeze(0).numpy()
             return action
 
     # ── Internal ────────────────────────────────────────────────

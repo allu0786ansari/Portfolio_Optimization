@@ -1,3 +1,9 @@
+"""Fix predictor.py to load SB3 zip from disk — no MLflow download on requests.
+Run: python fix_predictor_v2.py
+"""
+from pathlib import Path
+
+content = '''\
 """Prediction logic: loads SB3 model from disk, returns portfolio weights."""
 import sys
 import time
@@ -125,3 +131,13 @@ def predict_weights(requested_tickers: list[str]) -> dict:
         "timestamp":       datetime.now(timezone.utc).isoformat(),
         "skipped_tickers": missing,
     }
+'''
+
+path = Path("serving/predictor.py")
+path.write_text(content, encoding="utf-8")
+print(f"Written: {path.resolve()}")
+print()
+print("Now restart FastAPI:")
+print("  uvicorn serving.main:app --host 0.0.0.0 --port 8000 --reload")
+print()
+print("Then test the allocation page in Streamlit.")
