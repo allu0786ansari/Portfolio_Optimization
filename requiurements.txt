@@ -1,9 +1,28 @@
-pip install yfinance pandas numpy scikit-learn requests python-dotenv loguru pytest pytest-cov dvc pyarrow fastparquet ta
-pip install torch --index-url https://download.pytorch.org/whl/cpu
-pip install mlflow optuna statsmodels scikit-learn joblib
-
-pip install gymnasium stable-baselines3
-pip install cvxpy
-pip install ecos
-pip install scipy plotly jinja2
-pip install fastapi uvicorn[standard] httpx
+yfinance 
+pandas 
+numpy 
+scikit-learn 
+requests 
+python-dotenv 
+loguru 
+pytest 
+pytest-cov 
+dvc 
+pyarrow 
+fastparquet 
+ta
+torch --index-url https://download.pytorch.org/whl/cpu
+mlflow 
+optuna 
+statsmodels joblib
+gymnasium 
+stable-baselines3
+cvxpy
+ecos
+scipy 
+plotly 
+jinja2
+fastapi 
+uvicorn[standard] 
+httpx
+streamlit
