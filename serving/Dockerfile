@@ -1,5 +1,5 @@
 # Stage 1: builder
-FROM python:3.11-slim AS builder
+FROM python:3.11-slim-bullseye AS builder
 WORKDIR /build
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -13,7 +13,7 @@ RUN pip install --upgrade pip && \
 
 
 # Stage 2: runtime
-FROM python:3.11-slim AS runtime
+FROM python:3.11-slim-bullseye AS runtime
 WORKDIR /app
 
 # Install ONLY runtime dependency (curl)
