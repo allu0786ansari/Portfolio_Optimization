@@ -14,7 +14,11 @@ from models.rl_agent.reward import sortino_reward, step_reward
 
 @pytest.fixture(scope="module")
 def env():
-    """Shared env instance — loading data once is slow, reuse across tests."""
+    """Shared env instance — skip if feature data not available (e.g. CI)."""
+    from data.config import PROCESSED_DIR
+    feature_files = list(PROCESSED_DIR.glob("features_*.parquet"))
+    if len(feature_files) == 0:
+        pytest.skip("Feature data not available — run feature_engineering.py first")
     e = PortfolioEnv(seed=0)
     yield e
     e.close()
