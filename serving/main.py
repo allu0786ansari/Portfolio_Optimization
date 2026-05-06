@@ -33,6 +33,9 @@ from serving.schemas import (
 from serving.model_loader import registry
 from serving.predictor import predict_weights
 
+from serving.metrics import (
+    record_request, load_sharpe_from_backtest, metrics_endpoint
+)
 
 load_dotenv()
 
@@ -46,6 +49,7 @@ API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
 async def lifespan(app: FastAPI):
     logger.info("Starting Portfolio Optimization API...")
     registry.load()
+    load_sharpe_from_backtest()
     logger.info("API ready.")
     yield
     logger.info("Shutting down API.")
@@ -108,6 +112,11 @@ async def verify_api_key(key: str = Security(API_KEY_HEADER)) -> str:
 )
 async def health():
     return HealthResponse()
+
+
+@app.get("/metrics", tags=["Ops"], include_in_schema=False)
+async def metrics():
+    return metrics_endpoint()
 
 
 @app.get(

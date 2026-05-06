@@ -19,7 +19,8 @@ import mlflow.pytorch
 from loguru import logger
 
 
-MLFLOW_URI             = "http://localhost:5000"
+import os
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MODEL_NAME             = "PortfolioAgent"
 POLL_INTERVAL_SECONDS  = 300   # check for new champion every 5 minutes
 

@@ -1,24 +1,26 @@
-# Full stack with Prometheus + Grafana added
+
 services:
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow:latest
+    image: python:3.11-slim
     container_name: portfolio-mlflow
-    ports: ["5000:5000"]
+    ports:
+      - "5000:5000"
     volumes:
       - ./mlruns:/mlruns
       - ./mlartifacts:/mlartifacts
       - ./mlflow.db:/mlflow.db
     command: >
+      bash -c "pip install mlflow[extras] --quiet &&
       mlflow server --host 0.0.0.0 --port 5000
       --backend-store-uri sqlite:////mlflow.db
-      --default-artifact-root /mlartifacts
+      --default-artifact-root /mlartifacts"
     healthcheck:
-      test: ["CMD","curl","-f","http://localhost:5000"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/health')"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 60s
     restart: unless-stopped
 
   api:
@@ -26,8 +28,10 @@ services:
       context: .
       dockerfile: serving/Dockerfile
     container_name: portfolio-api
-    ports: ["8000:8000"]
-    env_file: [.env]
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
     environment:
       - MLFLOW_TRACKING_URI=http://mlflow:5000
     volumes:
@@ -38,10 +42,9 @@ services:
       - ./data:/app/data
       - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json
     depends_on:
-      mlflow:
-        condition: service_healthy
+      - mlflow
     healthcheck:
-      test: ["CMD","curl","-f","http://localhost:8000"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -53,22 +56,24 @@ services:
       context: .
       dockerfile: dashboard/Dockerfile
     container_name: portfolio-dashboard
-    ports: ["8501:8501"]
-    env_file: [.env]
+    ports:
+      - "8501:8501"
+    env_file:
+      - .env
     environment:
       - API_BASE_URL=http://api:8000
     volumes:
       - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json
       - ./data:/app/data
     depends_on:
-      api:
-        condition: service_healthy
+      - api
     restart: unless-stopped
 
   prometheus:
     image: prom/prometheus:latest
     container_name: portfolio-prometheus
-    ports: ["9090:9090"]
+    ports:
+      - "9090:9090"
     volumes:
       - ./mlops/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -77,20 +82,21 @@ services:
       - "--storage.tsdb.path=/prometheus"
       - "--storage.tsdb.retention.time=30d"
     depends_on:
-      api:
-        condition: service_healthy
+      - api
     restart: unless-stopped
 
   grafana:
     image: grafana/grafana:latest
     container_name: portfolio-grafana
-    ports: ["3000:3000"]
+    ports:
+      - "3000:3000"
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - grafana_data:/var/lib/grafana
-    depends_on: [prometheus]
+    depends_on:
+      - prometheus
     restart: unless-stopped
 
 volumes:
