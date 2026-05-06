@@ -5,16 +5,18 @@ Best hyperparameters are logged to MLflow and printed.
 """
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
-import warnings
+import warnings  # noqa: E402, I001
+
 warnings.filterwarnings("ignore")
 
-import optuna
-import mlflow
-import torch
-from loguru import logger
+import mlflow  # noqa: E402, I001
+import optuna  # noqa: E402, I001
+import torch  # noqa: E402, I001
+from loguru import logger  # noqa: E402, I001
 
-from models.forecasting.train_forecaster import train_ticker, MLFLOW_TRACKING_URI
+from models.forecasting.train_forecaster import MLFLOW_TRACKING_URI, train_ticker  # noqa: E402, I001
 
 PROXY_TICKER = "RELIANCE.NS"   # tune on one liquid stock as proxy
 N_TRIALS     = 20
@@ -65,9 +67,7 @@ def run_tuning() -> dict:
 if __name__ == "__main__":
     logger.info(f"=== Optuna tuning — {N_TRIALS} trials on {PROXY_TICKER} ===")
     best_hp = run_tuning()
-    print("
-Best hyperparameters found:")
+    print("\nBest hyperparameters found:")
     for k, v in best_hp.items():
         print(f"  {k}: {v}")
-    print("
-Now re-run train_forecaster.py with these hyperparameters.")
+    print("\nNow re-run train_forecaster.py with these hyperparameters.")

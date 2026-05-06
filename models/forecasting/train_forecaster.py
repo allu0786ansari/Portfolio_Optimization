@@ -130,7 +130,7 @@ def train_ticker(
     patience_count = 0
 
     for epoch in range(hp["max_epochs"]):
-        train_loss = train_one_epoch(model, train_loader, optimizer, criterion, device)
+        train_one_epoch(model, train_loader, optimizer, criterion, device)  # noqa: F841
         val_loss, val_rmse, val_dir_acc = evaluate(model, val_loader, criterion, device)
         scheduler.step(val_loss)
 

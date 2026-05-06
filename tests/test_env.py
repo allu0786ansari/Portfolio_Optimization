@@ -155,7 +155,6 @@ def test_step_reward_no_transaction_cost():
 
 
 def test_step_reward_penalises_turnover():
-    n = 4
     w_prev = np.array([0.25, 0.25, 0.25, 0.25])
     w_curr = np.array([1.00, 0.00, 0.00, 0.00])
     r_with_cost, info = step_reward(0.01, w_prev, w_curr)

@@ -6,13 +6,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 warnings.filterwarnings("ignore")
 
-import mlflow
-import numpy as np
-import pandas as pd
-from loguru import logger
-from statsmodels.tsa.arima.model import ARIMA
+import mlflow  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from loguru import logger  # noqa: E402
+from statsmodels.tsa.arima.model import ARIMA  # noqa: E402
 
-from data.config import ALL_TICKERS, PROCESSED_DIR
+from data.config import ALL_TICKERS, PROCESSED_DIR  # noqa: E402
 
 MLFLOW_TRACKING_URI = "http://localhost:5000"
 EXPERIMENT_NAME = "arima_baseline"

@@ -101,7 +101,7 @@ def train(algo: str = "ppo") -> None:
     train_env = Monitor(PortfolioEnv(seed=42))
     eval_env  = PortfolioEnv(seed=99, train_frac=1.0)   # full data for eval
 
-    with mlflow.start_run(run_name=f"{algo.upper()}_run") as run:
+    with mlflow.start_run(run_name=f"{algo.upper()}_run"):
         # Log hyperparameters
         params = PPO_PARAMS if algo == "ppo" else SAC_PARAMS
         mlflow.log_param("algo",       algo)

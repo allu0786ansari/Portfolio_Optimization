@@ -22,7 +22,8 @@ IMPROVEMENT_THRESHOLD = 0.05
 
 
 def task_fetch_data(**context):
-    import sys; sys.path.insert(0, ".")
+    import sys
+    sys.path.insert(0, ".")
     import time
 
     from loguru import logger
@@ -39,7 +40,8 @@ def task_fetch_data(**context):
 
 
 def task_engineer_features(**context):
-    import sys; sys.path.insert(0, ".")
+    import sys
+    sys.path.insert(0, ".")
     from loguru import logger
 
     from data.config import PROCESSED_DIR
@@ -51,7 +53,8 @@ def task_engineer_features(**context):
 
 
 def task_train_models(**context):
-    import sys; sys.path.insert(0, ".")
+    import sys
+    sys.path.insert(0, ".")
     from loguru import logger
 
     from models.rl_agent.train_agent import train
@@ -62,7 +65,8 @@ def task_train_models(**context):
 
 
 def task_evaluate_champion(**context):
-    import sys; sys.path.insert(0, ".")
+    import sys
+    sys.path.insert(0, ".")
     import mlflow
     from loguru import logger
     mlflow.set_tracking_uri("http://localhost:5000")
