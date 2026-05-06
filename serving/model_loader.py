@@ -8,6 +8,7 @@ is promoted — zero downtime, zero server restart needed.
 This is the MLOps pattern that Week 9 (Airflow retraining)
 will trigger automatically.
 """
+import os
 import sys
 import threading
 import time
@@ -15,34 +16,34 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import os
-
 import mlflow
 import mlflow.pytorch
 from loguru import logger
 
-MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
-MODEL_NAME             = "PortfolioAgent"
-POLL_INTERVAL_SECONDS  = 300   # check for new champion every 5 minutes
+MLFLOW_URI            = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
+MODEL_NAME            = "PortfolioAgent"
+POLL_INTERVAL_SECONDS = 300   # check for new champion every 5 minutes
 
 
 class ModelRegistry:
     """Thread-safe champion model holder with background polling."""
 
     def __init__(self) -> None:
-        self._policy        = None
-        self._version       : str  = "unknown"
-        self._algo          : str  = "unknown"
-        self._lock          = threading.RLock()
-        self._loaded        : bool = False
-        self._poll_thread   : threading.Thread | None = None
+        self._policy      = None
+        self._version     : str  = "unknown"
+        self._algo        : str  = "unknown"
+        self._lock        = threading.RLock()
+        self._loaded      : bool = False
+        self._poll_thread : threading.Thread | None = None
+        # NOTE: mlflow.set_tracking_uri is NOT called here.
+        # It is called lazily inside _load_champion() and _poll_loop()
+        # so that importing this module does not trigger any network calls.
+        # This is required for test_api.py to import cleanly in CI.
 
-        mlflow.set_tracking_uri(MLFLOW_URI)
-
-    # ── Public interface ────────────────────────────────────────
+    # ── Public interface ────────────────────────────────────────────
 
     def load(self) -> None:
-        """Load champion model synchronously. Called at startup."""
+        """Load champion model synchronously. Called at server startup."""
         self._load_champion()
         self._start_polling()
 
@@ -69,25 +70,25 @@ class ModelRegistry:
             with torch.no_grad():
                 obs_tensor = torch.FloatTensor(obs_array).unsqueeze(0)
 
-                # SAC has .actor attribute
-                # PPO (ActorCriticPolicy) uses ._predict or forward directly
                 if hasattr(self._policy, "actor"):
-                    # SAC
+                    # SAC policy
                     action = self._policy.actor(obs_tensor).squeeze(0).numpy()
                 elif hasattr(self._policy, "_predict"):
-                    # PPO — use the built-in _predict method
+                    # PPO ActorCriticPolicy
                     action = self._policy._predict(obs_tensor, deterministic=True)
                     action = action.squeeze(0).numpy()
                 else:
-                    # Fallback: use forward pass and take the action head output
+                    # Fallback: manual forward pass
                     features = self._policy.extract_features(obs_tensor)
                     latent   = self._policy.mlp_extractor(features)[0]
                     action   = self._policy.action_net(latent).squeeze(0).numpy()
             return action
 
-    # ── Internal ────────────────────────────────────────────────
+    # ── Internal ────────────────────────────────────────────────────
 
     def _load_champion(self) -> None:
+        """Load the champion model from MLflow registry."""
+        mlflow.set_tracking_uri(MLFLOW_URI)   # lazy — only called here
         try:
             client = mlflow.tracking.MlflowClient()
             mv     = client.get_model_version_by_alias(MODEL_NAME, "champion")
@@ -95,7 +96,7 @@ class ModelRegistry:
             algo   = run.data.params.get("algo", "unknown").upper()
             uri    = f"models:/{MODEL_NAME}@champion"
 
-            logger.info(f"Loading champion model: {MODEL_NAME} v{mv.version} ({algo})")
+            logger.info(f"Loading champion: {MODEL_NAME} v{mv.version} ({algo})")
             policy = mlflow.pytorch.load_model(uri)
 
             with self._lock:
@@ -111,9 +112,10 @@ class ModelRegistry:
             self._loaded = False
 
     def _poll_loop(self) -> None:
-        """Background thread: check for new champion periodically."""
+        """Background thread: poll MLflow for a new champion every N seconds."""
         while True:
             time.sleep(POLL_INTERVAL_SECONDS)
+            mlflow.set_tracking_uri(MLFLOW_URI)   # lazy — only called here
             try:
                 client  = mlflow.tracking.MlflowClient()
                 mv      = client.get_model_version_by_alias(MODEL_NAME, "champion")
@@ -135,5 +137,7 @@ class ModelRegistry:
         logger.info(f"Model polling started (every {POLL_INTERVAL_SECONDS}s)")
 
 
-# Singleton — shared across all FastAPI workers
+# Singleton — shared across all FastAPI request handlers
+# Importing this module does NOT trigger any network calls.
+# Call registry.load() explicitly at server startup (inside lifespan).
 registry = ModelRegistry()
