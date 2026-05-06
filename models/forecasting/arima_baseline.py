@@ -2,17 +2,17 @@
 import sys
 import warnings
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 warnings.filterwarnings("ignore")
 
+import mlflow
 import numpy as np
 import pandas as pd
-import mlflow
-from statsmodels.tsa.arima.model import ARIMA
 from loguru import logger
+from statsmodels.tsa.arima.model import ARIMA
 
-from data.config import PROCESSED_DIR, ALL_TICKERS
-
+from data.config import ALL_TICKERS, PROCESSED_DIR
 
 MLFLOW_TRACKING_URI = "http://localhost:5000"
 EXPERIMENT_NAME = "arima_baseline"

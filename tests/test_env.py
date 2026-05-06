@@ -1,14 +1,14 @@
 """Unit tests for Week 3 — PortfolioEnv Gym environment."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
 import numpy as np
+import pytest
 
 from models.rl_agent.portfolio_env import PortfolioEnv, softmax
-from models.rl_agent.reward import step_reward, sortino_reward
-
+from models.rl_agent.reward import sortino_reward, step_reward
 
 # ── Fixtures ────────────────────────────────────────────────────
 

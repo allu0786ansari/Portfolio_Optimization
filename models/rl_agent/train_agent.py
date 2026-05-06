@@ -8,22 +8,22 @@ Training progress is logged to MLflow. The best model is registered
 in the MLflow Model Registry with alias 'champion' if it beats the
 current champion's validation Sharpe ratio by 5%.
 """
-import sys
 import argparse
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import numpy as np
 import mlflow
 import mlflow.pytorch
-from stable_baselines3 import PPO, SAC
-from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
-from stable_baselines3.common.monitor import Monitor
+import numpy as np
 from loguru import logger
+from stable_baselines3 import PPO, SAC
+from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.monitor import Monitor
 
-from models.rl_agent.portfolio_env import PortfolioEnv
 from models.rl_agent.evaluate_agent import evaluate_agent
-
+from models.rl_agent.portfolio_env import PortfolioEnv
 
 MLFLOW_URI      = "http://localhost:5000"
 EXPERIMENT_NAME = "rl_agent_training"

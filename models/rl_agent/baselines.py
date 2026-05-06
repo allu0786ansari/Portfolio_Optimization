@@ -1,15 +1,16 @@
 """Compute equal-weight and benchmark baseline metrics for comparison."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import numpy as np
 from loguru import logger
 
-from models.rl_agent.data_loader import load_aligned_features, build_return_matrix
-from models.rl_agent.evaluate_agent import compute_metrics
-from models.classical.markowitz import MarkowitzOptimiser
 from data.config import ALL_TICKERS
+from models.classical.markowitz import MarkowitzOptimiser
+from models.rl_agent.data_loader import build_return_matrix, load_aligned_features
+from models.rl_agent.evaluate_agent import compute_metrics
 
 
 def equal_weight_metrics(

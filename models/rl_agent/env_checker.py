@@ -9,11 +9,12 @@ Expected output:
 """
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import numpy as np
-from stable_baselines3.common.env_checker import check_env
 from loguru import logger
+from stable_baselines3.common.env_checker import check_env
 
 from models.rl_agent.portfolio_env import PortfolioEnv
 

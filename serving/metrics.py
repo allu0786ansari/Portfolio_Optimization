@@ -7,13 +7,17 @@ Metrics:
   portfolio_rolling_sharpe_30d - gauge (drift signal)
 """
 import json
-from pathlib import Path
 from collections import deque
+from pathlib import Path
+
 import numpy as np
 from fastapi.responses import PlainTextResponse
 from prometheus_client import (
-    Counter, Histogram, Gauge,
-    generate_latest, CONTENT_TYPE_LATEST,
+    CONTENT_TYPE_LATEST,
+    Counter,
+    Gauge,
+    Histogram,
+    generate_latest,
 )
 
 REQUEST_COUNT = Counter(

@@ -1,21 +1,17 @@
 """Unit tests for Week 2 — LSTM model, dataset, and training utilities."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
 import torch
 
+from models.forecasting.dataset import FEATURE_COLS, ReturnSequenceDataset, make_dataloaders
 from models.forecasting.lstm_model import ReturnLSTM
-from models.forecasting.dataset import (
-    ReturnSequenceDataset, make_dataloaders, FEATURE_COLS
-)
-from models.forecasting.train_forecaster import (
-    directional_accuracy, evaluate, DEFAULT_HP
-)
-
+from models.forecasting.train_forecaster import DEFAULT_HP, directional_accuracy, evaluate
 
 # ── Fixtures ────────────────────────────────────────────────────
 
@@ -127,8 +123,8 @@ def test_directional_accuracy_random():
 def test_training_smoke(dummy_df, small_hp, tmp_path):
     """Full train loop runs without error on tiny dummy data."""
     import torch.nn as nn
-    from torch.utils.data import DataLoader
-    from models.forecasting.train_forecaster import train_one_epoch, evaluate
+
+    from models.forecasting.train_forecaster import train_one_epoch
 
     train_loader, val_loader, _, _ = make_dataloaders(
         dummy_df, seq_len=small_hp["seq_len"], batch_size=small_hp["batch_size"]

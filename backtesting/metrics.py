@@ -6,7 +6,6 @@ Annualisation assumes 252 trading days per year.
 import numpy as np
 from scipy import stats
 
-
 TRADING_DAYS = 252
 RISK_FREE_DAILY = 0.0   # simplified: 0% daily
 

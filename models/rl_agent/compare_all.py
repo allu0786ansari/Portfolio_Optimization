@@ -5,13 +5,13 @@ and prints a formatted comparison table.
 """
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import mlflow
 from loguru import logger
 
 from models.rl_agent.baselines import compute_all_baselines
-
 
 MLFLOW_URI = "http://localhost:5000"
 
@@ -81,7 +81,7 @@ def print_comparison_table(rows: list[dict]) -> None:
         print(f"  Best RL:    {best_rl['strategy']} (Sharpe={best_rl['sharpe']:.3f})")
         print(f"  Best Base:  {best_base['strategy']} (Sharpe={best_base['sharpe']:.3f})")
         print(f"  RL vs Base: {'BEATS' if beats else 'UNDERPERFORMS'} baseline by {abs(diff):.3f} Sharpe")
-        print(f"  (* = MLflow champion)")
+        print("  (* = MLflow champion)")
     print()
 
 

@@ -1,18 +1,25 @@
 """Unit tests for Week 5 — risk metrics and backtesting utilities."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
 import numpy as np
+import pytest
 
 from backtesting.metrics import (
-    sharpe_ratio, sortino_ratio, calmar_ratio,
-    annualised_return, max_drawdown,
-    value_at_risk, conditional_var,
-    equity_curve, rolling_sharpe,
-    drawdown_series, compute_all_metrics,
+    annualised_return,
+    calmar_ratio,
+    compute_all_metrics,
+    conditional_var,
+    drawdown_series,
+    equity_curve,
+    max_drawdown,
+    rolling_sharpe,
+    sharpe_ratio,
+    sortino_ratio,
     ttest_excess_returns,
+    value_at_risk,
 )
 
 

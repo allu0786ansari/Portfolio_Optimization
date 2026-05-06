@@ -1,10 +1,11 @@
 """Compare LSTM vs ARIMA — prints a side-by-side summary table."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import pandas as pd
 import mlflow
+import pandas as pd
 from loguru import logger
 
 MLFLOW_TRACKING_URI = "http://localhost:5000"

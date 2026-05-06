@@ -4,19 +4,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
-import pandas as pd
 import numpy as np
+import pandas as pd
+import pytest
 
+from data.config import ALL_TICKERS, MOMENTUM_WINDOWS, NIFTY50_TICKERS, SP500_TICKERS
 from data.ingestion.feature_engineering import (
-    compute_returns,
-    compute_momentum,
-    compute_volatility,
     compute_beta,
+    compute_momentum,
+    compute_returns,
     compute_rsi,
+    compute_volatility,
 )
-from data.config import NIFTY50_TICKERS, SP500_TICKERS, ALL_TICKERS, MOMENTUM_WINDOWS
-
 
 # ── Fixtures ─────────────────────────────────────────────────────
 

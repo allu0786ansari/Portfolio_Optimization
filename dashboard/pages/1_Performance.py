@@ -1,17 +1,17 @@
 """Page 1: Performance Overview — equity curves, drawdown, rolling Sharpe."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 import streamlit as st
 
 from dashboard.data_utils import (
-    load_backtest_results, get_equity_df,
+    get_equity_df,
     get_rolling_sharpe_df,
+    load_backtest_results,
 )
 
 st.set_page_config(page_title="Performance", page_icon="📊", layout="wide")

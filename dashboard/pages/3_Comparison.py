@@ -1,13 +1,13 @@
 """Page 3: Strategy Comparison — RL vs Markowitz vs Equal-Weight."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from dashboard.data_utils import load_backtest_results, get_metrics_df
+from dashboard.data_utils import get_metrics_df, load_backtest_results
 
 st.set_page_config(page_title="Comparison", page_icon="\u2696\ufe0f", layout="wide")
 st.title("\u2696\ufe0f Strategy Comparison")

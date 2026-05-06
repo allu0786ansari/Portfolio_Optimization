@@ -12,7 +12,6 @@ Why Sortino over Sharpe?
 """
 import numpy as np
 
-
 TRANSACTION_COST_RATE = 0.001   # 0.1% per unit of turnover
 RISK_FREE_DAILY       = 0.0     # simplification: 0% daily risk-free rate
 MIN_DOWNSIDE_STD      = 1e-8    # avoid division by zero

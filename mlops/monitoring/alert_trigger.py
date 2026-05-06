@@ -4,10 +4,11 @@ Run: python mlops/monitoring/alert_trigger.py
 Listens: http://localhost:5001/alert
 Grafana webhook URL: http://host.docker.internal:5001/alert
 """
-import subprocess
 import os
+import subprocess
 from pathlib import Path
-from flask import Flask, request, jsonify
+
+from flask import Flask, jsonify, request
 from loguru import logger
 
 app = Flask(__name__)

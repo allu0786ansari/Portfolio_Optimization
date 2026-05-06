@@ -1,21 +1,21 @@
 """Training loop for the LSTM return forecaster with MLflow logging."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
+import mlflow
+import mlflow.pytorch
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
-from torch.utils.data import DataLoader
-import mlflow
-import mlflow.pytorch
 from loguru import logger
+from torch.utils.data import DataLoader
 
-from data.config import PROCESSED_DIR, ALL_TICKERS
-from models.forecasting.dataset import make_dataloaders, FEATURE_COLS
+from data.config import ALL_TICKERS, PROCESSED_DIR
+from models.forecasting.dataset import FEATURE_COLS, make_dataloaders
 from models.forecasting.lstm_model import ReturnLSTM
-
 
 MLFLOW_TRACKING_URI = "http://localhost:5000"
 EXPERIMENT_NAME     = "lstm_forecaster"

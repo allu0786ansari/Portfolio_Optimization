@@ -4,14 +4,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
 from loguru import logger
 
-from data.config import (
-    RAW_DIR, START_DATE, END_DATE,
-    ALL_TICKERS, BENCHMARKS
-)
+from data.config import ALL_TICKERS, BENCHMARKS, END_DATE, RAW_DIR, START_DATE
 
 
 def fetch_ticker(ticker: str, start: str, end: str) -> pd.DataFrame | None:

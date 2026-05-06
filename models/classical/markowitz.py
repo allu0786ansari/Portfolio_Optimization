@@ -9,17 +9,13 @@ Uses Ledoit-Wolf shrinkage for a more stable covariance estimate.
 """
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import numpy as np
-import pandas as pd
 import cvxpy as cp
-from sklearn.covariance import LedoitWolf
+import numpy as np
 from loguru import logger
-
-from data.config import ALL_TICKERS
-from models.rl_agent.data_loader import load_aligned_features
-
+from sklearn.covariance import LedoitWolf
 
 MAX_WEIGHT     = 0.40   # max single-asset allocation
 RISK_FREE_RATE = 0.0    # daily risk-free rate

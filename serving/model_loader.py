@@ -8,18 +8,19 @@ is promoted — zero downtime, zero server restart needed.
 This is the MLOps pattern that Week 9 (Airflow retraining)
 will trigger automatically.
 """
+import sys
 import threading
 import time
 from pathlib import Path
-import sys
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
+
+import os
 
 import mlflow
 import mlflow.pytorch
 from loguru import logger
 
-
-import os
 MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MODEL_NAME             = "PortfolioAgent"
 POLL_INTERVAL_SECONDS  = 300   # check for new champion every 5 minutes
@@ -65,7 +66,6 @@ class ModelRegistry:
             if self._policy is None:
                 raise RuntimeError("Model not loaded yet")
             import torch
-            import numpy as np
             with torch.no_grad():
                 obs_tensor = torch.FloatTensor(obs_array).unsqueeze(0)
 

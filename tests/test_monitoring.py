@@ -1,12 +1,16 @@
 """Unit tests for Week 9 Prometheus metrics."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from serving.metrics import (
-    record_request, record_portfolio_return,
-    update_rolling_sharpe, _return_buffer,
-    ROLLING_SHARPE, REQUEST_COUNT,
+    REQUEST_COUNT,
+    ROLLING_SHARPE,
+    _return_buffer,
+    record_portfolio_return,
+    record_request,
+    update_rolling_sharpe,
 )
 
 

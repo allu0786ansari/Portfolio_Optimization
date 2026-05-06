@@ -4,13 +4,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import yfinance as yf
-import pandas as pd
 import numpy as np
+import pandas as pd
+import yfinance as yf
 from loguru import logger
 
-from data.config import RAW_DIR, PROCESSED_DIR, START_DATE, END_DATE
-
+from data.config import END_DATE, PROCESSED_DIR, START_DATE
 
 # Macro tickers available via yfinance
 MACRO_TICKERS: dict[str, str] = {

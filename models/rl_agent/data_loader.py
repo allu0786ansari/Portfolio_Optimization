@@ -5,13 +5,14 @@ This module handles the alignment and returns a clean dict of DataFrames.
 """
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import numpy as np
 import pandas as pd
 from loguru import logger
 
-from data.config import PROCESSED_DIR, ALL_TICKERS
+from data.config import ALL_TICKERS, PROCESSED_DIR
 from models.forecasting.dataset import FEATURE_COLS
 
 

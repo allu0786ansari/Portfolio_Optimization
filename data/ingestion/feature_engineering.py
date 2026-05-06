@@ -4,13 +4,18 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 from loguru import logger
 
 from data.config import (
-    RAW_DIR, PROCESSED_DIR, ALL_TICKERS,
-    MOMENTUM_WINDOWS, VOLATILITY_WINDOW, BETA_WINDOW, MIN_HISTORY_DAYS, BENCHMARKS
+    ALL_TICKERS,
+    BETA_WINDOW,
+    MIN_HISTORY_DAYS,
+    MOMENTUM_WINDOWS,
+    PROCESSED_DIR,
+    RAW_DIR,
+    VOLATILITY_WINDOW,
 )
 
 

@@ -1,6 +1,7 @@
 """Central configuration loaded from .env file."""
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv()

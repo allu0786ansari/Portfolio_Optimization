@@ -17,22 +17,24 @@ import sys
 import time
 from contextlib import asynccontextmanager
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from fastapi import FastAPI, HTTPException, Security, Depends, Request
-from fastapi.security import APIKeyHeader
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI, HTTPException, Request, Security
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from dotenv import load_dotenv
+from fastapi.security import APIKeyHeader
 from loguru import logger
 
-from serving.schemas import (
-    PredictRequest, PredictResponse,
-    HealthResponse, ReadyResponse,
-)
 from serving.model_loader import registry
 from serving.predictor import predict_weights
-
+from serving.schemas import (
+    HealthResponse,
+    PredictRequest,
+    PredictResponse,
+    ReadyResponse,
+)
 
 load_dotenv()
 

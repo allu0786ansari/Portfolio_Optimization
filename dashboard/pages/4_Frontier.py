@@ -1,6 +1,7 @@
 """Page 4: Efficient Frontier — Markowitz risk-return visualisation."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 import numpy as np
@@ -8,9 +9,9 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from dashboard.data_utils import load_backtest_results
-from models.rl_agent.data_loader import load_aligned_features, build_return_matrix
-from models.classical.markowitz import ledoit_wolf_cov
 from data.config import ALL_TICKERS
+from models.classical.markowitz import ledoit_wolf_cov
+from models.rl_agent.data_loader import build_return_matrix, load_aligned_features
 
 st.set_page_config(page_title="Frontier", page_icon="🔵", layout="wide")
 st.title("🔵 Markowitz Efficient Frontier")

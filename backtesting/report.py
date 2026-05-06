@@ -1,15 +1,15 @@
 """Generate a self-contained HTML backtest report with interactive charts."""
-import sys
 import json
+import sys
 import webbrowser
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
 from loguru import logger
-
 
 INPUT_PATH  = Path("backtesting/backtest_results.json")
 OUTPUT_PATH = Path("backtesting/backtest_report.html")

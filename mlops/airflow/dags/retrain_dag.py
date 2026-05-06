@@ -5,7 +5,9 @@ Tasks: fetch_new_data -> engineer_features -> train_models
        -> evaluate_champion -> notify_result
 """
 from __future__ import annotations
+
 from datetime import datetime, timedelta
+
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
@@ -21,10 +23,12 @@ IMPROVEMENT_THRESHOLD = 0.05
 
 def task_fetch_data(**context):
     import sys; sys.path.insert(0, ".")
-    from data.ingestion.fetch_data import fetch_all_tickers, fetch_benchmarks
-    from data.config import ALL_TICKERS, RAW_DIR
-    from loguru import logger
     import time
+
+    from loguru import logger
+
+    from data.config import ALL_TICKERS, RAW_DIR
+    from data.ingestion.fetch_data import fetch_all_tickers, fetch_benchmarks
     cutoff = time.time() - 86400
     for f in RAW_DIR.glob("*.parquet"):
         if f.stat().st_mtime < cutoff:
@@ -36,9 +40,10 @@ def task_fetch_data(**context):
 
 def task_engineer_features(**context):
     import sys; sys.path.insert(0, ".")
-    from data.ingestion.feature_engineering import engineer_all_features
-    from data.config import PROCESSED_DIR
     from loguru import logger
+
+    from data.config import PROCESSED_DIR
+    from data.ingestion.feature_engineering import engineer_all_features
     for f in PROCESSED_DIR.glob("features_*.parquet"):
         f.unlink()
     engineer_all_features()
@@ -47,8 +52,9 @@ def task_engineer_features(**context):
 
 def task_train_models(**context):
     import sys; sys.path.insert(0, ".")
-    from models.rl_agent.train_agent import train
     from loguru import logger
+
+    from models.rl_agent.train_agent import train
     logger.info("DAG: Training PPO...")
     train("ppo")
     logger.info("DAG: Training SAC...")

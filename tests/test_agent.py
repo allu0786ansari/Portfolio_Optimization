@@ -1,14 +1,14 @@
 """Unit tests for Week 4 — RL training utilities and baselines."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import pytest
 import numpy as np
+import pytest
 
+from models.classical.markowitz import MarkowitzOptimiser, ledoit_wolf_cov, markowitz_weights
 from models.rl_agent.evaluate_agent import compute_metrics
-from models.classical.markowitz import markowitz_weights, ledoit_wolf_cov, MarkowitzOptimiser
-
 
 # ── compute_metrics tests ────────────────────────────────────────
 

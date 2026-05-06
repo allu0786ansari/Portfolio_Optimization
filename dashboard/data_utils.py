@@ -3,17 +3,18 @@
 Uses st.cache_data to avoid reloading backtest results on every
 page interaction — critical for dashboard responsiveness.
 """
-import sys
 import json
+import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import numpy as np
+import os
+
 import pandas as pd
 import streamlit as st
-
-import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 RESULTS_PATH = Path("backtesting/backtest_results.json")
