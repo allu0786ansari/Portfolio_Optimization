@@ -555,46 +555,7 @@ Set `API_KEY` in your `.env` file.
 
 **Response:** Portfolio weights summing to 1.0, model version, latency.
 
----
 
-## Interview Talking Points
-
-<details>
-<summary><strong>1. Walk me through your system architecture</strong></summary>
-
-Five-layer pipeline: data ingestion → LSTM forecasting → RL agent training in custom Gym environment → walk-forward backtesting → FastAPI serving with MLflow hot-reload. Each layer is independently testable and replaceable.
-
-</details>
-
-<details>
-<summary><strong>2. Why RL over Markowitz?</strong></summary>
-
-Markowitz assumes static correlations and normal return distributions — both violated in real markets. The RL agent handles non-stationary environments, incorporates transaction costs natively in the reward signal, and learns asymmetric risk preferences. Markowitz is kept as a baseline and the RL agent outperforms it by 0.66 Sharpe points in walk-forward testing.
-
-</details>
-
-<details>
-<summary><strong>3. How did you prevent look-ahead bias?</strong></summary>
-
-Walk-forward backtesting with strict temporal separation: train on 2 years, test on next 6 months, step forward 1 month. Feature scalers are re-fitted on the training window only and applied forward. No future data ever enters the training process at any point.
-
-</details>
-
-<details>
-<summary><strong>4. How does the system handle model drift?</strong></summary>
-
-Prometheus exports `portfolio_rolling_sharpe_30d` from the live API. When it drops below 0.5, Grafana fires a webhook to a Flask bridge server which calls the Airflow REST API to trigger the retraining DAG. The DAG fetches new data, retrains, evaluates against the current champion, and promotes only if Sharpe improves by ≥5%. FastAPI hot-reloads the new champion within 5 minutes. Zero human intervention.
-
-</details>
-
-<details>
-<summary><strong>5. What was the hardest engineering problem?</strong></summary>
-
-Designing the RL reward function. A naive Sharpe ratio reward leads to unstable training due to high variance over short episode windows. Switching to Sortino ratio, adding explicit transaction cost penalties proportional to portfolio turnover, and normalising rewards by rolling standard deviation reduced training instability by ~40% and improved validation Sharpe by 0.3 points.
-
-</details>
-
----
 
 ## License
 
@@ -606,6 +567,6 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) for detai
 
 Built as an end-to-end AI engineering portfolio project demonstrating production ML system design from data ingestion to cloud deployment.
 
-**[⭐ Star this repo](https://github.com/allu0786ansari/Portfolio_Optimization)** if you found it useful.
+**[⭐ Star this repo](https://github.com/allu0786ansari/Portfolio_Optimization.git)** if you found it useful.
 
 </div>
