@@ -8,10 +8,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from unittest.mock import MagicMock, patch
+
 import numpy as np
 import pytest
 from fastapi.testclient import TestClient
-from unittest.mock import MagicMock, patch
 
 from serving.main import app
 
