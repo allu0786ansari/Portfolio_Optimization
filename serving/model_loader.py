@@ -8,6 +8,10 @@ is promoted — zero downtime, zero server restart needed.
 This is the MLOps pattern that Week 9 (Airflow retraining)
 will trigger automatically.
 """
+
+import socket
+socket.setdefaulttimeout(10)   # 10 second timeout for all network calls
+
 import os
 import sys
 import threading
