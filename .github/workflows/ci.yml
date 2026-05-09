@@ -46,8 +46,8 @@ jobs:
 
       - name: Run API integration tests (mocked)
         run: |
-          python -c "import tests.test_api" || true
-          pytest tests/test_api.py -v --tb=long --import-mode=importlib
+          python -c "import tests.test_api; print(dir(__import__('tests.test_api', fromlist=['test_api'])))"
+          pytest tests/test_api.py -v --tb=long --collect-only
         env:
           PYTHONPATH: .
           API_KEY: test-key
