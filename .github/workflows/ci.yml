@@ -45,7 +45,9 @@ jobs:
           PYTHONPATH: .
 
       - name: Run API integration tests (mocked)
-        run: pytest tests/test_api.py -v --tb=short
+        run: |
+          python -c "import tests.test_api" || true
+          pytest tests/test_api.py -v --tb=long --import-mode=importlib
         env:
           PYTHONPATH: .
           API_KEY: test-key
