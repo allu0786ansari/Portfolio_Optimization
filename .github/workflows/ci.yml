@@ -45,9 +45,7 @@ jobs:
           PYTHONPATH: .
 
       - name: Run API integration tests (mocked)
-        run: |
-          python -c "import tests.test_api; print(dir(__import__('tests.test_api', fromlist=['test_api'])))"
-          pytest tests/test_api.py -v --tb=long --collect-only
+        run: pytest tests/test_api.py -v --tb=short
         env:
           PYTHONPATH: .
           API_KEY: test-key
@@ -88,6 +86,19 @@ jobs:
             -e MLFLOW_TRACKING_URI=http://localhost:5000 \
             -p 8000:8000 \
             portfolio-api:ci
-          sleep 15
-          curl -f http://localhost:8000/health || (docker logs test-api && exit 1)
-          docker stop test-api
+
+          echo "Waiting for API to be ready..."
+          for i in $(seq 1 12); do
+            sleep 5
+            echo "Attempt $i of 12..."
+            if curl -sf http://localhost:8000/health; then
+              echo "Health check passed!"
+              docker stop test-api
+              exit 0
+            fi
+          done
+
+          echo "API failed to start after 60 seconds"
+          docker logs test-api
+          docker stop test-api || true
+          exit 1
