@@ -25,7 +25,7 @@ SAMPLE_TICKERS = ["RELIANCE.NS", "TCS.NS", "AAPL", "MSFT"]
 
 @pytest.fixture(scope="module")
 def mock_registry():
-    with patch("serving.model_loader.registry") as mock_reg:
+    with patch("serving.main.registry") as mock_reg:
         mock_reg.is_loaded    = True
         mock_reg.version      = "champion-v1"
         mock_reg.algo         = "PPO"
