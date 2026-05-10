@@ -27,7 +27,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 from loguru import logger
 
-from serving.metrics import load_sharpe_from_backtest, metrics_endpoint
+from serving.metrics import metrics_endpoint
 from serving.model_loader import registry
 from serving.predictor import predict_weights
 from serving.schemas import (
