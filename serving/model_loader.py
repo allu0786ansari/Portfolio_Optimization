@@ -9,20 +9,20 @@ This is the MLOps pattern that Week 9 (Airflow retraining)
 will trigger automatically.
 """
 
-import socket
-socket.setdefaulttimeout(10)   # 10 second timeout for all network calls
-
 import os
+import socket
 import sys
 import threading
 import time
 from pathlib import Path
 
+socket.setdefaulttimeout(10)   # 10 second timeout for all network calls
+
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-import mlflow
-import mlflow.pytorch
-from loguru import logger
+import mlflow  # noqa: E402
+import mlflow.pytorch  # noqa: E402
+from loguru import logger  # noqa: E402
 
 MLFLOW_URI            = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 MODEL_NAME            = "PortfolioAgent"
