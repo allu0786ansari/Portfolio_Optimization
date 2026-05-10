@@ -89,7 +89,7 @@ jobs:
 
           echo "Waiting for API to be ready..."
           for i in $(seq 1 12); do
-            sleep 5
+            sleep 8
             echo "Attempt $i of 12..."
             if curl -sf http://localhost:8000/health; then
               echo "Health check passed!"

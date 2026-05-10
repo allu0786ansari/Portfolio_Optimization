@@ -1,0 +1,13 @@
+[1mdiff --git a/serving/main.py b/serving/main.py[m
+[1mindex 2dbab01..03e0845 100644[m
+[1m--- a/serving/main.py[m
+[1m+++ b/serving/main.py[m
+[36m@@ -27,7 +27,7 @@[m [mfrom fastapi.responses import JSONResponse[m
+ from fastapi.security import APIKeyHeader[m
+ from loguru import logger[m
+ [m
+[31m-from serving.metrics import load_sharpe_from_backtest, metrics_endpoint[m
+[32m+[m[32mfrom serving.metrics import metrics_endpoint[m
+ from serving.model_loader import registry[m
+ from serving.predictor import predict_weights[m
+ from serving.schemas import ([m

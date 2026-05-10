@@ -48,10 +48,13 @@ API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("Starting Portfolio Optimization API...")
-    try:
-        registry.load()
-    except Exception as e:
-        logger.warning(f"Model load failed at startup (non-fatal): {e}")
+    import threading
+    def load_in_background():
+        try:
+            registry.load()
+        except Exception as e:
+            logger.warning(f"Model load failed at startup (non-fatal): {e}")
+    threading.Thread(target=load_in_background, daemon=True).start()
     logger.info("API ready.")
     yield
     logger.info("Shutting down API.")
