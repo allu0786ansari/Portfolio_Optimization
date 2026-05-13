@@ -18,7 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 RESULTS_PATH = Path("backtesting/backtest_results.json")
-API_BASE_URL = "http://localhost:8000"
+API_BASE_URL = os.getenv("API_URL", "http://localhost:8000")
 API_KEY = os.getenv("API_KEY", "portfolio-secret-key-change-in-production")
 
 

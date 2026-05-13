@@ -1,130 +1,159 @@
-"""Airflow DAG: nightly portfolio agent retraining.
+"""Airflow DAG: nightly portfolio retraining via HTTP calls to FastAPI.
 
-Schedule: 18:00 IST Mon-Fri (12:30 UTC)
-Tasks: fetch_new_data -> engineer_features -> train_models
-       -> evaluate_champion -> notify_result
+This DAG is intentionally lightweight — it contains NO ML code.
+All training happens in the FastAPI training service.
+Airflow is a pure orchestrator that fires HTTP requests and
+monitors the results.
+
+Architecture:
+  Airflow → POST http://api:8000/retrain/* → FastAPI ML Service
+                                           → MLflow Registry
+                                           → Model hot-reloaded
 """
 from __future__ import annotations
 
+import os
 from datetime import datetime, timedelta
 
+import requests
 from airflow import DAG
 from airflow.operators.python import PythonOperator
 
+# ── Config ────────────────────────────────────────────────────────
+TRAINING_SERVICE_URL = os.getenv("TRAINING_SERVICE_URL", "http://api:8000")
+API_KEY              = os.getenv("TRAINING_SERVICE_API_KEY",
+                                  "portfolio-secret-key-change-in-production")
+HEADERS              = {"X-API-Key": API_KEY, "Content-Type": "application/json"}
+TIMEOUT_SHORT        = 60      # seconds — for data/feature tasks
+TIMEOUT_TRAIN        = 7200    # seconds — 2 hours for training tasks
+
 DEFAULT_ARGS = {
-    "owner": "ai-engineer",
-    "depends_on_past": False,
-    "retries": 1,
-    "retry_delay": timedelta(minutes=5),
+    "owner":            "ai-engineer",
+    "depends_on_past":  False,
+    "retries":          1,
+    "retry_delay":      timedelta(minutes=5),
     "email_on_failure": False,
 }
+
 IMPROVEMENT_THRESHOLD = 0.05
 
 
-def task_fetch_data(**context):
-    import sys
-    sys.path.insert(0, ".")
-    import time
+# ── Helper ────────────────────────────────────────────────────────
 
+def call_training_service(
+    endpoint: str,
+    params:   dict | None = None,
+    timeout:  int = TIMEOUT_SHORT,
+) -> dict:
+    """POST to the FastAPI training service and return the JSON response."""
+    url = f"{TRAINING_SERVICE_URL}/retrain/{endpoint}"
     from loguru import logger
+    logger.info(f"Calling training service: POST {url}")
 
-    from data.config import ALL_TICKERS, RAW_DIR
-    from data.ingestion.fetch_data import fetch_all_tickers, fetch_benchmarks
-    cutoff = time.time() - 86400
-    for f in RAW_DIR.glob("*.parquet"):
-        if f.stat().st_mtime < cutoff:
-            f.unlink()
-    fetch_all_tickers(ALL_TICKERS)
-    fetch_benchmarks()
-    logger.info("DAG: Data fetch complete")
+    try:
+        response = requests.post(url, headers=HEADERS, params=params, timeout=timeout)
+        response.raise_for_status()
+        result = response.json()
+        logger.info(f"Response from {endpoint}: {result}")
+        return result
+    except requests.exceptions.Timeout:
+        raise RuntimeError(f"Training service timed out on {endpoint}")
+    except requests.exceptions.HTTPError as e:
+        raise RuntimeError(f"Training service error on {endpoint}: {e} — {response.text}")
+    except Exception as e:
+        raise RuntimeError(f"Failed to call {endpoint}: {e}")
+
+
+# ── Task functions ────────────────────────────────────────────────
+
+def task_fetch_data(**context):
+    result = call_training_service("fetch-data", timeout=TIMEOUT_SHORT)
+    context["ti"].xcom_push(key="fetch_result", value=result)
 
 
 def task_engineer_features(**context):
-    import sys
-    sys.path.insert(0, ".")
-    from loguru import logger
-
-    from data.config import PROCESSED_DIR
-    from data.ingestion.feature_engineering import engineer_all_features
-    for f in PROCESSED_DIR.glob("features_*.parquet"):
-        f.unlink()
-    engineer_all_features()
-    logger.info("DAG: Feature engineering complete")
+    result = call_training_service("engineer-features", timeout=TIMEOUT_SHORT)
+    context["ti"].xcom_push(key="engineer_result", value=result)
 
 
-def task_train_models(**context):
-    import sys
-    sys.path.insert(0, ".")
-    from loguru import logger
+def task_train_ppo(**context):
+    result = call_training_service(
+        "train", params={"algo": "ppo"}, timeout=TIMEOUT_TRAIN
+    )
+    context["ti"].xcom_push(key="ppo_result", value=result)
 
-    from models.rl_agent.train_agent import train
-    logger.info("DAG: Training PPO...")
-    train("ppo")
-    logger.info("DAG: Training SAC...")
-    train("sac")
+
+def task_train_sac(**context):
+    result = call_training_service(
+        "train", params={"algo": "sac"}, timeout=TIMEOUT_TRAIN
+    )
+    context["ti"].xcom_push(key="sac_result", value=result)
 
 
 def task_evaluate_champion(**context):
-    import sys
-    sys.path.insert(0, ".")
-    import mlflow
-    from loguru import logger
-    mlflow.set_tracking_uri("http://localhost:5000")
-    client = mlflow.tracking.MlflowClient()
-    try:
-        mv = client.get_model_version_by_alias("PortfolioAgent", "champion")
-        run = client.get_run(mv.run_id)
-        champ_sh = float(run.data.metrics.get("val_sharpe", 0.0))
-    except Exception:
-        champ_sh = 0.0
-    exp = client.get_experiment_by_name("rl_agent_training")
-    runs = client.search_runs(exp.experiment_id,
-        order_by=["metrics.val_sharpe DESC"], max_results=5)
-    best_run, best_sh = None, 0.0
-    for r in runs:
-        sh = float(r.data.metrics.get("val_sharpe", 0.0))
-        if sh > best_sh:
-            best_sh, best_run = sh, r
-    promoted = False
-    if best_run and best_sh > champ_sh * (1 + IMPROVEMENT_THRESHOLD):
-        versions = client.search_model_versions("name='PortfolioAgent'")
-        latest = sorted(versions, key=lambda v: int(v.version))[-1]
-        client.set_registered_model_alias("PortfolioAgent", "champion", latest.version)
-        promoted = True
-        logger.info(f"NEW CHAMPION v{latest.version} Sharpe {best_sh:.3f}")
-    else:
-        logger.info(f"No promotion: {best_sh:.3f} vs threshold {champ_sh*1.05:.3f}")
-    context["ti"].xcom_push(key="promoted", value=promoted)
-    context["ti"].xcom_push(key="new_sharpe", value=best_sh)
-    context["ti"].xcom_push(key="champ_sharpe", value=champ_sh)
+    result = call_training_service("evaluate-champion", timeout=TIMEOUT_SHORT)
+    context["ti"].xcom_push(key="evaluate_result", value=result)
 
 
 def task_notify_result(**context):
     from loguru import logger
     ti = context["ti"]
-    promoted = ti.xcom_pull(key="promoted", task_ids="evaluate_champion")
-    new_sh = ti.xcom_pull(key="new_sharpe", task_ids="evaluate_champion")
-    champ_sh = ti.xcom_pull(key="champ_sharpe", task_ids="evaluate_champion")
-    logger.info("=" * 50)
-    logger.info(f"DAG COMPLETE — {'PROMOTED' if promoted else 'NO CHANGE'}")
-    logger.info(f"  New Sharpe:    {new_sh:.3f}")
-    logger.info(f"  Champ Sharpe:  {champ_sh:.3f}")
-    logger.info("=" * 50)
+    evaluate_result = ti.xcom_pull(
+        key="evaluate_result", task_ids="evaluate_champion"
+    ) or {}
 
+    promoted   = evaluate_result.get("details", {}).get("promoted",     False)
+    new_sharpe = evaluate_result.get("details", {}).get("new_sharpe",   0.0)
+    champ_sh   = evaluate_result.get("details", {}).get("champ_sharpe", 0.0)
+
+    logger.info("=" * 55)
+    logger.info(f"DAG COMPLETE — {'CHAMPION PROMOTED' if promoted else 'NO CHANGE'}")
+    logger.info(f"  New model Sharpe:     {new_sharpe:.3f}")
+    logger.info(f"  Previous champion:    {champ_sh:.3f}")
+    logger.info(f"  Champion updated:     {promoted}")
+    logger.info(f"  Full result:          {evaluate_result}")
+    logger.info("=" * 55)
+
+
+# ── DAG definition ────────────────────────────────────────────────
 
 with DAG(
-    dag_id="retrain_portfolio_agent",
-    default_args=DEFAULT_ARGS,
-    description="Nightly retraining for portfolio RL agent",
-    schedule="30 12 * * 1-5",
-    start_date=datetime(2024, 1, 1),
-    catchup=False,
-    tags=["portfolio", "mlops"],
-    max_active_runs=1,
+    dag_id          = "retrain_portfolio_agent",
+    default_args    = DEFAULT_ARGS,
+    description     = "Nightly retraining — Airflow calls FastAPI training service",
+    schedule        = "30 12 * * 1-5",   # 18:00 IST Mon-Fri
+    start_date      = datetime(2024, 1, 1),
+    catchup         = False,
+    tags            = ["portfolio", "mlops", "retraining"],
+    max_active_runs = 1,
 ) as dag:
-    fetch    = PythonOperator(task_id="fetch_new_data",     python_callable=task_fetch_data)
-    engineer = PythonOperator(task_id="engineer_features",  python_callable=task_engineer_features)
-    train    = PythonOperator(task_id="train_models",       python_callable=task_train_models, execution_timeout=timedelta(hours=2))
-    evaluate = PythonOperator(task_id="evaluate_champion",  python_callable=task_evaluate_champion)
-    notify   = PythonOperator(task_id="notify_result",      python_callable=task_notify_result)
-    fetch >> engineer >> train >> evaluate >> notify
+
+    fetch = PythonOperator(
+        task_id         = "fetch_new_data",
+        python_callable = task_fetch_data,
+    )
+    engineer = PythonOperator(
+        task_id         = "engineer_features",
+        python_callable = task_engineer_features,
+    )
+    train_ppo = PythonOperator(
+        task_id           = "train_ppo",
+        python_callable   = task_train_ppo,
+        execution_timeout = timedelta(hours=2),
+    )
+    train_sac = PythonOperator(
+        task_id           = "train_sac",
+        python_callable   = task_train_sac,
+        execution_timeout = timedelta(hours=2),
+    )
+    evaluate = PythonOperator(
+        task_id         = "evaluate_champion",
+        python_callable = task_evaluate_champion,
+    )
+    notify = PythonOperator(
+        task_id         = "notify_result",
+        python_callable = task_notify_result,
+    )
+
+    # PPO and SAC train in parallel after feature engineering
+    fetch >> engineer >> [train_ppo, train_sac] >> evaluate >> notify

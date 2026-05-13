@@ -9,7 +9,7 @@ RUN apt-get update && \
 COPY requirements.txt ./
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir streamlit plotly pandas numpy httpx python-dotenv
+    pip install --no-cache-dir streamlit plotly pandas numpy httpx python-dotenv cvxpy osqp ecos scs loguru
 
 COPY data/        ./data/
 COPY dashboard/   ./dashboard/
