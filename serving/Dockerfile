@@ -6,10 +6,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc g++ curl git \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+COPY requirements/api.txt ./
 
 RUN pip install --upgrade pip && \
-    pip install --prefix=/install --no-cache-dir -r requirements_api.txt
+    pip install --prefix=/install --no-cache-dir -r api.txt
 
 
 # Stage 2: runtime

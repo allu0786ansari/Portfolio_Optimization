@@ -9,7 +9,7 @@ RUN apt-get update && \
 COPY requirements/dashboard.txt ./
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements/dashboard.txt
+    pip install --no-cache-dir -r dashboard.txt
 
 COPY data/        ./data/
 COPY dashboard/   ./dashboard/
