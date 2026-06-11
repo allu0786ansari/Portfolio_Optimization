@@ -75,7 +75,7 @@ The system goes far beyond model training — it includes the full ML engineerin
 ### Equity Curves
 
 <!-- Replace with actual screenshot from backtest_report.html -->
-![Equity Curves](docs/images/equity_curves.png)
+![Equity Curves](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/equity_curve.png)
 *Figure 1: Walk-forward equity curves — RL Agent vs Markowitz vs Equal-Weight vs Nifty50*
 
 ### Drawdown Analysis
