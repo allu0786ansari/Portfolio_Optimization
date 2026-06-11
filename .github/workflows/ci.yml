@@ -23,11 +23,9 @@ jobs:
       - name: Install dependencies
         run: |
           pip install --upgrade pip
-          pip install ruff pytest pytest-cov
-          pip install torch --index-url https://download.pytorch.org/whl/cpu
-          pip install prometheus-client
-          pip install "pandas<3"
-          pip install -r requirements.txt
+          pip install ruff
+          pip install -r requirements/api.txt
+          pip install -r requirements/dashboard.txt
 
       - name: Lint with ruff
         run: ruff check . --select E,F,I --ignore E501
@@ -101,4 +99,33 @@ jobs:
           echo "API failed to start after 60 seconds"
           docker logs test-api
           docker stop test-api || true
+          exit 1
+
+      - name: Build Dashboard Docker image
+        run: docker build -f dashboard/Dockerfile -t portfolio-dashboard:ci .
+
+      - name: Verify dashboard image exists
+        run: docker images portfolio-dashboard:ci
+
+      - name: Smoke test — dashboard health endpoint
+        run: |
+          docker run -d --name test-dashboard \
+            -e API_URL=http://localhost:8000 \
+            -p 8501:8501 \
+            portfolio-dashboard:ci
+
+          echo "Waiting for dashboard to be ready..."
+          for i in $(seq 1 12); do
+            sleep 8
+            echo "Attempt $i of 12..."
+            if curl -sf http://localhost:8501/_stcore/health; then
+              echo "Dashboard health check passed!"
+              docker stop test-dashboard
+              exit 0
+            fi
+          done
+
+          echo "Dashboard failed to start after 60 seconds"
+          docker logs test-dashboard
+          docker stop test-dashboard || true
           exit 1
