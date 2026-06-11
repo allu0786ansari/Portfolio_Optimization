@@ -81,7 +81,7 @@ The system goes far beyond model training — it includes the full ML engineerin
 ### Drawdown Analysis
 
 <!-- Replace with actual screenshot -->
-![Drawdown](docs/images/drawdown.png)
+![Drawdown](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/dropdown.png)
 *Figure 2: Portfolio drawdown comparison across strategies*
 
 ### Rolling 63-Day Sharpe Ratio
