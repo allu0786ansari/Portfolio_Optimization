@@ -1,6 +1,6 @@
 # AI-Powered Portfolio Optimization Engine
 
-**Author:** ALLAUDIN ANSARI 
+**Author:** Allaudin Ansari
 **Repository:** github.com/allu0786ansari/Portfolio_Optimization  
 **Stack:** PyTorch · Stable-Baselines3 · FastAPI · Streamlit · MLflow · Airflow · Prometheus · Docker  
 
