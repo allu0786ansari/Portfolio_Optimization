@@ -76,21 +76,17 @@ The system goes far beyond model training — it includes the full ML engineerin
 
 <!-- Replace with actual screenshot from backtest_report.html -->
 ![Equity Curves](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/equity_curve.png)
+
 *Figure 1: Walk-forward equity curves — RL Agent vs Markowitz vs Equal-Weight vs Nifty50*
 
-### Drawdown Analysis
+
+### Drawdown Analysis And Rolling 63-Day Sharpe Ratio
 
 <!-- Replace with actual screenshot -->
 ![Drawdown](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/dropdown.png)
+
 *Figure 2: Portfolio drawdown comparison across strategies*
 
-### Rolling 63-Day Sharpe Ratio
-
-<!-- Replace with actual screenshot -->
-![Rolling Sharpe](docs/images/rolling_sharpe.png)
-*Figure 3: Rolling Sharpe ratio showing RL agent stability across market regimes*
-
----
 
 ## System Architecture
 
