@@ -72,18 +72,16 @@ The system goes far beyond model training — it includes the full ML engineerin
 
 > Alpha over equal-weight is statistically significant at p < 0.05 using a two-sided t-test on monthly excess returns.
 
-### Equity Curves
+### Equity Curves: Walk-forward equity curves — RL Agent vs Markowitz vs Equal-Weight vs Nifty50
 
 <!-- Replace with actual screenshot from backtest_report.html -->
 ![Equity Curves](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/equity_curve.png)
-*Figure 1: Walk-forward equity curves — RL Agent vs Markowitz vs Equal-Weight vs Nifty50*
 
 
-### Drawdown Analysis And Rolling 63-Day Sharpe Ratio
+### Drawdown Analysis And Rolling 63-Day Sharpe Ratio: Portfolio drawdown comparison across strategies 
 
 <!-- Replace with actual screenshot -->
 ![Drawdown](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/dropdown.png)
-*Figure 2: Portfolio drawdown comparison across strategies*
 
 
 ## System Architecture
@@ -309,11 +307,10 @@ The model is **never retrained** on the test window. Feature scalers are re-fitt
 | CVaR 95% | Mean of returns below VaR |
 | Max Drawdown | max(peak − trough) / peak |
 
-### Per-Window Results
+### Per-Window Results: Sharpe ratio per walk-forward window — RL Agent vs baselines
 
 <!-- Replace with actual screenshot from Streamlit comparison page -->
-![Per-Window Sharpe](docs/images/per_window_sharpe.png)
-*Figure 5: Sharpe ratio per walk-forward window — RL Agent vs baselines*
+![Per-Window Sharpe](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/forward%20walk.png)
 
 ---
 
