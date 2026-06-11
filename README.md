@@ -76,7 +76,6 @@ The system goes far beyond model training — it includes the full ML engineerin
 
 <!-- Replace with actual screenshot from backtest_report.html -->
 ![Equity Curves](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/equity_curve.png)
-
 *Figure 1: Walk-forward equity curves — RL Agent vs Markowitz vs Equal-Weight vs Nifty50*
 
 
@@ -84,7 +83,6 @@ The system goes far beyond model training — it includes the full ML engineerin
 
 <!-- Replace with actual screenshot -->
 ![Drawdown](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/dropdown.png)
-
 *Figure 2: Portfolio drawdown comparison across strategies*
 
 
@@ -119,11 +117,7 @@ The system is organised into five layers, each with a clear responsibility. Data
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-<!-- Replace with actual architecture diagram -->
-![Architecture Diagram](docs/images/architecture.png)
-*Figure 4: Full system architecture diagram*
 
----
 
 ## Project Structure
 
