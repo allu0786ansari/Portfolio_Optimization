@@ -367,16 +367,13 @@ The API loads the champion model at startup from the MLflow registry. A backgrou
 Four-page Streamlit dashboard deployed at: **[Live URL](https://your-streamlit-url.streamlit.app)**
 
 <!-- Replace with actual screenshot -->
-![Dashboard Performance Page](docs/images/dashboard_performance.png)
-*Figure 6: Performance overview — KPI cards, equity curves, drawdown, rolling Sharpe*
+![Dashboard Performance Page]()
 
 <!-- Replace with actual screenshot -->
-![Dashboard Allocation Page](docs/images/dashboard_allocation.png)
-*Figure 7: Live allocation page — calls FastAPI in real time and displays weights as donut chart*
+![Dashboard Allocation Page](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/allocation.png)
 
 <!-- Replace with actual screenshot -->
-![Dashboard Comparison Page](docs/images/dashboard_comparison.png)
-*Figure 8: Strategy comparison — metrics table with best-value highlighting*
+![Dashboard Comparison Page](https://github.com/allu0786ansari/Portfolio_Optimization/blob/main/Document/screenshots/strategy%20cmp.png)
 
 | Page | Description |
 |---|---|
