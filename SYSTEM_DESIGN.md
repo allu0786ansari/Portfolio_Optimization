@@ -1,6 +1,6 @@
-# SYSTEM_DESIGN.md — AI-Powered Portfolio Optimization Engine
+# AI-Powered Portfolio Optimization Engine
 
-**Author:** AI Engineer Candidate  
+**Author:** ALLAUDIN ANSARI 
 **Repository:** github.com/allu0786ansari/Portfolio_Optimization  
 **Stack:** PyTorch · Stable-Baselines3 · FastAPI · Streamlit · MLflow · Airflow · Prometheus · Docker  
 
