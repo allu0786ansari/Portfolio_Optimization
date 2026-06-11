@@ -20,3 +20,6 @@ RUN pip install --no-cache-dir \
 RUN mkdir -p /opt/airflow/dags /opt/airflow/logs /opt/airflow/plugins
 
 WORKDIR /opt/airflow
+
+
+

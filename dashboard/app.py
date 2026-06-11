@@ -6,9 +6,11 @@ Pages are in dashboard/pages/ — Streamlit auto-discovers them
 by filename prefix (1_, 2_, 3_, 4_) and shows them in the sidebar.
 """
 import sys
+import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
+API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 import streamlit as st
 

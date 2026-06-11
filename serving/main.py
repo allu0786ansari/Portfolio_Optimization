@@ -30,6 +30,7 @@ from loguru import logger
 from serving.metrics import metrics_endpoint
 from serving.model_loader import registry
 from serving.predictor import predict_weights
+from serving.retrain_router import retrain_router
 from serving.schemas import (
     HealthResponse,
     PredictRequest,
@@ -79,6 +80,8 @@ app.add_middleware(
     allow_methods  = ["GET", "POST"],
     allow_headers  = ["*"],
 )
+
+app.include_router(retrain_router) 
 
 
 # ── Middleware: request logging ──────────────────────────────────

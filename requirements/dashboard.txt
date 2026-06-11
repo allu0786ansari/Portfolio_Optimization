@@ -1,0 +1,42 @@
+# ==============================================================================
+# requirements/dashboard.txt  —  Streamlit Dashboard
+# Covers: dashboard/app.py, pages/performance.py, pages/allocation.py,
+#         pages/comparison.py
+# Features: equity curves, drawdown, efficient frontier (Plotly), strategy
+#           comparison, donut/heatmap allocation charts, live API calls,
+#           QuantStats risk metrics display, MLflow run history
+# ==============================================================================
+
+# ── PyTorch CPU-only (lightweight model calls from dashboard) ─────────────────
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.1
+
+# ── Dashboard framework ───────────────────────────────────────────────────────
+streamlit==1.36.0
+plotly==5.22.0                   # equity curves, drawdown, efficient frontier
+altair==5.3.0                    # streamlit native charts
+
+# ── Data & numerics ───────────────────────────────────────────────────────────
+numpy==1.26.4
+pandas==2.2.2
+scipy==1.13.1                    # stats for frontier computation
+pyarrow==14.0.1                  # read Parquet backtest results / DVC artifacts
+
+# ── Finance data & risk metrics ───────────────────────────────────────────────
+yfinance==0.2.40                 # live price fetching for dashboard charts
+quantstats==0.0.62               # Sharpe, Sortino, CVaR, drawdown display
+seaborn==0.13.2                  # quantstats pulls seaborn for tearsheet plots
+matplotlib==3.8.4                # quantstats + seaborn backend
+tabulate==0.9.0                  # quantstats HTML/text report tables
+statsmodels==0.14.2              # quantstats rolling stats / regression
+
+# ── API client (calls FastAPI serving layer) ──────────────────────────────────
+httpx==0.27.0                    # async-capable HTTP client for /predict calls
+
+# ── MLflow (pull experiment history, metric charts) ───────────────────────────
+mlflow-skinny==2.14.1
+cloudpickle==3.0.0               # mlflow-skinny transitive dep
+
+# ── RL environment (imported when loading champion model for frontier viz) ────
+stable-baselines3==2.3.2
+gymnasium==0.29.1

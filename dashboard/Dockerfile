@@ -6,10 +6,10 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends curl && \
     rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt ./
+COPY requirements/dashboard.txt ./
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir streamlit plotly pandas numpy httpx python-dotenv cvxpy osqp ecos scs loguru
+    pip install --no-cache-dir -r requirements/dashboard.txt
 
 COPY data/        ./data/
 COPY dashboard/   ./dashboard/
@@ -20,7 +20,10 @@ COPY .streamlit/  ./.streamlit/
 
 RUN groupadd -r appuser && \
     useradd -r -g appuser -u 1000 appuser && \
-    chown -R appuser:appuser /app
+    mkdir -p /home/appuser && \
+    chown -R appuser:appuser /app /home/appuser
+
+ENV HOME=/home/appuser
 
 USER appuser
 

@@ -1,0 +1,41 @@
+# ==============================================================================
+# requirements/api.txt  —  FastAPI Serving Layer
+# Covers: serving/main.py, serving/schemas.py, serving/model_loader.py
+# Features: /health, /predict, /metrics, API-key auth, MLflow model loading,
+#            RL agent inference (SB3+Gymnasium), LSTM inference (PyTorch),
+#            Prometheus metrics export, structured JSON logging
+# ==============================================================================
+
+# ── PyTorch CPU-only (saves ~2 GB vs default CUDA wheel) ──────────────────────
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.3.1
+
+# ── API framework ─────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.30.1        # [standard] adds websockets, httptools, uvloop
+pydantic==2.7.1
+pydantic-settings==2.3.0         # BaseSettings / .env file loading
+python-multipart==0.0.9          # required by FastAPI for form/file endpoints
+email-validator==2.1.1           # fastapi[all] pulls this; needed for Pydantic EmailStr
+
+# ── ML inference ──────────────────────────────────────────────────────────────
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.5.0              # RobustScaler, Ledoit-Wolf (used at predict time)
+stable-baselines3==2.3.2         # PPO/SAC agent loading + predict()
+gymnasium==0.29.1                # PortfolioEnv (imported by SB3 at load time)
+cloudpickle==3.0.0               # SB3 model serialisation; mlflow-skinny dep
+
+# ── MLflow model registry (skinny = no UI server, no SQLAlchemy) ───────────────
+mlflow-skinny==2.14.1
+pyarrow==14.0.1                  # mlflow-skinny[extras] Parquet artifact support
+
+# ── Monitoring & logging ──────────────────────────────────────────────────────
+prometheus-fastapi-instrumentator==7.0.0
+loguru==0.7.2                    # used directly in main.py: from loguru import logger
+
+# ── Authentication ────────────────────────────────────────────────────────────
+python-jose[cryptography]==3.3.0 # API key JWT validation
+
+# ── Testing (needed inside container for CI health-check scripts) ──────────────
+httpx==0.27.0                    # FastAPI TestClient transport
