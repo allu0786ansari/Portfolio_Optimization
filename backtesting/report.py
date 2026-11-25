@@ -95,10 +95,10 @@ def build_report(results: dict) -> str:
     <html>
     <body>
     <h1>Backtest Report</h1>
-    {pio.to_html(fig1, full_html=False)}
-    {pio.to_html(fig2, full_html=False)}
-    {pio.to_html(fig3, full_html=False)}
-    {pio.to_html(fig4, full_html=False)}
+    {pio.to_html(fig1, full_html=False, include_plotlyjs="cdn")}
+    {pio.to_html(fig2, full_html=False, include_plotlyjs=False)}
+    {pio.to_html(fig3, full_html=False, include_plotlyjs=False)}
+    {pio.to_html(fig4, full_html=False, include_plotlyjs=False)}
     <table>{rows_html}</table>
     </body>
     </html>
@@ -115,4 +115,5 @@ if __name__ == "__main__":
     results = json.loads(INPUT_PATH.read_text())
     html = build_report(results)
     OUTPUT_PATH.write_text(html, encoding="utf-8" )
-    webbrowser.open(OUTPUT_PATH.resolve().as_uri())
+    if "--open" in sys.argv:
+        webbrowser.open(OUTPUT_PATH.resolve().as_uri())

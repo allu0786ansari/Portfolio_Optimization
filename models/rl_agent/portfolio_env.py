@@ -1,235 +1,115 @@
-"""Custom Gymnasium environment for portfolio allocation.
+"""Legacy entry point for the portfolio RL environment — now backed by the corrected v2 env.
 
-Implements the OpenAI Gym interface:
-    reset()  -> (observation, info)
-    step()   -> (observation, reward, terminated, truncated, info)
-    render() -> None
-    close()  -> None
+v1's ``PortfolioEnv`` had look-ahead (the reward was the same-day return that
+was also in the observation), mixed NSE and NYSE calendars, clipped raw
+features and an action projection that pinned weights near 1/N. This module
+keeps the v1 import path and constructor shape for ``train_agent.py`` and the
+dashboard, but all logic now lives in ``pfo.rl.env.PortfolioEnvV2``.
 
-Design decisions (asked in interviews):
-- Action space: Box(-1, 1, N) — agent outputs raw logits, softmax projects
-  onto the simplex. Weights always sum to 1, all non-negative.
-- State space: flattened (N assets x 11 features) + current weights = N*12
-- Reward: per-step log return minus transaction cost penalty
-- Episode length: 252 steps (1 trading year)
-- Random start: each reset() samples a random start date from the
-  training window — prevents memorisation of specific market paths
+Data layout of one env instance (fractions of the universe's history):
+    [0, train_frac)               training rows (scaler is fitted here only)
+    [start_frac, end_frac)        rows this env may sample episodes from
 """
+
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+ROOT = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(ROOT / "src"))
 
-import gymnasium as gym
 import numpy as np
-from gymnasium import spaces
 from loguru import logger
 
-from data.config import ALL_TICKERS
-from models.forecasting.dataset import FEATURE_COLS
-from models.rl_agent.data_loader import build_return_matrix, load_aligned_features
-from models.rl_agent.reward import step_reward
+from pfo.data.market import load_v1_universe
+from pfo.features.basic import FEATURE_NAMES, WARMUP_DAYS, FoldScaler, compute_features, to_tensor
+from pfo.rl.env import PortfolioEnvV2, project_action
 
-EPISODE_LENGTH   = 252          # trading days per episode (1 year)
-N_FEATURES       = len(FEATURE_COLS)   # features per asset (10)
-SOFTMAX_TEMP     = 1.0          # temperature for softmax projection
+EPISODE_LENGTH = 252
+DEFAULT_UNIVERSE = "sp500"
 
 
-def softmax(x: np.ndarray, temperature: float = SOFTMAX_TEMP) -> np.ndarray:
-    """Numerically stable softmax — projects action vector onto simplex."""
-    x = x / temperature
-    x = x - np.max(x)   # stability: subtract max before exp
-    e = np.exp(x)
+def softmax(x: np.ndarray, temperature: float = 1.0) -> np.ndarray:
+    """Kept for backward compatibility with v1 callers."""
+    z = np.asarray(x, dtype=float) / temperature
+    z = z - z.max()
+    e = np.exp(z)
     return e / e.sum()
 
 
-class PortfolioEnv(gym.Env):
-    """Portfolio allocation environment.
-
-    The agent learns to allocate capital across N assets to maximise
-    risk-adjusted returns while controlling transaction costs.
-
-    Attributes:
-        n_assets      : number of assets in the universe
-        observation_space : Box(N * (n_features + 1),)
-        action_space      : Box(-1, 1, N) — softmaxed to weights
-    """
-
-    metadata = {"render_modes": ["human"]}
+class PortfolioEnv(PortfolioEnvV2):
+    """Corrected environment on one universe's own exchange calendar."""
 
     def __init__(
         self,
-        tickers: list[str] = ALL_TICKERS,
+        universe: str = DEFAULT_UNIVERSE,
         episode_length: int = EPISODE_LENGTH,
-        train_frac: float = 0.7,
+        train_frac: float = 0.70,
+        start_frac: float = 0.0,
+        end_frac: float | None = None,
+        action_scale: float = 5.0,
+        cost_bps: float = 10.0,
+        execution_lag: int = 1,
         seed: int | None = None,
+        tickers=None,  # accepted for v1 compatibility; the universe defines the tickers
     ):
-        super().__init__()
+        market = load_v1_universe(universe)
+        feats = compute_features(market.prices, market.benchmark)
+        x = to_tensor(feats)[WARMUP_DAYS:]
+        r = market.returns.to_numpy()[WARMUP_DAYS:]
+        self.dates = market.dates[WARMUP_DAYS:]
+        self.tickers = market.tickers
+        self.universe = universe
+        T = len(self.dates)
+        train_end = int(T * train_frac)
+        self.scaler = FoldScaler().fit(x, range(0, train_end))
+        end_frac = train_frac if end_frac is None else end_frac
+        start, end = int(T * start_frac), int(T * end_frac)
+        super().__init__(self.scaler.transform(x), r, start=start, end=end, episode_length=episode_length,
+                         cost_bps=cost_bps, action_scale=action_scale, execution_lag=execution_lag, seed=seed)
+        self._returns_log: list[float] = []
+        logger.info(f"PortfolioEnv[{universe}]: {self.n_assets} assets, rows [{start}, {end}) of {T} "
+                    f"({self.dates[start].date()} -> {self.dates[end - 1].date()}), scaler fit on [0, {train_end})")
 
-        # Load and align feature data
-        self.features_dict, self.tickers, self.dates = load_aligned_features(tickers)
-        self.n_assets        = len(self.tickers)
-        self.episode_length  = episode_length
-        self.return_matrix   = build_return_matrix(self.features_dict, self.tickers)
+    # -- compatibility helpers used by v1 scripts/tests ----------------------------
+    def reset(self, *, seed=None, options=None):
+        self._returns_log = []
+        obs, info = super().reset(seed=seed, options=options)
+        info["start_date"] = str(self.dates[self._t].date())
+        return obs, info
 
-        # Feature matrix: shape (T, N, F)
-        self.feature_matrix = np.stack(
-            [self.features_dict[t][FEATURE_COLS].values for t in self.tickers],
-            axis=1,
-        ).astype(np.float32)   # (T, N, F)
+    def step(self, action):
+        obs, reward, term, trunc, info = super().step(action)
+        self._returns_log.append(info["portfolio_return"])
+        info["portfolio_value"] = float(np.prod(1.0 + np.asarray(self._returns_log)))
+        info["step"] = self._steps
+        return obs, reward, term, trunc, info
 
-        # Training window boundary (no leakage into val/test)
-        self.train_end_idx = int(len(self.dates) * train_frac) - episode_length - 1
-        if self.train_end_idx < episode_length:
-            raise ValueError("Not enough training data for episode length")
+    @property
+    def _current_step(self) -> int:
+        return self._steps
 
-        # Gymnasium spaces
-        obs_dim = self.n_assets * (N_FEATURES + 1)   # features + current weights
-        self.observation_space = spaces.Box(
-            low=-np.inf, high=np.inf,
-            shape=(obs_dim,), dtype=np.float32,
-        )
-        self.action_space = spaces.Box(
-            low=-1.0, high=1.0,
-            shape=(self.n_assets,), dtype=np.float32,
-        )
-
-        # Episode state
-        self._start_idx    : int        = 0
-        self._current_step : int        = 0
-        self._weights      : np.ndarray = np.ones(self.n_assets) / self.n_assets
-        self._portfolio_value : float   = 1.0
-        self._episode_returns : list[float] = []
-
-        # RNG
-        self.np_random, _ = gym.utils.seeding.np_random(seed)
-
-        logger.info(
-            f"PortfolioEnv ready: {self.n_assets} assets, "
-            f"obs={obs_dim}, action={self.n_assets}, "
-            f"episode_length={episode_length}"
-        )
-
-    # ── Gym interface ───────────────────────────────────────────────
-
-    def reset(
-        self,
-        seed: int | None = None,
-        options: dict | None = None,
-    ) -> tuple[np.ndarray, dict]:
-        super().reset(seed=seed)
-
-        # Random start index within training window
-        self._start_idx    = int(self.np_random.integers(
-            low=0, high=max(1, self.train_end_idx)
-        ))
-        self._current_step = 0
-        self._weights      = np.ones(self.n_assets, dtype=np.float32) / self.n_assets
-        self._portfolio_value = 1.0
-        self._episode_returns = []
-
-        obs = self._get_observation()
-        return obs, {"start_date": str(self.dates[self._start_idx])}
-
-    def step(
-        self, action: np.ndarray
-    ) -> tuple[np.ndarray, float, bool, bool, dict]:
-        """Execute one trading day.
-
-        1. Project action (raw logits) -> portfolio weights via softmax
-        2. Compute portfolio return for this day
-        3. Compute reward: step return - transaction cost
-        4. Update state
-        5. Return (obs, reward, terminated, truncated, info)
-        """
-        # Project action onto simplex
-        new_weights = softmax(action.astype(np.float32))
-
-        # Current market step
-        t = self._start_idx + self._current_step
-        asset_returns = self.return_matrix[t]   # shape (N,)
-
-        # Portfolio log return = weighted sum of asset returns
-        portfolio_return = float(np.dot(new_weights, asset_returns))
-        self._episode_returns.append(portfolio_return)
-
-        # Update portfolio value (compound)
-        self._portfolio_value *= np.exp(portfolio_return)
-
-        # Reward
-        reward, reward_info = step_reward(
-            portfolio_return = portfolio_return,
-            weights_prev     = self._weights,
-            weights_curr     = new_weights,
-        )
-
-        # Advance state
-        self._weights      = new_weights
-        self._current_step += 1
-
-        terminated = False
-        truncated  = self._current_step >= self.episode_length
-
-        obs  = self._get_observation()
-        info = {
-            "weights":          new_weights,
-            "portfolio_return":  portfolio_return,
-            "portfolio_value":  self._portfolio_value,
-            "step":             self._current_step,
-            **reward_info,
-        }
-        return obs, reward, terminated, truncated, info
-
-    def render(self, mode: str = "human") -> None:
-        t = self._start_idx + self._current_step
-        date_str = str(self.dates[t]) if t < len(self.dates) else "N/A"
-        top3 = sorted(
-            zip(self.tickers, self._weights),
-            key=lambda x: x[1], reverse=True
-        )[:3]
-        top3_str = ", ".join(f"{t}:{w:.2f}" for t, w in top3)
-        print(
-            f"Step {self._current_step:3d} | {date_str[:10]} | "
-            f"Value={self._portfolio_value:.4f} | Top3: {top3_str}"
-        )
-
-    def close(self) -> None:
-        pass
-
-    # ── Internal helpers ────────────────────────────────────────────
-
-    def _get_observation(self) -> np.ndarray:
-        """Build flat observation vector: [asset_features | current_weights]."""
-        t = self._start_idx + self._current_step
-        t = min(t, len(self.dates) - 1)   # clamp to valid range
-
-        # Feature slice: (N, F) -> flatten to (N*F,)
-        features = self.feature_matrix[t]             # (N, F)
-        features_flat = features.flatten()            # (N*F,)
-
-        # Clip extreme values (outliers in returns / vol)
-        features_flat = np.clip(features_flat, -10.0, 10.0)
-
-        obs = np.concatenate([features_flat, self._weights]).astype(np.float32)
-        return obs
+    @property
+    def _weights(self) -> np.ndarray:
+        return self._last_target
 
     @property
     def episode_sharpe(self) -> float:
-        """Sharpe ratio of current/last episode (for logging)."""
-        if len(self._episode_returns) < 2:
-            return 0.0
-        r = np.array(self._episode_returns)
-        std = r.std()
-        return float(r.mean() / std * np.sqrt(252)) if std > 1e-8 else 0.0
+        r = np.asarray(self._returns_log)
+        return float(r.mean() / r.std() * np.sqrt(252)) if len(r) > 1 and r.std() > 1e-12 else 0.0
 
-    @property
-    def episode_sortino(self) -> float:
-        """Sortino ratio of current/last episode (for logging)."""
-        if len(self._episode_returns) < 2:
-            return 0.0
-        r = np.array(self._episode_returns)
-        downside = r[r < 0]
-        if len(downside) == 0:
-            return float(r.mean() * np.sqrt(252) / 1e-8)
-        downside_std = np.sqrt(np.mean(downside ** 2))
-        return float(r.mean() / downside_std * np.sqrt(252)) if downside_std > 1e-8 else 0.0
+    def serving_spec(self) -> dict:
+        """Everything serving needs to rebuild this env's observation."""
+        return {
+            "universe": self.universe,
+            "tickers": list(self.tickers),
+            "feature_names": list(FEATURE_NAMES),
+            "scaler_mean": self.scaler.mean_.tolist(),
+            "scaler_std": self.scaler.std_.tolist(),
+            "action_scale": self.scale,
+            "execution_lag": self.lag,
+            "timing_contract": "obs(t) uses rows <= t; reward uses return row t + lag + 1",
+        }
+
+
+__all__ = ["PortfolioEnv", "softmax", "project_action"]

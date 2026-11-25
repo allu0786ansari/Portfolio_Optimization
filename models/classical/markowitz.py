@@ -1,6 +1,7 @@
 """Markowitz Mean-Variance Optimiser using cvxpy.
 
-Maximises Sharpe ratio subject to:
+Minimises variance subject to a minimum expected return (the cross-sectional
+mean of the asset means) and:
   - weights sum to 1
   - all weights >= 0 (long-only)
   - max single asset weight = 40% (concentration limit)
@@ -41,11 +42,7 @@ def markowitz_weights(
     max_weight: float = MAX_WEIGHT,
     risk_free: float = RISK_FREE_RATE,
 ) -> np.ndarray:
-    """Compute maximum-Sharpe portfolio weights using cvxpy.
-
-    We maximise the Sharpe ratio by solving the equivalent problem
-    of minimising portfolio variance for a given target return,
-    then scanning along the efficient frontier.
+    """Minimum-variance weights subject to ``mu @ w >= mean(mu)`` (not max-Sharpe).
 
     Args:
         expected_returns: (N,) vector of expected daily returns
@@ -61,7 +58,7 @@ def markowitz_weights(
 
     # Portfolio return and variance
     port_return = expected_returns @ w
-    port_var    = cp.quad_form(w, cov_matrix)
+    port_var    = cp.quad_form(w, cp.psd_wrap(cov_matrix))
 
     # Constraints: long-only, sum to 1, concentration limit
     constraints = [
@@ -70,15 +67,14 @@ def markowitz_weights(
         w <= max_weight,
     ]
 
-    # Maximise Sharpe: equivalent to minimising variance
-    # for a target return (we use mean return as target)
+    # Minimise variance for a target return (the mean of the expected returns)
     target_return = float(np.mean(expected_returns))
     objective = cp.Minimize(port_var)
     constraints.append(port_return >= target_return)
 
     prob = cp.Problem(objective, constraints)
     try:
-        prob.solve(solver=cp.ECOS, warm_start=True)
+        prob.solve()  # default installed solver (ECOS is no longer bundled with cvxpy)
         if w.value is None or prob.status not in ("optimal", "optimal_inaccurate"):
             logger.warning(f"cvxpy status: {prob.status} — falling back to equal weight")
             return np.ones(n) / n

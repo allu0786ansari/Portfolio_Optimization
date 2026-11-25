@@ -9,9 +9,8 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from dashboard.data_utils import load_backtest_results
-from data.config import ALL_TICKERS
 from models.classical.markowitz import ledoit_wolf_cov
-from models.rl_agent.data_loader import build_return_matrix, load_aligned_features
+from pfo.data.market import load_v1_universe
 
 st.set_page_config(page_title="Frontier", page_icon="🔵", layout="wide")
 st.title("🔵 Markowitz Efficient Frontier")
@@ -21,11 +20,13 @@ results = load_backtest_results()
 
 # ── Controls ─────────────────────────────────────────────────────
 n_portfolios = st.slider("Number of random portfolios to simulate", 500, 5000, 2000, step=500)
+universe = st.selectbox("Universe (one exchange calendar — no NSE/NYSE mixing)", ["sp500", "nifty"])
 
 with st.spinner("Computing efficient frontier..."):
     try:
-        features_dict, tickers, dates = load_aligned_features(ALL_TICKERS)
-        return_matrix = build_return_matrix(features_dict, tickers)
+        market = load_v1_universe(universe)
+        tickers, dates = market.tickers, market.dates
+        return_matrix = np.log1p(market.returns.dropna().to_numpy())
 
         # Use last 2 years for frontier computation
         lookback = min(504, len(dates))

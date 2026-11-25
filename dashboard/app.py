@@ -5,14 +5,14 @@ Run with: streamlit run dashboard/app.py
 Pages are in dashboard/pages/ — Streamlit auto-discovers them
 by filename prefix (1_, 2_, 3_, 4_) and shows them in the sidebar.
 """
-import sys
 import os
+import sys
 from pathlib import Path
+
+import streamlit as st
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 API_URL = os.getenv("API_URL", "http://localhost:8000")
-
-import streamlit as st
 
 st.set_page_config(
     page_title = "Portfolio Optimization Engine",

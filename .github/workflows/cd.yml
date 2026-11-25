@@ -1,13 +1,17 @@
 name: CD
 
+# Runs only after CI has passed on main (v1 deployed regardless of CI status).
 on:
-  push:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 
 jobs:
   build-and-push-api:
     name: Build and Push API to Docker Hub
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -29,13 +33,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=ref,event=branch
-            latest
-
-      - name: Create dummy .env
-        run: |
-          echo "API_KEY=placeholder" > .env
-          echo "START_DATE=2019-01-01" >> .env
-          echo "END_DATE=2024-12-31" >> .env
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v5
@@ -55,6 +53,7 @@ jobs:
 
   build-and-push-dashboard:
     name: Build and Push Dashboard to Docker Hub
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -76,13 +75,7 @@ jobs:
           tags: |
             type=sha,prefix=sha-
             type=ref,event=branch
-            latest
-
-      - name: Create dummy .env
-        run: |
-          echo "API_KEY=placeholder" > .env
-          echo "START_DATE=2019-01-01" >> .env
-          echo "END_DATE=2024-12-31" >> .env
+            type=raw,value=latest
 
       - name: Build and push
         uses: docker/build-push-action@v5

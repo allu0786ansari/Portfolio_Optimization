@@ -5,11 +5,14 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, ".")
+sys.path.insert(0, "src")
+
+import os
 
 import mlflow
 from loguru import logger
 
-MLFLOW_URI = "http://localhost:5000"
+MLFLOW_URI = os.getenv("MLFLOW_TRACKING_URI", "http://localhost:5000")
 SAVE_DIR   = Path("models/rl_agent/saved_models")
 SAVE_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -49,7 +52,7 @@ try:
 
             # Load and resave as SB3 zip using the environment
             from models.rl_agent.portfolio_env import PortfolioEnv
-            env = PortfolioEnv(seed=0)
+            env = PortfolioEnv(universe=run.data.params.get("universe", "sp500"), seed=0)
 
             ModelClass = PPO if algo == "ppo" else SAC
 
@@ -63,6 +66,11 @@ try:
             fresh_model.policy.load_state_dict(policy_model.state_dict())
             fresh_model.save(str(save_path))
             env.close()
+
+            # Phase 0: serving refuses a local model without its observation spec.
+            spec_file = mlflow.artifacts.download_artifacts(run_id=run.info.run_id,
+                                                            artifact_path="serving_spec.json")
+            Path(f"{save_path}.spec.json").write_text(Path(spec_file).read_text())
 
             logger.info(f"Saved: {save_path}.zip")
             saved.append(algo)

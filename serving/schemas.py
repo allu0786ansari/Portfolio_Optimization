@@ -46,6 +46,8 @@ class PredictResponse(BaseModel):
     latency_ms:     float            = Field(..., description="End-to-end prediction latency in milliseconds")
     n_assets:       int              = Field(..., description="Number of assets in the allocation")
     timestamp:      str              = Field(..., description="UTC timestamp of prediction")
+    as_of_date:     Optional[str]    = Field(None, description="Feature date actually used (<= requested date)")
+    skipped_tickers: list[str]       = Field(default_factory=list, description="Requested tickers outside the model universe")
 
 
 class HealthResponse(BaseModel):

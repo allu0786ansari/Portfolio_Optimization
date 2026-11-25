@@ -22,12 +22,26 @@ API_BASE_URL = os.getenv("API_URL", "http://localhost:8000")
 API_KEY = os.getenv("API_KEY", "portfolio-secret-key-change-in-production")
 
 
+V1_WARNING = (
+    "These are the v1 backtest results. A Phase 0 audit found look-ahead bias and overlapping "
+    "test windows in them, so they are NOT valid. See runlog/phase0 and run `pfo-v1-baseline` "
+    "for the corrected baseline."
+)
+
+
 @st.cache_data(ttl=300)   # cache for 5 minutes
-def load_backtest_results() -> dict | None:
-    """Load walk-forward backtest results from JSON file."""
+def _load_results() -> dict | None:
     if not RESULTS_PATH.exists():
         return None
     return json.loads(RESULTS_PATH.read_text())
+
+
+def load_backtest_results() -> dict | None:
+    """Load walk-forward backtest results from JSON file (with the Phase 0 validity warning)."""
+    results = _load_results()
+    if results is not None and "pfo_version" not in results:
+        st.warning(V1_WARNING)
+    return results
 
 
 @st.cache_data(ttl=300)

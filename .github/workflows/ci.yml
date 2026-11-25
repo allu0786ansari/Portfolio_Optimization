@@ -6,126 +6,111 @@ on:
   pull_request:
     branches: [main]
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.11.32"
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+
 jobs:
-  lint-and-test:
-    name: Lint and Test
+  lint-test:
+    name: Lint, type-check, leakage gate, tests
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-          cache: "pip"
+          python-version: "3.12"
 
-      - name: Install dependencies
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Lockfile is in sync with pyproject.toml
+        run: uv lock --check
+
+      - name: Install locked deps (CPU torch)
         run: |
-          pip install --upgrade pip
-          pip install ruff
-          pip install -r requirements/api.txt
-          pip install -r requirements/dashboard.txt
+          bash scripts/install_deps.sh "dev rl ml serving data dashboard"
+          uv pip install --system --no-deps -e .
 
-      - name: Lint with ruff
-        run: ruff check . --select E,F,I --ignore E501
+      - name: Ruff
+        run: ruff check .
 
-      - name: Run unit tests (no data required)
+      - name: Mypy (src/pfo)
+        run: mypy
+
+      - name: Leakage suite (Phase 0 exit gate)
+        run: pytest tests/leakage -m leakage -v
+
+      - name: Full test suite with coverage
+        env:
+          API_KEY: ci-test-key
+        run: pytest tests --cov --cov-report=term --cov-report=xml
+
+      - name: Leakage scan + corrected-baseline smoke run (synthetic data)
         run: |
-          pytest tests/test_data_pipeline.py \
-                 tests/test_forecasting.py \
-                 tests/test_env.py \
-                 tests/test_agent.py \
-                 tests/test_backtesting.py \
-                 tests/test_monitoring.py \
-                 -v --tb=short
-        env:
-          PYTHONPATH: .
+          pfo-leakage-scan --source synthetic --out ci-artifacts/leakage_scan_synthetic.json
+          pfo-v1-baseline --source synthetic --rl-timesteps 2000 --n-boot 200 --synthetic-days 1300 \
+            --out ci-artifacts/baseline_smoke
 
-      - name: Run API integration tests (mocked)
-        run: pytest tests/test_api.py -v --tb=short
-        env:
-          PYTHONPATH: .
-          API_KEY: test-key
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase0-ci-artifacts
+          path: |
+            ci-artifacts/
+            coverage.xml
 
-  docker-build:
-    name: Docker Build Check
+  docker:
+    name: Docker build + smoke test
     runs-on: ubuntu-latest
-    needs: lint-and-test
-
+    needs: lint-test
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
 
-      - name: Create dummy .env
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: serving/Dockerfile
+          tags: portfolio-api:ci
+          load: true
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: API smoke test (/health, fail-closed auth)
         run: |
-          echo "API_KEY=ci-test-key" > .env
-          echo "START_DATE=2019-01-01" >> .env
-          echo "END_DATE=2024-12-31" >> .env
-          echo "RAW_DATA_DIR=data/raw" >> .env
-          echo "PROCESSED_DATA_DIR=data/processed" >> .env
+          docker run -d --name api -e API_KEY=ci-key -e MLFLOW_TRACKING_URI=http://127.0.0.1:9 -p 8000:8000 portfolio-api:ci
+          for i in $(seq 1 30); do curl -fsS http://localhost:8000/health && break; sleep 2; done
+          curl -fsS http://localhost:8000/health
+          test "$(curl -s -o /dev/null -w '%{http_code}' -X POST localhost:8000/predict -H 'Content-Type: application/json' -d '{"tickers":["AAPL","MSFT"]}')" = "401"
+          test "$(curl -s -o /dev/null -w '%{http_code}' localhost:8000/retrain/status -H 'X-API-Key: ci-key')" = "200"
+          docker exec api sh -c 'test ! -e /app/.env'  # no secrets baked into the image
+          docker logs api | tail -20
+          docker rm -f api
 
-      - name: Create dummy data dirs
+      - name: Build dashboard image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: dashboard/Dockerfile
+          tags: portfolio-dashboard:ci
+          load: true
+          cache-from: type=gha,scope=dashboard
+          cache-to: type=gha,mode=max,scope=dashboard
+
+      - name: Dashboard smoke test
         run: |
-          mkdir -p data/raw data/processed
-          mkdir -p backtesting
-          echo "{}" > backtesting/backtest_results.json
-          mkdir -p models/rl_agent/saved_models
-
-      - name: Build API Docker image
-        run: docker build -f serving/Dockerfile -t portfolio-api:ci .
-
-      - name: Verify image exists
-        run: docker images portfolio-api:ci
-
-      - name: Smoke test — container health endpoint
-        run: |
-          docker run -d --name test-api \
-            -e API_KEY=test-key \
-            -e MLFLOW_TRACKING_URI=http://localhost:5000 \
-            -p 8000:8000 \
-            portfolio-api:ci
-
-          echo "Waiting for API to be ready..."
-          for i in $(seq 1 12); do
-            sleep 8
-            echo "Attempt $i of 12..."
-            if curl -sf http://localhost:8000/health; then
-              echo "Health check passed!"
-              docker stop test-api
-              exit 0
-            fi
-          done
-
-          echo "API failed to start after 60 seconds"
-          docker logs test-api
-          docker stop test-api || true
-          exit 1
-
-      - name: Build Dashboard Docker image
-        run: docker build -f dashboard/Dockerfile -t portfolio-dashboard:ci .
-
-      - name: Verify dashboard image exists
-        run: docker images portfolio-dashboard:ci
-
-      - name: Smoke test — dashboard health endpoint
-        run: |
-          docker run -d --name test-dashboard \
-            -e API_URL=http://localhost:8000 \
-            -p 8501:8501 \
-            portfolio-dashboard:ci
-
-          echo "Waiting for dashboard to be ready..."
-          for i in $(seq 1 12); do
-            sleep 8
-            echo "Attempt $i of 12..."
-            if curl -sf http://localhost:8501/_stcore/health; then
-              echo "Dashboard health check passed!"
-              docker stop test-dashboard
-              exit 0
-            fi
-          done
-
-          echo "Dashboard failed to start after 60 seconds"
-          docker logs test-dashboard
-          docker stop test-dashboard || true
-          exit 1
+          docker run -d --name dash -p 8501:8501 portfolio-dashboard:ci
+          for i in $(seq 1 30); do curl -fsS http://localhost:8501/_stcore/health && break; sleep 2; done
+          curl -fsS http://localhost:8501/_stcore/health
+          docker rm -f dash

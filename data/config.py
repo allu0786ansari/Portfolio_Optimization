@@ -1,5 +1,6 @@
 """Central configuration loaded from .env file."""
 import os
+from datetime import date
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -13,8 +14,9 @@ PROCESSED_DIR = ROOT_DIR / os.getenv("PROCESSED_DATA_DIR", "data/processed")
 RAW_DIR.mkdir(parents=True, exist_ok=True)
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
-START_DATE: str = os.getenv("START_DATE", "2019-01-01")
-END_DATE: str = os.getenv("END_DATE", "2024-12-31")
+START_DATE: str = os.getenv("START_DATE") or "2015-01-01"
+# Empty END_DATE means "today" (v1 hard-coded 2024-12-31, so nightly refreshes never got new data).
+END_DATE: str = os.getenv("END_DATE") or date.today().isoformat()
 
 NIFTY50_TICKERS: list[str] = [
     "RELIANCE.NS", "TCS.NS", "HDFCBANK.NS", "INFY.NS", "ICICIBANK.NS",

@@ -8,6 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+import os
 from unittest.mock import MagicMock, patch
 
 import numpy as np
@@ -17,6 +18,7 @@ from fastapi.testclient import TestClient
 from serving.main import app
 
 API_KEY        = "test-key"
+os.environ["API_KEY"] = API_KEY
 HEADERS        = {"X-API-Key": API_KEY}
 SAMPLE_TICKERS = ["RELIANCE.NS", "TCS.NS", "AAPL", "MSFT"]
 
@@ -54,7 +56,14 @@ def mock_predictor():
 
 
 @pytest.fixture(scope="module")
-def client(mock_registry, mock_predictor):
+def mock_source():
+    with patch("serving.main.serving_source") as src:
+        src.return_value = {"kind": "mlflow-registry", "version": "champion-v1", "algo": "PPO"}
+        yield src
+
+
+@pytest.fixture(scope="module")
+def client(mock_registry, mock_predictor, mock_source):
     with TestClient(app) as c:
         yield c
 
@@ -170,3 +179,36 @@ def test_predict_uppercases_tickers(client):
     assert r.status_code == 200
     keys = list(r.json()["weights"].keys())
     assert all(t == t.upper() for t in keys)
+
+# ── Phase 0 regression tests ──────────────────────────────────────
+
+def test_retrain_routes_use_the_prefix_airflow_calls(client):
+    paths = set(app.openapi()["paths"])
+    for p in ("/retrain/status", "/retrain/fetch-data", "/retrain/engineer-features",
+              "/retrain/train", "/retrain/evaluate-champion"):
+        assert p in paths, f"missing {p} (v1 mounted the router without a prefix)"
+
+
+def test_retrain_status_requires_key(client):
+    assert client.get("/retrain/status").status_code == 401
+    r = client.get("/retrain/status", headers=HEADERS)
+    assert r.status_code == 200 and r.json()["status"] in ("idle", "busy")
+
+
+def test_missing_server_key_fails_closed(client, monkeypatch):
+    monkeypatch.delenv("API_KEY", raising=False)
+    r = client.post("/predict", json={"tickers": SAMPLE_TICKERS}, headers=HEADERS)
+    assert r.status_code == 503
+
+
+def test_predict_increments_prometheus_counter(client):
+    from serving.metrics import REQUEST_COUNT
+
+    before = REQUEST_COUNT.labels(status="success")._value.get()
+    client.post("/predict", json={"tickers": SAMPLE_TICKERS}, headers=HEADERS)
+    assert REQUEST_COUNT.labels(status="success")._value.get() == before + 1
+
+
+def test_date_is_forwarded_to_predictor(client, mock_predictor):
+    client.post("/predict", json={"tickers": SAMPLE_TICKERS, "date": "2024-06-28"}, headers=HEADERS)
+    assert mock_predictor.call_args.kwargs.get("as_of") == "2024-06-28"
