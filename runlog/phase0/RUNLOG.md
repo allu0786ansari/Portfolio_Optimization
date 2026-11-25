@@ -78,7 +78,19 @@ All outputs below are in `runlog/phase0/artifacts/`.
 | [CI #45660212807](https://github.com/allu0786ansari/Portfolio_Optimization/actions/runs/45660212807) | Lint, type-check, leakage gate, tests (+ synthetic scan and baseline smoke) | ✅ success | 1 min 32 s |
 | | Docker build + smoke test (API and dashboard images, health, fail-closed auth, `/retrain` prefix, no `.env` in image) | ✅ success | 10 min 7 s (first build, cold cache) |
 
-Exit-gate note: the test/leakage job runs in well under 10 minutes. The Docker job took about 10 minutes on a cold
+Second run after adding Windows support ([CI #45665869286](https://github.com/allu0786ansari/Portfolio_Optimization/actions/runs/45665869286)), all ✅:
+
+| Job | Duration | What ran |
+|---|---|---|
+| Lint, type-check, leakage gate, tests (Ubuntu) | 1 min 22 s | as above |
+| **Windows (tasks.ps1, as run from VS Code)** | 2 min 47 s | `tasks.ps1 install` (uv sync) → ruff ✓ → mypy ✓ → 11/11 leakage → **134 passed, 15 skipped** → `phase0-smoke` wrote `reports\phase0\synthetic\report.md` |
+| Docker build + smoke test | 5 min 9 s | warm layer cache |
+
+The first Windows run failed and found a real bug: `tasks.ps1` defined a helper named `Uv`, and PowerShell
+resolves functions before executables (case-insensitively), so it recursed until "call depth overflow".
+Fixed in `phase0: fix tasks.ps1 recursion on Windows`.
+
+Exit-gate note: with a warm cache every CI job finishes in under 10 minutes. The Docker job took about 10 minutes on a cold
 build cache; later runs reuse the GitHub Actions layer cache. If it stays slow, Phase 6 will build images only on
 `main` and on PRs.
 
