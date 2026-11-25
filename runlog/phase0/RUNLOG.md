@@ -6,7 +6,7 @@
 | Date | 2026-11-25 (IST) |
 | Goal | Fix the v1 defects found in the audit; build the leakage-safe core every later phase depends on; get CI green. |
 | Exit gate (proposal §17.1) | Leakage suite passes on v1 data; CI < 10 min. |
-| Status | **Built and verified on synthetic data.** Real-data gate must be run locally (`make leakage-real`) because Yahoo Finance is not reachable from the build sandbox. |
+| Status | **Built, verified on synthetic data, CI green on GitHub.** Real-data gate must be run locally (`make leakage-real`) because Yahoo Finance is not reachable from the build sandbox. |
 
 ## 1. Environment used for the build
 
@@ -70,6 +70,17 @@ All outputs below are in `runlog/phase0/artifacts/`.
 | `pfo-leakage-scan --source v1 --universe both` on synthetic v1-layout files | 12/12 checks pass (exercises the real-data code path) | `leakage_scan_v1layout_synthetic.json` |
 | v1 timing-bug demo | same-day "oracle" Sharpe **24.84** under v1 timing vs **0.75** under v2 timing (EW 1.10) | `v1_timing_bug_demo.txt` |
 | `pfo-v1-baseline --source synthetic --rl-timesteps 20000 --n-boot 500` (142 s) | 10 non-overlapping folds, 1,259 unique OOS days. EW Sharpe 0.84, min-var 0.82, Markowitz-v1 0.83, PPO −0.14; no strategy beats EW significantly (as expected on signal-free data) | `synthetic_smoke/report.md`, `summary.json` |
+
+### 3.1 GitHub Actions (first push of `phase0`)
+
+| Run | Job | Result | Duration |
+|---|---|---|---|
+| [CI #45660212807](https://github.com/allu0786ansari/Portfolio_Optimization/actions/runs/45660212807) | Lint, type-check, leakage gate, tests (+ synthetic scan and baseline smoke) | ✅ success | 1 min 32 s |
+| | Docker build + smoke test (API and dashboard images, health, fail-closed auth, `/retrain` prefix, no `.env` in image) | ✅ success | 10 min 7 s (first build, cold cache) |
+
+Exit-gate note: the test/leakage job runs in well under 10 minutes. The Docker job took about 10 minutes on a cold
+build cache; later runs reuse the GitHub Actions layer cache. If it stays slow, Phase 6 will build images only on
+`main` and on PRs.
 
 ## 4. Decisions taken
 

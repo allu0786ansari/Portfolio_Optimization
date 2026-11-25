@@ -29,7 +29,7 @@ main ── phase0 ── phase1 ── phase2 ── phase3 ── phase4 ─�
 
 | Phase | Weeks | Branch | Goal | Exit gate | Status |
 |---|---|---|---|---|---|
-| 0 Remediate | 1–2 | `phase0` | Fix v1 defects; leakage-safe core; CI green | Leakage suite passes on v1 data; CI < 10 min | ✅ built — real-data gate to be run locally (`make leakage-real`) |
+| 0 Remediate | 1–2 | `phase0` | Fix v1 defects; leakage-safe core; CI green | Leakage suite passes on v1 data; CI < 10 min | ✅ built, CI green — real-data gate to be run locally (`make leakage-real`) |
 | 1 Data & backtester | 3–5 | `phase1` | PIT data, calendars, FX, event-driven simulator, CPCV | 1/N and min-var reproduce reference stats | ⏳ |
 | 2 Signals & risk | 6–8 | `phase2` | Forecasters, conformal, regimes, risk models | ≥ 1 forecaster passes rank-IC rule | ⏳ |
 | 3 Classical & RL | 9–10 | `phase3` | Convex/robust/CVaR/HRP/BL/MIQP; redesigned RL | Strategy CPCV report with DSR/PBO | ⏳ |
