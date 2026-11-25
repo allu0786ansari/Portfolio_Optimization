@@ -6,7 +6,7 @@
 | Date | 2026-11-25 (IST) |
 | Goal | Fix the v1 defects found in the audit; build the leakage-safe core every later phase depends on; get CI green. |
 | Exit gate (proposal §17.1) | Leakage suite passes on v1 data; CI < 10 min. |
-| Status | **Built, verified on synthetic data, CI green on GitHub.** Real-data gate must be run locally (`make leakage-real`) because Yahoo Finance is not reachable from the build sandbox. |
+| Status | ✅ **Exit gate passed on real data** (fresh download 2010-01-04 → 2026-11-25, workflow run [45670281110](https://github.com/allu0786ansari/Portfolio_Optimization/actions/runs/45670281110)); CI green on Ubuntu and Windows. |
 
 ## 1. Environment used for the build
 
@@ -129,6 +129,51 @@ Development now proceeds phase by phase, and each phase replaces the v1 parts it
 | Tests | v1 data tests now key off the fresh download (`_manifest.json` integrity test replaces the v1 processed-features test). 6 new download tests. Without data: 140 passed, 15 skipped; with a (fake) fresh download in `data/raw`: **155 passed, 0 skipped**. |
 | Real data on GitHub | Workflow `Phase 0 - real data run` (`.github/workflows/phase0-real-data.yml`) downloads fresh data, runs the exit gate, the tests and the corrected baseline on GitHub's runners (Yahoo Finance is unreachable from the build sandbox) and uploads the outputs, which are copied to `artifacts/real/`. |
 | Run log | Files renamed to `PHASE0_RUNLOG.md` / `PHASE0_HOW_TO_RUN.md`; the run guide now contains Phase 0 steps only. |
+
+## 3.4 Real-data run — the corrected v1 baseline
+
+Produced by the *Phase 0 - real data run* workflow on GitHub (Yahoo Finance is unreachable from the build
+sandbox). All files are in `artifacts/real/` (`report.md`, `summary.json`, per-fold metrics, leakage scan,
+data manifest, test log, `RUN_INFO.txt`).
+
+**Data (fresh download, `data_manifest.json`).** 42 files: 20 Nifty 50 + 20 S&P 500 stocks + `^NSEI` +
+`^GSPC`, 2010-01-04 → 2026-11-25, adjusted prices. Validation flagged one issue: `NESTLEIND.NS` shows a
++76% one-day move on 2010-01-08 (a bad tick in the Yahoo series). It lies in the 200-day feature warm-up
+and the first training fold only; cleaning rules for such ticks are a Phase 1 data-quality item.
+`ABBV` (listed 2013) and `META` (2012) cover < 95% of the S&P calendar and are excluded by the
+coverage rule, so the S&P universe has 18 assets.
+
+**Exit gate.** `pfo-leakage-scan --source v1`: **12/12 checks pass** (feature causality, positive control,
+oracle canary, fold isolation, non-overlapping folds, decisions ignore future data — for both markets).
+Tests with real data present: **152 passed** (the 3 `slow` tests are deselected in that job and run in CI).
+
+**Corrected baseline** — 27 non-overlapping folds per market, 3,401 unique out-of-sample days
+(Nifty 2012-11-19 → 2026-09-21, S&P 2013-04-18 → 2026-10-23), execution lag 1 day, 10 bps costs,
+PPO (30,000 steps) re-trained in every fold:
+
+| Strategy | Nifty Sharpe (95% CI) | Nifty CAGR / MaxDD | S&P Sharpe (95% CI) | S&P CAGR / MaxDD |
+|---|---|---|---|---|
+| Equal weight | 1.15 (0.48, 1.80) | 18.2% / −34.9% | **1.42** (0.91, 2.06) | 26.9% / −31.4% |
+| Min variance | 1.14 (0.52, 1.77) | 15.9% / −28.0% | 1.13 (0.63, 1.73) | 16.0% / −25.0% |
+| Markowitz (v1 rule) | 1.15 (0.55, 1.78) | 16.1% / −27.5% | 1.22 (0.71, 1.83) | 18.6% / −24.4% |
+| RL (PPO) | 1.07 (0.48, 1.67) | 18.8% / −30.2% | 1.19 (0.72, 1.73) | 28.6% / −28.9% |
+
+RL vs equal weight: ΔSharpe −0.08 (Nifty, p = 0.58) and −0.23 (S&P, p = 0.14); it wins 8/27 and 9/27
+folds, with annual turnover of 12–13× (≈1.2–1.3% cost drag a year).
+
+**What this means**
+
+* The v1 headline (RL Sharpe 1.47, p = 4×10⁻²², winning 29/30 windows) does **not** survive the fixes.
+  With look-ahead removed, non-overlapping windows and per-fold training, the RL agent is statistically
+  indistinguishable from — and point-estimate worse than — equal weight in both markets.
+* Equal weight is a hard benchmark, as the proposal expected. Minimum-variance and Markowitz cut drawdowns
+  (−25 to −28% vs −31 to −35%) but give up return; on the S&P their monthly underperformance vs 1/N is
+  significant (Newey-West p ≤ 0.002).
+* The S&P equal-weight Sharpe of 1.42 is inflated by **survivorship bias**: the universe is today's mega-caps
+  (NVDA, AVGO, LLY, …) chosen with hindsight. Phase 1's point-in-time constituents address this; until then
+  absolute levels should not be read as achievable.
+* This is the honest starting point for Phases 1–3: any later model has to beat these numbers under the same
+  protocol.
 
 ## 4. Decisions taken
 

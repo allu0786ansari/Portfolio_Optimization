@@ -83,7 +83,7 @@ Must print a table where every check is `True` and end with `leakage scan PASSED
 Then re-run the tests; the 15 data-dependent tests now run too:
 
 ```powershell
-.\tasks.ps1 test       # expect 155 passed, 0 skipped
+.\tasks.ps1 test       # expect 155 passed, 0 skipped (152 + the 3 slow tests)
 ```
 
 ## 7. Corrected v1 baseline on real data (~15-40 min)
@@ -92,7 +92,8 @@ Then re-run the tests; the 15 data-dependent tests now run too:
 .\tasks.ps1 phase0-baseline
 ```
 
-Re-trains PPO inside every walk-forward fold for both universes. Output in
+Re-trains PPO inside every walk-forward fold for both universes (27 folds each with
+data from 2010; about 7 minutes on a GitHub runner, longer on a laptop). Output in
 `reports\phase0\real\`: `report.md` (open with *Ctrl+Shift+V*), `summary.json`,
 `<universe>\equity.csv`, `fold_metrics.csv`.
 
