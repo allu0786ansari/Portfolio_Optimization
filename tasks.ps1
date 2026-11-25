@@ -29,15 +29,26 @@ $Extras = @("--extra", "dev", "--extra", "rl", "--extra", "ml", "--extra", "serv
 
 function Invoke-Step([string] $Exe, [string[]] $Arguments) {
     Write-Host ">> $Exe $($Arguments -join ' ')" -ForegroundColor Cyan
-    & $Exe @Arguments
+    # Resolve to the executable explicitly: PowerShell would otherwise prefer a
+    # function or alias with the same name (case-insensitive).
+    $app = Get-Command $Exe -CommandType Application -ErrorAction Stop | Select-Object -First 1
+    # Windows PowerShell 5.1 can turn a native tool's stderr (uv/pytest progress) into
+    # terminating errors under "Stop"; rely on the exit code instead.
+    $previous = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    & $app.Source @Arguments
+    $ErrorActionPreference = $previous
     if ($LASTEXITCODE -ne 0) {
         Write-Host "FAILED (exit $LASTEXITCODE): $Exe $($Arguments -join ' ')" -ForegroundColor Red
         exit $LASTEXITCODE
     }
 }
 
-function Uv([string[]] $Arguments) { Invoke-Step "uv" $Arguments }
-function UvRun([string[]] $Arguments) { Invoke-Step "uv" (@("run") + $Arguments) }
+function Invoke-Uv([string[]] $Arguments) { Invoke-Step "uv" $Arguments }
+function Invoke-UvRun([string[]] $Arguments) { Invoke-Step "uv" (@("run") + $Arguments) }
+
+# Extra command-line arguments forwarded to some tasks (never contains $null entries).
+$Extra = @($Rest | Where-Object { $_ -ne $null -and $_ -ne "" })
 
 function Assert-Uv {
     if (-not (Get-Command uv -ErrorAction SilentlyContinue)) {
@@ -90,42 +101,42 @@ switch ($Task) {
         Invoke-Step "uv" @("--version")
     }
     "install" {
-        Uv (@("sync") + $Extras)
-        UvRun @("pre-commit", "install")
+        Invoke-Uv (@("sync") + $Extras)
+        Invoke-UvRun @("pre-commit", "install")
     }
-    "lint"      { UvRun @("ruff", "check", ".") }
-    "typecheck" { UvRun @("mypy") }
-    "test"      { UvRun (@("pytest", "tests", "--cov") + $Rest) }
+    "lint"      { Invoke-UvRun @("ruff", "check", ".") }
+    "typecheck" { Invoke-UvRun @("mypy") }
+    "test"      { Invoke-UvRun (@("pytest", "tests", "--cov") + $Extra) }
     "leakage" {
-        UvRun @("pytest", "tests/leakage", "-m", "leakage", "-v")
-        UvRun @("pfo-leakage-scan", "--source", "synthetic")
+        Invoke-UvRun @("pytest", "tests/leakage", "-m", "leakage", "-v")
+        Invoke-UvRun @("pfo-leakage-scan", "--source", "synthetic")
     }
     "check" {
-        UvRun @("ruff", "check", ".")
-        UvRun @("mypy")
-        UvRun @("pytest", "tests/leakage", "-m", "leakage", "-v")
-        UvRun @("pytest", "tests", "--cov")
+        Invoke-UvRun @("ruff", "check", ".")
+        Invoke-UvRun @("mypy")
+        Invoke-UvRun @("pytest", "tests/leakage", "-m", "leakage", "-v")
+        Invoke-UvRun @("pytest", "tests", "--cov")
     }
     "leakage-real" {
-        UvRun @("pfo-leakage-scan", "--source", "v1", "--universe", "both", "--out", "reports/phase0/leakage_scan_real.json")
+        Invoke-UvRun @("pfo-leakage-scan", "--source", "v1", "--universe", "both", "--out", "reports/phase0/leakage_scan_real.json")
     }
     "phase0-smoke" {
-        UvRun (@("pfo-v1-baseline", "--source", "synthetic", "--rl-timesteps", "20000", "--out", "reports/phase0/synthetic") + $Rest)
+        Invoke-UvRun (@("pfo-v1-baseline", "--source", "synthetic", "--rl-timesteps", "20000", "--out", "reports/phase0/synthetic") + $Extra)
     }
     "phase0-baseline" {
-        UvRun (@("pfo-v1-baseline", "--source", "v1", "--universe", "both", "--out", "reports/phase0/real") + $Rest)
+        Invoke-UvRun (@("pfo-v1-baseline", "--source", "v1", "--universe", "both", "--out", "reports/phase0/real") + $Extra)
     }
     "data" {
-        UvRun @("python", "-m", "data.ingestion.fetch_data")
-        UvRun @("python", "-m", "data.ingestion.feature_engineering")
-        UvRun @("python", "-m", "data.ingestion.macro_features")
+        Invoke-UvRun @("python", "-m", "data.ingestion.fetch_data")
+        Invoke-UvRun @("python", "-m", "data.ingestion.feature_engineering")
+        Invoke-UvRun @("python", "-m", "data.ingestion.macro_features")
     }
     "train" {
-        UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "ppo")
-        UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "sac")
+        Invoke-UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "ppo")
+        Invoke-UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "sac")
     }
-    "serve"     { UvRun @("uvicorn", "serving.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload") }
-    "dashboard" { UvRun @("streamlit", "run", "dashboard/app.py") }
+    "serve"     { Invoke-UvRun @("uvicorn", "serving.main:app", "--host", "127.0.0.1", "--port", "8000", "--reload") }
+    "dashboard" { Invoke-UvRun @("streamlit", "run", "dashboard/app.py") }
     "mlflow"    { Invoke-Step "docker" @("compose", "up", "-d", "--build", "mlflow") }
     "up"        { Invoke-Step "docker" @("compose", "up", "--build") }
     "down"      { Invoke-Step "docker" @("compose", "down") }
