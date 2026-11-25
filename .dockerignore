@@ -23,3 +23,12 @@ mlflow.db
 *.log
 docs/
 *.md
+!README.md
+.env
+.env.*
+!.env.example
+.venv/
+runlog/
+reports/
+Document/
+backtesting/backtest_report.html
