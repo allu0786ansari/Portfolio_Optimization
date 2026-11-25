@@ -1,0 +1,206 @@
+{
+  "results": [
+    {
+      "universe": "nifty",
+      "n_days": 4149,
+      "n_assets": 20,
+      "start": "2010-01-04",
+      "end": "2026-11-25",
+      "passed": true,
+      "checks": {
+        "feature_causality": {
+          "passed": true,
+          "violations": []
+        },
+        "causality_positive_control": {
+          "passed": true,
+          "note": "a deliberately leaky transform must be caught"
+        },
+        "oracle_canary": {
+          "passed": true,
+          "flagged_real_features": [],
+          "table": [
+            {
+              "feature": "log_return",
+              "ic_forward": -0.0005,
+              "ic_same_day": 0.9914,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_21d",
+              "ic_forward": -0.0106,
+              "ic_same_day": 0.212,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_63d",
+              "ic_forward": -0.0169,
+              "ic_same_day": 0.1166,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_126d",
+              "ic_forward": -0.0161,
+              "ic_same_day": 0.0834,
+              "flagged": false
+            },
+            {
+              "feature": "volatility_21d",
+              "ic_forward": 0.0167,
+              "ic_same_day": 0.0214,
+              "flagged": false
+            },
+            {
+              "feature": "volatility_63d",
+              "ic_forward": 0.0208,
+              "ic_same_day": 0.0225,
+              "flagged": false
+            },
+            {
+              "feature": "beta_63d",
+              "ic_forward": 0.0047,
+              "ic_same_day": 0.0048,
+              "flagged": false
+            },
+            {
+              "feature": "rsi_14",
+              "ic_forward": -0.0042,
+              "ic_same_day": 0.2505,
+              "flagged": false
+            },
+            {
+              "feature": "price_vs_ma50",
+              "ic_forward": -0.0149,
+              "ic_same_day": 0.2374,
+              "flagged": false
+            },
+            {
+              "feature": "price_vs_ma200",
+              "ic_forward": -0.0181,
+              "ic_same_day": 0.1186,
+              "flagged": false
+            },
+            {
+              "feature": "CANARY_tomorrow_return",
+              "ic_forward": 1.0,
+              "ic_same_day": -0.0002,
+              "flagged": true
+            }
+          ]
+        },
+        "fold_isolation": {
+          "passed": true
+        },
+        "non_overlapping_folds": {
+          "passed": true,
+          "n_folds": 27
+        },
+        "decisions_ignore_future": {
+          "passed": true,
+          "cut_date": "2013-06-06"
+        }
+      }
+    },
+    {
+      "universe": "sp500",
+      "n_days": 4129,
+      "n_assets": 18,
+      "start": "2010-06-29",
+      "end": "2026-11-25",
+      "passed": true,
+      "checks": {
+        "feature_causality": {
+          "passed": true,
+          "violations": []
+        },
+        "causality_positive_control": {
+          "passed": true,
+          "note": "a deliberately leaky transform must be caught"
+        },
+        "oracle_canary": {
+          "passed": true,
+          "flagged_real_features": [],
+          "table": [
+            {
+              "feature": "log_return",
+              "ic_forward": -0.0452,
+              "ic_same_day": 0.9993,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_21d",
+              "ic_forward": -0.0166,
+              "ic_same_day": 0.216,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_63d",
+              "ic_forward": -0.0196,
+              "ic_same_day": 0.1197,
+              "flagged": false
+            },
+            {
+              "feature": "momentum_126d",
+              "ic_forward": -0.0062,
+              "ic_same_day": 0.0946,
+              "flagged": false
+            },
+            {
+              "feature": "volatility_21d",
+              "ic_forward": 0.027,
+              "ic_same_day": 0.0311,
+              "flagged": false
+            },
+            {
+              "feature": "volatility_63d",
+              "ic_forward": 0.0307,
+              "ic_same_day": 0.0317,
+              "flagged": false
+            },
+            {
+              "feature": "beta_63d",
+              "ic_forward": 0.0076,
+              "ic_same_day": 0.0071,
+              "flagged": false
+            },
+            {
+              "feature": "rsi_14",
+              "ic_forward": -0.0192,
+              "ic_same_day": 0.2227,
+              "flagged": false
+            },
+            {
+              "feature": "price_vs_ma50",
+              "ic_forward": -0.0234,
+              "ic_same_day": 0.2386,
+              "flagged": false
+            },
+            {
+              "feature": "price_vs_ma200",
+              "ic_forward": -0.0081,
+              "ic_same_day": 0.1266,
+              "flagged": false
+            },
+            {
+              "feature": "CANARY_tomorrow_return",
+              "ic_forward": 1.0,
+              "ic_same_day": -0.0442,
+              "flagged": true
+            }
+          ]
+        },
+        "fold_isolation": {
+          "passed": true
+        },
+        "non_overlapping_folds": {
+          "passed": true,
+          "n_folds": 27
+        },
+        "decisions_ignore_future": {
+          "passed": true,
+          "cut_date": "2013-10-29"
+        }
+      }
+    }
+  ]
+}

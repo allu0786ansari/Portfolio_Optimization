@@ -1,0 +1,386 @@
+{
+  "generated_utc": "2026-11-25T17:59:36+00:00",
+  "pfo_version": "2.0.0a0",
+  "python": "3.12.16",
+  "source": "v1",
+  "config": {
+    "source": "v1",
+    "universe": "both",
+    "train_days": 504,
+    "test_days": 126,
+    "rebalance": 21,
+    "execution_lag": 1,
+    "cost_bps": 10.0,
+    "rl_timesteps": 30000,
+    "n_boot": 1000,
+    "seed": 0,
+    "synthetic_assets": 20,
+    "synthetic_days": 2000,
+    "out": "reports/phase0/real"
+  },
+  "v1_claims": {
+    "universe": "40 assets, NSE and NYSE dates intersected, no FX",
+    "windows": "30 overlapping 126-day windows stepped by 21 days (735 unique days counted as 3,780)",
+    "rl_ppo": {
+      "sharpe": 1.466,
+      "cagr": 0.1995,
+      "max_drawdown": -0.3278,
+      "p_value_vs_ew": 4.27e-22
+    },
+    "markowitz_v1": {
+      "sharpe": 0.774,
+      "cagr": 0.0869,
+      "max_drawdown": -0.4233
+    },
+    "equal_weight": {
+      "sharpe": 1.241,
+      "cagr": 0.1687,
+      "max_drawdown": -0.4153
+    }
+  },
+  "universes": {
+    "nifty": {
+      "strategies": {
+        "equal_weight": {
+          "start": "2012-11-19",
+          "end": "2026-09-21",
+          "n_days": 3401,
+          "cagr": 0.18186870456509996,
+          "ann_vol": 0.15616334089073636,
+          "sharpe": 1.1488408156140064,
+          "sortino": 1.6340868126889598,
+          "max_drawdown": -0.34854326925471013,
+          "calmar": 0.5217966336116308,
+          "var_95": -0.01398470987766509,
+          "cvar_95": -0.022294562873613744,
+          "annual_turnover": 0.6300106404266848,
+          "annual_cost_drag": 0.0006300106404266845,
+          "sharpe_ci95": [
+            0.48462486030312646,
+            1.7993060787276207
+          ],
+          "gross_sharpe": 1.152915115247567
+        },
+        "min_variance": {
+          "start": "2012-11-19",
+          "end": "2026-09-21",
+          "n_days": 3401,
+          "cagr": 0.15881864530201217,
+          "ann_vol": 0.13777263440682655,
+          "sharpe": 1.1392202706758838,
+          "sortino": 1.647686217050485,
+          "max_drawdown": -0.27983500393215555,
+          "calmar": 0.567543885040618,
+          "var_95": -0.01244375269588815,
+          "cvar_95": -0.01907766829416049,
+          "annual_turnover": 2.3041192305559766,
+          "annual_cost_drag": 0.0023041192305559765,
+          "sharpe_ci95": [
+            0.5218303688253005,
+            1.7719527816971727
+          ],
+          "gross_sharpe": 1.1561194626768496
+        },
+        "markowitz_v1": {
+          "start": "2012-11-19",
+          "end": "2026-09-21",
+          "n_days": 3401,
+          "cagr": 0.16136326307041138,
+          "ann_vol": 0.13894228434923353,
+          "sharpe": 1.146590085688473,
+          "sortino": 1.6595862738835954,
+          "max_drawdown": -0.2754641187202632,
+          "calmar": 0.5857868669794977,
+          "var_95": -0.012434832824769867,
+          "cvar_95": -0.01922625125358738,
+          "annual_turnover": 2.672344108685643,
+          "annual_cost_drag": 0.0026723441086856426,
+          "sharpe_ci95": [
+            0.5475345175975804,
+            1.7838926984424985
+          ],
+          "gross_sharpe": 1.1660004942163078
+        },
+        "rl_ppo": {
+          "start": "2012-11-19",
+          "end": "2026-09-21",
+          "n_days": 3401,
+          "cagr": 0.18770127815862758,
+          "ann_vol": 0.17578290791869755,
+          "sharpe": 1.0668069314198807,
+          "sortino": 1.5740344637692583,
+          "max_drawdown": -0.3019821894806817,
+          "calmar": 0.6215640680048621,
+          "var_95": -0.01574213334346763,
+          "cvar_95": -0.02438992318289803,
+          "annual_turnover": 12.328965705203832,
+          "annual_cost_drag": 0.012328965705203834,
+          "sharpe_ci95": [
+            0.47558018763500487,
+            1.6717050186524784
+          ],
+          "gross_sharpe": 1.1376383369812446
+        }
+      },
+      "vs_equal_weight": {
+        "min_variance": {
+          "monthly_excess_test": {
+            "n_months": 167,
+            "mean_monthly_excess": -0.0018852652715121193,
+            "t_stat_nw": -1.6119236458429975,
+            "p_value": 0.10887820310909203,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.009620544938122588,
+            "ci95": [
+              -0.23076115477935233,
+              0.19057414701188477
+            ],
+            "p_value": 0.938
+          },
+          "folds_won": 15,
+          "n_folds": 27
+        },
+        "markowitz_v1": {
+          "monthly_excess_test": {
+            "n_months": 167,
+            "mean_monthly_excess": -0.0017221885166109941,
+            "t_stat_nw": -1.405581812762044,
+            "p_value": 0.16171719275378388,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.0022507299255334345,
+            "ci95": [
+              -0.23365793472829247,
+              0.1942989082192316
+            ],
+            "p_value": 0.99
+          },
+          "folds_won": 16,
+          "n_folds": 27
+        },
+        "rl_ppo": {
+          "monthly_excess_test": {
+            "n_months": 167,
+            "mean_monthly_excess": 0.0006780130204915555,
+            "t_stat_nw": 0.37066639158522985,
+            "p_value": 0.7113585928367476,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.08203388419412572,
+            "ci95": [
+              -0.3660931227606453,
+              0.18402755931642586
+            ],
+            "p_value": 0.58
+          },
+          "folds_won": 8,
+          "n_folds": 27
+        }
+      },
+      "oos_start": "2012-11-19",
+      "oos_end": "2026-09-21",
+      "oos_days": 3401,
+      "n_folds": 27,
+      "tickers": [
+        "RELIANCE.NS",
+        "TCS.NS",
+        "HDFCBANK.NS",
+        "INFY.NS",
+        "ICICIBANK.NS",
+        "HINDUNILVR.NS",
+        "SBIN.NS",
+        "BAJFINANCE.NS",
+        "BHARTIARTL.NS",
+        "KOTAKBANK.NS",
+        "LT.NS",
+        "AXISBANK.NS",
+        "ASIANPAINT.NS",
+        "MARUTI.NS",
+        "TITAN.NS",
+        "NESTLEIND.NS",
+        "WIPRO.NS",
+        "ULTRACEMCO.NS",
+        "POWERGRID.NS",
+        "NTPC.NS"
+      ],
+      "dropped_tickers": [],
+      "runtime_sec": 352.7
+    },
+    "sp500": {
+      "strategies": {
+        "equal_weight": {
+          "start": "2013-04-18",
+          "end": "2026-10-23",
+          "n_days": 3401,
+          "cagr": 0.26939469273070094,
+          "ann_vol": 0.17911676760774786,
+          "sharpe": 1.4221257398004894,
+          "sortino": 2.0589049524344616,
+          "max_drawdown": -0.31360469887895737,
+          "calmar": 0.8590263273914774,
+          "var_95": -0.01625062802475727,
+          "cvar_95": -0.026629346095900508,
+          "annual_turnover": 0.6451289244905906,
+          "annual_cost_drag": 0.0006451289244905905,
+          "sharpe_ci95": [
+            0.9091891005653494,
+            2.056306003450196
+          ],
+          "gross_sharpe": 1.4257560915362275
+        },
+        "min_variance": {
+          "start": "2013-04-18",
+          "end": "2026-10-23",
+          "n_days": 3401,
+          "cagr": 0.15985045741881398,
+          "ann_vol": 0.13960039374071764,
+          "sharpe": 1.1324043327143465,
+          "sortino": 1.6366582587640026,
+          "max_drawdown": -0.25007459198984494,
+          "calmar": 0.6392111095608833,
+          "var_95": -0.012281179163604147,
+          "cvar_95": -0.020336475413534064,
+          "annual_turnover": 2.046462319074066,
+          "annual_cost_drag": 0.002046462319074066,
+          "sharpe_ci95": [
+            0.6329670293469132,
+            1.7299184406979593
+          ],
+          "gross_sharpe": 1.14720948020065
+        },
+        "markowitz_v1": {
+          "start": "2013-04-18",
+          "end": "2026-10-23",
+          "n_days": 3401,
+          "cagr": 0.18646015701684537,
+          "ann_vol": 0.14883219771092343,
+          "sharpe": 1.2235822037931507,
+          "sortino": 1.7800088468640918,
+          "max_drawdown": -0.2436412232993821,
+          "calmar": 0.7653062749062229,
+          "var_95": -0.013459239806680172,
+          "cvar_95": -0.021810988895876345,
+          "annual_turnover": 3.433809644950688,
+          "annual_cost_drag": 0.0034338096449506887,
+          "sharpe_ci95": [
+            0.7100410595422895,
+            1.8288183813569334
+          ],
+          "gross_sharpe": 1.2467600221625565
+        },
+        "rl_ppo": {
+          "start": "2013-04-18",
+          "end": "2026-10-23",
+          "n_days": 3401,
+          "cagr": 0.28631185311111906,
+          "ann_vol": 0.2346913661329651,
+          "sharpe": 1.1898942987046686,
+          "sortino": 1.798558745267932,
+          "max_drawdown": -0.2888540007071707,
+          "calmar": 0.9911991954765107,
+          "var_95": -0.021637447410211553,
+          "cvar_95": -0.03392427042574588,
+          "annual_turnover": 13.15194450204559,
+          "annual_cost_drag": 0.013151944502045588,
+          "sharpe_ci95": [
+            0.7151366255374625,
+            1.7272193764658963
+          ],
+          "gross_sharpe": 1.246342555505997
+        }
+      },
+      "vs_equal_weight": {
+        "min_variance": {
+          "monthly_excess_test": {
+            "n_months": 163,
+            "mean_monthly_excess": -0.007845113343035465,
+            "t_stat_nw": -3.9676110946262937,
+            "p_value": 0.0001088091303542281,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.2897214070861429,
+            "ci95": [
+              -0.6194633923824011,
+              0.026378462956608537
+            ],
+            "p_value": 0.077
+          },
+          "folds_won": 10,
+          "n_folds": 27
+        },
+        "markowitz_v1": {
+          "monthly_excess_test": {
+            "n_months": 163,
+            "mean_monthly_excess": -0.0058754073866384045,
+            "t_stat_nw": -3.105612027473951,
+            "p_value": 0.002242180830646642,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.19854353600733865,
+            "ci95": [
+              -0.4973488268480462,
+              0.09864766677312357
+            ],
+            "p_value": 0.194
+          },
+          "folds_won": 10,
+          "n_folds": 27
+        },
+        "rl_ppo": {
+          "monthly_excess_test": {
+            "n_months": 163,
+            "mean_monthly_excess": 0.0018030599496612343,
+            "t_stat_nw": 0.7100348141784785,
+            "p_value": 0.47870335900557653,
+            "nw_lags": 4
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.23223144109582083,
+            "ci95": [
+              -0.5698254640556756,
+              0.05681294576469399
+            ],
+            "p_value": 0.139
+          },
+          "folds_won": 9,
+          "n_folds": 27
+        }
+      },
+      "oos_start": "2013-04-18",
+      "oos_end": "2026-10-23",
+      "oos_days": 3401,
+      "n_folds": 27,
+      "tickers": [
+        "AAPL",
+        "MSFT",
+        "NVDA",
+        "AMZN",
+        "GOOGL",
+        "BRK-B",
+        "LLY",
+        "TSLA",
+        "AVGO",
+        "JPM",
+        "V",
+        "UNH",
+        "XOM",
+        "MA",
+        "PG",
+        "COST",
+        "HD",
+        "JNJ"
+      ],
+      "dropped_tickers": [
+        "ABBV",
+        "META"
+      ],
+      "runtime_sec": 348.9
+    }
+  }
+}

@@ -1,0 +1,396 @@
+{
+  "downloaded_utc": "2026-11-25T17:59:03+00:00",
+  "source": "Yahoo Finance via yfinance (auto_adjust=True)",
+  "yfinance_version": "1.8.0",
+  "start": "2010-01-01",
+  "end_exclusive": "2026-11-26",
+  "universes": [
+    "nifty",
+    "sp500"
+  ],
+  "fresh": true,
+  "n_files": 42,
+  "failures": {},
+  "files": {
+    "RELIANCE.NS.parquet": {
+      "ticker": "RELIANCE.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "159c42bfe93aaca58f8c9c822d6499f68224aeac7c96afa5c62fe6828761fdbe",
+      "problems": []
+    },
+    "TCS.NS.parquet": {
+      "ticker": "TCS.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "9982821d6e2aab81d27f0406979d9b981d8ff32faa2610e86fbf1698a44e8f54",
+      "problems": []
+    },
+    "HDFCBANK.NS.parquet": {
+      "ticker": "HDFCBANK.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "9a53fe1d159cec5e453a0234c450ee90279b46d67ffea828aaa7d79094990558",
+      "problems": []
+    },
+    "INFY.NS.parquet": {
+      "ticker": "INFY.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "65fecf65e865ea4d95054bbe847faf117c027848c6ccf413db7ad3835eb53bd3",
+      "problems": []
+    },
+    "ICICIBANK.NS.parquet": {
+      "ticker": "ICICIBANK.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "035721c4c1d6db98cc4e4cb5f971f495637cc4c41b64cfab3d9a1012210763fa",
+      "problems": []
+    },
+    "HINDUNILVR.NS.parquet": {
+      "ticker": "HINDUNILVR.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "95bf1a8af9dd77224736e7fd0e5a1bc8cd0528a251d998379cf47e917f549437",
+      "problems": []
+    },
+    "SBIN.NS.parquet": {
+      "ticker": "SBIN.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "39996cb13a4a1bdc092478c8842e79d7c47e01eb7b57cc2e2cb83d7bc88cac56",
+      "problems": []
+    },
+    "BAJFINANCE.NS.parquet": {
+      "ticker": "BAJFINANCE.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "a245fe3a057d448cd6d471bd98e196554c63ddf5aa2d685c26ed92cc8cc9d214",
+      "problems": []
+    },
+    "BHARTIARTL.NS.parquet": {
+      "ticker": "BHARTIARTL.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "6a705cd2198adf19b50080d54b8402d87cd2153fb780be6b1eb842aaee693d08",
+      "problems": []
+    },
+    "KOTAKBANK.NS.parquet": {
+      "ticker": "KOTAKBANK.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "fbbeba0b62fe14a034428b8fbe647d591f0b3077375beebec757430fd197978d",
+      "problems": []
+    },
+    "LT.NS.parquet": {
+      "ticker": "LT.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "e3da28a7ee9807360edb3546fcd7a63bfbc51e10df64601005eb292ac4e9bb89",
+      "problems": []
+    },
+    "AXISBANK.NS.parquet": {
+      "ticker": "AXISBANK.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "b595e7af8053662a3be76f5e08b056588451d0aa62b22fbe94cc1289fa4670d4",
+      "problems": []
+    },
+    "ASIANPAINT.NS.parquet": {
+      "ticker": "ASIANPAINT.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "50ccc63462941ac586d8bbc36312a43fedab22d9e737112db8b7d5ceeac237ec",
+      "problems": []
+    },
+    "MARUTI.NS.parquet": {
+      "ticker": "MARUTI.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "3b8b4daed71dc18098f93eef7ffcd52c43595045770ac0a2c51ede20c6509efb",
+      "problems": []
+    },
+    "TITAN.NS.parquet": {
+      "ticker": "TITAN.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "42af8795332d0c920fbdccd8fc8a5ccb8b3fbc1916c5315d952ba677d8663625",
+      "problems": []
+    },
+    "NESTLEIND.NS.parquet": {
+      "ticker": "NESTLEIND.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "30df0fb0ae45681cc5b2e81eb0581a4d887e8a31c0bb98de728a521bfeead535",
+      "problems": [
+        "daily move 76% on 2010-01-08 (bad tick or unadjusted split?)"
+      ]
+    },
+    "WIPRO.NS.parquet": {
+      "ticker": "WIPRO.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "f235e4f389bbc7a8b15929238ab3b25a5aeadd815567863074a8d299ee60c730",
+      "problems": []
+    },
+    "ULTRACEMCO.NS.parquet": {
+      "ticker": "ULTRACEMCO.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "8c55ea7a22b4ef18024d80c688f307e80f28d7ca4bcc19b19c552112e558f920",
+      "problems": []
+    },
+    "POWERGRID.NS.parquet": {
+      "ticker": "POWERGRID.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "94eb7f34eef7bac9e51570a205cb2d03498f7fb084c06b6cadfa5817304c1890",
+      "problems": []
+    },
+    "NTPC.NS.parquet": {
+      "ticker": "NTPC.NS",
+      "universe": "nifty",
+      "rows": 4170,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "eeb713e4bea47fd7385df7654b4fcb5c753788ff15ae3da9a0e2c5086e56b90e",
+      "problems": []
+    },
+    "benchmark_nifty50.parquet": {
+      "ticker": "^NSEI",
+      "universe": "nifty",
+      "rows": 4149,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "0eff8260d210dd7ceb0b3906c2992b5b071ab1684bd24f08e299b151ec55cd01",
+      "problems": []
+    },
+    "AAPL.parquet": {
+      "ticker": "AAPL",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "a7110dbc0c935b31b932d8358e9f84612b3dd734b458490114625847e041aee9",
+      "problems": []
+    },
+    "MSFT.parquet": {
+      "ticker": "MSFT",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "70a58d36ccf9c7cc54765c2b7b6ee0a581267c4559b23465e31e173c76e5da5e",
+      "problems": []
+    },
+    "NVDA.parquet": {
+      "ticker": "NVDA",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "1e875b6b81f16debe22dfd76fc72f6c38a002e3cc9f66c35a9c5274c7b83e3b1",
+      "problems": []
+    },
+    "AMZN.parquet": {
+      "ticker": "AMZN",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "8866270b746aa33d28e8ddb1826c99347a9fdabaf79f5f907311cabe9424318f",
+      "problems": []
+    },
+    "GOOGL.parquet": {
+      "ticker": "GOOGL",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "7f2fc108d7869187edeffd4223a43506357894725028394cba974654f784d25c",
+      "problems": []
+    },
+    "META.parquet": {
+      "ticker": "META",
+      "universe": "sp500",
+      "rows": 3652,
+      "first": "2012-05-18",
+      "last": "2026-11-25",
+      "sha256": "cba23c9f6f1b25f2302ee2b196a983650eabbb6cf9ccc24b17bc5dce9f4b2ebb",
+      "problems": []
+    },
+    "BRK-B.parquet": {
+      "ticker": "BRK-B",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "eafedffacd2b60d0f531e63651c01c489144c45ff53eea6c81ddaade18ecbc97",
+      "problems": []
+    },
+    "LLY.parquet": {
+      "ticker": "LLY",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "7cafb24d987de17cda23118d20f536ea47712ea62a7d17aa76f2460b98788fac",
+      "problems": []
+    },
+    "TSLA.parquet": {
+      "ticker": "TSLA",
+      "universe": "sp500",
+      "rows": 4129,
+      "first": "2010-06-29",
+      "last": "2026-11-25",
+      "sha256": "eb2f79ea452f2a459883e532ca0d02f7fe5228fcf8bc9434a54704459ecbd5d5",
+      "problems": []
+    },
+    "AVGO.parquet": {
+      "ticker": "AVGO",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "eed80155cfeed93e9b3684683091bee5af92e3dfed5a451547f13786bb17cd2c",
+      "problems": []
+    },
+    "JPM.parquet": {
+      "ticker": "JPM",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "e01e22b29c4a9f048e2725eb25cfc7ae093e8e42f47a23d90cd1ffe67f5c26c7",
+      "problems": []
+    },
+    "V.parquet": {
+      "ticker": "V",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "ae178b843b0ce7cf1b0f044bad4bdb54586e52c811c0b7c72e22d23e471c196e",
+      "problems": []
+    },
+    "UNH.parquet": {
+      "ticker": "UNH",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "2302cfeb34995fcf07342efe62aec3799ab7fe126df1892e65beea476115fc20",
+      "problems": []
+    },
+    "XOM.parquet": {
+      "ticker": "XOM",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "c7f00fb143d5b17967d52d89d495d6c155b746c79972753d6d74a74f016169f9",
+      "problems": []
+    },
+    "MA.parquet": {
+      "ticker": "MA",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "130ebb5bafc88dc4268228fe00006b8bb146dda1bd5d3a44197a912f3a171807",
+      "problems": []
+    },
+    "PG.parquet": {
+      "ticker": "PG",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "d6bb8185ecb705a5694db5e030007feacc52ecb55bced451d602ac491b40564a",
+      "problems": []
+    },
+    "COST.parquet": {
+      "ticker": "COST",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "4fe024567445fcb0b57e1494d55f308ab1e5d922f270ba0953f53b1b7d9e5958",
+      "problems": []
+    },
+    "HD.parquet": {
+      "ticker": "HD",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "a5db187a6e52e3354b47fe4c8124c44f2d0d709ef946c39c4ec27613d9e756dc",
+      "problems": []
+    },
+    "JNJ.parquet": {
+      "ticker": "JNJ",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "48fcc514aa1ef92f2db7c20fb8a50a76f406a81be06ef51a8243efdb16e573ad",
+      "problems": []
+    },
+    "ABBV.parquet": {
+      "ticker": "ABBV",
+      "universe": "sp500",
+      "rows": 3497,
+      "first": "2013-01-02",
+      "last": "2026-11-25",
+      "sha256": "384a14c0c8522dcb76fc8ec50df9692fab0f2cb5f453700e369a4e19e41d23fa",
+      "problems": []
+    },
+    "benchmark_sp500.parquet": {
+      "ticker": "^GSPC",
+      "universe": "sp500",
+      "rows": 4251,
+      "first": "2010-01-04",
+      "last": "2026-11-25",
+      "sha256": "79c0a344f3087c1d7fe90d94a0a1cd2f6f0bd663244ee7608ac53bc9cbacbe01",
+      "problems": []
+    }
+  }
+}

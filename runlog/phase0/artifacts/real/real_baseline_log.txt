@@ -1,0 +1,8 @@
+2026-11-25 17:59:36.475 +00:00 | INFO     | pfo.data.market:load_v1_universe:104 - nifty: 20 assets, 4149 days (2010-01-04 -> 2026-11-25)
+2026-11-25 17:59:36.534 +00:00 | INFO     | pfo.backtest.walkforward:run_walk_forward:66 - nifty: 27 non-overlapping folds, OOS 2012-11-16 -> 2026-09-21
+2026-11-25 18:05:29.101 +00:00 | INFO     | pfo.reports.v1_baseline:run:155 - nifty: done in 352.7s
+2026-11-25 18:05:29.146 +00:00 | WARNING  | pfo.data.market:load_v1_universe:97 - sp500: dropping ['ABBV', 'META'] (coverage < 95%)
+2026-11-25 18:05:29.149 +00:00 | INFO     | pfo.data.market:load_v1_universe:104 - sp500: 18 assets, 4129 days (2010-06-29 -> 2026-11-25)
+2026-11-25 18:05:29.179 +00:00 | INFO     | pfo.backtest.walkforward:run_walk_forward:66 - sp500: 27 non-overlapping folds, OOS 2013-04-17 -> 2026-10-23
+2026-11-25 18:11:18.032 +00:00 | INFO     | pfo.reports.v1_baseline:run:155 - sp500: done in 348.9s
+2026-11-25 18:11:18.033 +00:00 | INFO     | pfo.reports.v1_baseline:run:166 - wrote reports/phase0/real/report.md
