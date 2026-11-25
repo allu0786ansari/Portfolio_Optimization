@@ -70,7 +70,7 @@ def load_sharpe_from_backtest() -> None:
     try:
         path = Path("backtesting/backtest_results.json")
         if path.exists():
-            results = json.loads(path.read_text())
+            results = json.loads(path.read_text(encoding="utf-8"))
             sharpe = results.get("strategies", {}).get("rl", {}).get("sharpe", 0.0)
             ROLLING_SHARPE.set(sharpe)
     except Exception:

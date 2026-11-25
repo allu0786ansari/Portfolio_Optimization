@@ -139,7 +139,7 @@ def train(algo: str = "ppo", universe: str = UNIVERSE, timesteps: int | None = N
         spec = base_train_env.serving_spec()
         with tempfile.TemporaryDirectory() as tmp:
             spec_file = os.path.join(tmp, "serving_spec.json")
-            with open(spec_file, "w") as fh:
+            with open(spec_file, "w", encoding="utf-8") as fh:
                 json.dump(spec, fh, indent=2)
             mlflow.log_artifact(spec_file)
 

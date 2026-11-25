@@ -82,6 +82,29 @@ Exit-gate note: the test/leakage job runs in well under 10 minutes. The Docker j
 build cache; later runs reuse the GitHub Actions layer cache. If it stays slow, Phase 6 will build images only on
 `main` and on PRs.
 
+## 3.2 Windows / VS Code support (added 2026-11-25, after the first push)
+
+The developer works on Windows with VS Code, so every phase must run there natively.
+
+| Change | Why |
+|---|---|
+| `tasks.ps1` (PowerShell 5.1+ task runner mirroring the `Makefile`) | `make` and bash are not available on Windows. |
+| `.vscode/` settings, tasks (Windows → `tasks.ps1`, Linux/macOS → `make`), launch configs, extension recommendations | Run, test and debug every phase from VS Code. |
+| `.gitattributes` (LF for `.sh`/Dockerfiles/Python, CRLF for `.ps1`) | Git for Windows converts to CRLF by default, which would break `install_deps.sh` inside Linux Docker images. |
+| UTF-8 on every file read/write; `PYTHONUTF8=1` in tasks and VS Code terminals | Windows defaults to cp1252: writing the baseline report (`→`, `Δ`, `—`) would have raised `UnicodeEncodeError`. |
+| `.env.example` without inline comments | VS Code's `envFile` parser would keep `# comment` as part of the value (e.g. `END_DATE`). |
+| Portable SQLite URI in tests (`as_posix()`) | Windows paths with backslashes. |
+| New CI job **windows-latest**: `tasks.ps1 install` → `check` → `phase0-smoke`, under Windows PowerShell 5.1 | Windows compatibility is tested on every push of every phase. |
+
+Dependency check: `uv.lock` was scanned for Windows wheels. Every package has one except Linux-only CUDA
+wheels, `triton` and `uvloop`, which the lock's platform markers already skip on Windows, and
+`antlr4-python3-runtime` (pure-Python source build). PyPI's Windows PyTorch wheel is CPU-only.
+
+Platform notes for later phases: Airflow (Phase 6) runs only inside Docker on Windows (it has no native
+Windows support), and so do the Celery workers. GPU acceleration (simulated bifurcation, foundation
+models) is optional and needs the CUDA build of PyTorch. Everything else (Qiskit, D-Wave Ocean, cvxpy,
+Gurobi/HiGHS, LightGBM, Stable-Baselines3, MLflow, FastAPI, Streamlit) runs natively.
+
 ## 4. Decisions taken
 
 1. **Execution lag 1 day by default** (decide at close *t*, trade at close *t+1*). Market-on-close (`--execution-lag 0`) is available for sensitivity.

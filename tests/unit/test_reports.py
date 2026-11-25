@@ -26,7 +26,7 @@ def v1_files(tmp_path, monkeypatch):
 def test_leakage_scan_cli_passes_on_synthetic(tmp_path):
     out = tmp_path / "scan.json"
     assert leakage_scan.main(["--source", "synthetic", "--out", str(out)]) == 0
-    res = json.loads(out.read_text())["results"][0]
+    res = json.loads(out.read_text(encoding="utf-8"))["results"][0]
     assert res["passed"] and set(res["checks"]) >= {"feature_causality", "oracle_canary", "decisions_ignore_future"}
 
 
@@ -38,12 +38,12 @@ def test_baseline_cli_writes_report_on_v1_layout(v1_files):
     rc = v1_baseline.main(["--source", "v1", "--universe", "both", "--rl-timesteps", "0", "--n-boot", "50",
                            "--train-days", "504", "--test-days", "126", "--out", "out"])
     assert rc == 0
-    summary = json.loads((v1_files / "out" / "summary.json").read_text())
+    summary = json.loads((v1_files / "out" / "summary.json").read_text(encoding="utf-8"))
     assert set(summary["universes"]) == {"nifty", "sp500"}
     for u in summary["universes"].values():
         assert set(u["strategies"]) == {"equal_weight", "min_variance", "markowitz_v1"}
         assert u["n_folds"] >= 2
-    md = (v1_files / "out" / "report.md").read_text()
+    md = (v1_files / "out" / "report.md").read_text(encoding="utf-8")
     assert "What v1 claimed" in md and "nifty" in md and "sp500" in md
     eq = pd.read_csv(v1_files / "out" / "sp500" / "equity.csv", index_col=0, parse_dates=True)
     assert eq.index.is_monotonic_increasing and not eq.index.has_duplicates
@@ -54,5 +54,5 @@ def test_baseline_cli_synthetic_with_rl(tmp_path):
     rc = v1_baseline.main(["--source", "synthetic", "--rl-timesteps", "512", "--n-boot", "50",
                            "--synthetic-assets", "6", "--synthetic-days", "1000", "--out", str(tmp_path)])
     assert rc == 0
-    s = json.loads((tmp_path / "summary.json").read_text())["universes"]["synthetic"]
+    s = json.loads((tmp_path / "summary.json").read_text(encoding="utf-8"))["universes"]["synthetic"]
     assert "rl_ppo" in s["strategies"] and "rl_ppo" in s["vs_equal_weight"]

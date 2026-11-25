@@ -97,7 +97,7 @@ def main(argv: list[str] | None = None) -> int:
         markets = [load_v1_universe(u) for u in (["nifty", "sp500"] if a.universe == "both" else [a.universe])]
     results = [scan(m) for m in markets]
     Path(a.out).parent.mkdir(parents=True, exist_ok=True)
-    Path(a.out).write_text(json.dumps({"results": results}, indent=2, default=float))
+    Path(a.out).write_text(json.dumps({"results": results}, indent=2, default=float), encoding="utf-8")
     rows = []
     for r in results:
         for name, c in r["checks"].items():

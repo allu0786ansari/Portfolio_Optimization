@@ -68,6 +68,41 @@ jobs:
             ci-artifacts/
             coverage.xml
 
+  windows:
+    name: Windows (tasks.ps1, as run from VS Code)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: tasks.ps1 install  (uv sync from uv.lock; PyPI torch is CPU-only on Windows)
+        shell: powershell
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tasks.ps1 install
+
+      - name: tasks.ps1 check  (ruff, mypy, leakage gate, full test suite)
+        shell: powershell
+        env:
+          API_KEY: ci-test-key
+        run: powershell -NoProfile -ExecutionPolicy Bypass -File .\tasks.ps1 check
+
+      - name: tasks.ps1 phase0-smoke  (corrected baseline CLI, UTF-8 report on Windows)
+        shell: powershell
+        run: |
+          powershell -NoProfile -ExecutionPolicy Bypass -File .\tasks.ps1 phase0-smoke --rl-timesteps 2000 --n-boot 100 --synthetic-days 1300
+          if (-not (Select-String -Path reports\phase0\synthetic\report.md -Pattern "Corrected v1 baseline" -Quiet)) { exit 1 }
+
   docker:
     name: Docker build + smoke test
     runs-on: ubuntu-latest

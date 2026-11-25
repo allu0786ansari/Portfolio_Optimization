@@ -86,7 +86,7 @@ class ModelRegistry:
             run = client.get_run(mv.run_id)
             algo = run.data.params.get("algo", "unknown").upper()
             spec_path = mlflow.artifacts.download_artifacts(run_id=mv.run_id, artifact_path="serving_spec.json")
-            spec = json.loads(Path(spec_path).read_text())
+            spec = json.loads(Path(spec_path).read_text(encoding="utf-8"))
             policy = mlflow.pytorch.load_model(f"models:/{MODEL_NAME}@champion")
             policy.set_training_mode(False)
             with self._lock:

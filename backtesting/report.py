@@ -112,7 +112,7 @@ if __name__ == "__main__":
         logger.error("Run walk_forward first")
         raise SystemExit(1)
 
-    results = json.loads(INPUT_PATH.read_text())
+    results = json.loads(INPUT_PATH.read_text(encoding="utf-8"))
     html = build_report(results)
     OUTPUT_PATH.write_text(html, encoding="utf-8" )
     if "--open" in sys.argv:

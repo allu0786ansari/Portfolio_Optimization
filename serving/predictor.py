@@ -48,7 +48,7 @@ def _local_model() -> dict | None:
             from stable_baselines3 import PPO, SAC
 
             model = (PPO if algo == "ppo" else SAC).load(str(zip_path), device="cpu")
-            _local = {"model": model, "spec": json.loads(spec_path.read_text()), "algo": algo.upper(),
+            _local = {"model": model, "spec": json.loads(spec_path.read_text(encoding="utf-8")), "algo": algo.upper(),
                       "version": f"local-{algo}"}
             logger.info(f"Local fallback model loaded from {zip_path}")
             return _local

@@ -38,6 +38,14 @@ main ── phase0 ── phase1 ── phase2 ── phase3 ── phase4 ─�
 | 6 Production | 17–18 | `phase6` | API v2, async jobs, MLOps, monitoring, paper trading | Load test meets SLOs; alert drills pass | ⏳ |
 | 7 Validate & publish | 19–20 | `phase7` | Holdout unlock, reports, docs, demo | Acceptance criteria signed off | ⏳ |
 
+## Platforms
+
+Primary development platform: **Windows 11 + VS Code + PowerShell**. Each phase's
+`HOW_TO_RUN.md` gives VS Code steps and `.\tasks.ps1 <task>` commands first, and
+`make <task>` for Linux/macOS. CI runs Linux and Windows jobs on every push.
+Docker Desktop (WSL 2 backend) is needed only for the container services
+(MLflow server, Airflow, full stack).
+
 ## Conventions
 
 * Dates are ISO (YYYY-MM-DD), times IST unless stated.

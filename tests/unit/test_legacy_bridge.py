@@ -62,7 +62,7 @@ def test_predictor_serves_local_model_with_spec(v1_layout, monkeypatch):
     out = v1_layout / "models" / "rl_agent" / "saved_models"
     out.mkdir(parents=True)
     model.save(out / "ppo_agent")
-    (out / "ppo_agent.spec.json").write_text(json.dumps(env.serving_spec()))
+    (out / "ppo_agent.spec.json").write_text(json.dumps(env.serving_spec()), encoding="utf-8")
 
     monkeypatch.setattr(pred, "SAVED_MODELS_DIR", out)
     monkeypatch.setattr(pred, "_local", None)
@@ -90,7 +90,7 @@ def test_train_registers_this_runs_version_and_serving_spec(v1_layout, monkeypat
     """train() logs the serving spec, registers its own version and sets the champion alias."""
     import mlflow
 
-    uri = f"sqlite:///{v1_layout / 'mlflow.db'}"
+    uri = f"sqlite:///{(v1_layout / 'mlflow.db').as_posix()}"  # forward slashes: valid on Windows too
     monkeypatch.setenv("MLFLOW_TRACKING_URI", uri)
     import models.rl_agent.train_agent as ta
 
@@ -104,7 +104,7 @@ def test_train_registers_this_runs_version_and_serving_spec(v1_layout, monkeypat
     assert str(mv.version) == str(first["version"]) and mv.run_id == first["run_id"]
     spec_path = mlflow.artifacts.download_artifacts(run_id=first["run_id"], artifact_path="serving_spec.json",
                                                     tracking_uri=uri)
-    assert json.loads(open(spec_path).read())["universe"] == "sp500"
+    assert json.loads(open(spec_path, encoding="utf-8").read())["universe"] == "sp500"
 
     # the registry loader (serving) can load the champion and run policy.predict
     from serving.model_loader import ModelRegistry

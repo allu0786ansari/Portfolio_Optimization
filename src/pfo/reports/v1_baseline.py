@@ -158,8 +158,8 @@ def run(args: argparse.Namespace) -> int:
         md.append(f"| {k} | {c['sharpe']:.2f} | {c['cagr']:.1%} | {c['max_drawdown']:.1%} |")
     md += ["", f"v1 universe: {V1_CLAIMS['universe']}. v1 windows: {V1_CLAIMS['windows']}. "
            f"v1 RL p-value vs EW: {V1_CLAIMS['rl_ppo']['p_value_vs_ew']:.1e}.", ""]
-    (out_dir / "summary.json").write_text(json.dumps(report, indent=2, default=float))
-    (out_dir / "report.md").write_text("\n".join(md))
+    (out_dir / "summary.json").write_text(json.dumps(report, indent=2, default=float), encoding="utf-8")
+    (out_dir / "report.md").write_text("\n".join(md), encoding="utf-8")
     logger.info(f"wrote {out_dir / 'report.md'}")
     return 0
 

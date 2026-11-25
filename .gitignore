@@ -41,9 +41,13 @@ mlflow.db
 .ipynb_checkpoints/
 *.ipynb
 
-# IDE
+# IDE (shared VS Code config is committed; personal files are not)
 .idea/
-.vscode/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
 *.code-workspace
 
 # OS

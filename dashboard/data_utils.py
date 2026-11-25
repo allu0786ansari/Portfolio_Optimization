@@ -33,7 +33,7 @@ V1_WARNING = (
 def _load_results() -> dict | None:
     if not RESULTS_PATH.exists():
         return None
-    return json.loads(RESULTS_PATH.read_text())
+    return json.loads(RESULTS_PATH.read_text(encoding="utf-8"))
 
 
 def load_backtest_results() -> dict | None:

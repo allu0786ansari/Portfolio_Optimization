@@ -1,4 +1,4 @@
-.PHONY: help install lint typecheck test leakage leakage-real phase0-smoke phase0-baseline data train backtest serve dashboard up down logs clean
+.PHONY: help setup check mlflow install lint typecheck test leakage leakage-real phase0-smoke phase0-baseline data train backtest serve dashboard up down logs clean
 
 UV ?= uv
 EXTRAS = --extra dev --extra rl --extra ml --extra serving --extra data
@@ -7,9 +7,18 @@ export MLFLOW_DISABLE_AGENT_HINT=1
 help:            ## list targets
 	@grep -E '^[a-zA-Z0-9_-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*##/\t/'
 
+setup:           ## create .env from .env.example if missing
+	@test -f .env || (cp .env.example .env && echo "Created .env - set API_KEY")
+
 install:         ## create .venv from uv.lock (all extras)
 	$(UV) sync $(EXTRAS)
 	$(UV) run pre-commit install
+
+check:           ## lint + typecheck + leakage + test (what CI runs)
+	$(UV) run ruff check .
+	$(UV) run mypy
+	$(UV) run pytest tests/leakage -m leakage -v
+	$(UV) run pytest tests --cov
 
 lint:            ## ruff
 	$(UV) run ruff check .
@@ -49,6 +58,9 @@ serve:
 
 dashboard:
 	$(UV) run streamlit run dashboard/app.py
+
+mlflow:          ## start only the MLflow server container
+	docker compose up -d --build mlflow
 
 up:
 	docker compose up --build

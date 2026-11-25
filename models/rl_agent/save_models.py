@@ -70,7 +70,7 @@ try:
             # Phase 0: serving refuses a local model without its observation spec.
             spec_file = mlflow.artifacts.download_artifacts(run_id=run.info.run_id,
                                                             artifact_path="serving_spec.json")
-            Path(f"{save_path}.spec.json").write_text(Path(spec_file).read_text())
+            Path(f"{save_path}.spec.json").write_text(Path(spec_file).read_text(encoding="utf-8"))
 
             logger.info(f"Saved: {save_path}.zip")
             saved.append(algo)

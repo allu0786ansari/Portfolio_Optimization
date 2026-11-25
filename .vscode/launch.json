@@ -1,0 +1,168 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Pytest: current file",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "${file}",
+        "-v"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Pytest: leakage suite",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "args": [
+        "tests/leakage",
+        "-m",
+        "leakage",
+        "-v"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Phase 0: corrected baseline (synthetic)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pfo.reports.v1_baseline",
+      "args": [
+        "--source",
+        "synthetic",
+        "--rl-timesteps",
+        "5000",
+        "--n-boot",
+        "200",
+        "--out",
+        "reports/phase0/synthetic"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Phase 0: corrected baseline (real data)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pfo.reports.v1_baseline",
+      "args": [
+        "--source",
+        "v1",
+        "--universe",
+        "both",
+        "--out",
+        "reports/phase0/real"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Phase 0: leakage scan (real data)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pfo.reports.leakage_scan",
+      "args": [
+        "--source",
+        "v1",
+        "--universe",
+        "both"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Train PPO (sp500)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "models.rl_agent.train_agent",
+      "args": [
+        "--algo",
+        "ppo",
+        "--universe",
+        "sp500"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "API (uvicorn)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "serving.main:app",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "8000"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    },
+    {
+      "name": "Dashboard (streamlit)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": [
+        "run",
+        "dashboard/app.py"
+      ],
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env",
+      "env": {
+        "PYTHONUTF8": "1",
+        "MLFLOW_DISABLE_AGENT_HINT": "1"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}
