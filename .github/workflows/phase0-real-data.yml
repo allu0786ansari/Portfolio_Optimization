@@ -18,6 +18,13 @@ on:
       - ".github/workflows/phase0-real-data.yml"
       - "src/pfo/data/download.py"
 
+permissions:
+  contents: write   # the last step commits the outputs to runlog/phase0/artifacts/real/
+
+defaults:
+  run:
+    shell: bash      # explicit bash => -eo pipefail (a failing command before "| tee" fails the step)
+
 concurrency:
   group: phase0-real-data-${{ github.ref }}
   cancel-in-progress: true
@@ -45,7 +52,7 @@ jobs:
 
       - name: Install locked deps (CPU torch)
         run: |
-          bash scripts/install_deps.sh "dev rl data"
+          bash scripts/install_deps.sh "dev rl ml serving data"
           uv pip install --system --no-deps -e .
 
       - name: 1. Fresh download (deletes old data, writes data/raw/_manifest.json)
@@ -69,6 +76,27 @@ jobs:
         if: always()
         run: |
           { echo "## Phase 0 real-data run"; echo; cat reports/phase0/real/report.md 2>/dev/null || echo "baseline did not finish"; } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 5. Commit outputs to runlog/phase0/artifacts/real
+        if: success()
+        run: |
+          DEST=runlog/phase0/artifacts/real
+          mkdir -p "$DEST"
+          cp reports/phase0/real/report.md reports/phase0/real/summary.json "$DEST"/
+          cp reports/phase0/real/nifty/fold_metrics.csv "$DEST"/nifty_fold_metrics.csv
+          cp reports/phase0/real/sp500/fold_metrics.csv "$DEST"/sp500_fold_metrics.csv
+          cp reports/phase0/leakage_scan_real.json reports/phase0/data_manifest.json \
+             reports/phase0/pytest_real_data.txt "$DEST"/
+          sed 's/\x1b\[[0-9;]*m//g' reports/phase0/real_baseline_log.txt | grep -v "training .* steps" > "$DEST"/real_baseline_log.txt || true
+          echo "run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" > "$DEST"/RUN_INFO.txt
+          echo "commit: ${{ github.sha }}" >> "$DEST"/RUN_INFO.txt
+          echo "finished_utc: $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$DEST"/RUN_INFO.txt
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          git commit -m "phase0: real-data run outputs (workflow run ${{ github.run_id }})" || exit 0
+          git pull --rebase origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
 
       - uses: actions/upload-artifact@v4
         if: always()
