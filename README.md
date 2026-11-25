@@ -18,6 +18,15 @@
 
 ---
 
+> [!WARNING]
+> **v2 rebuild in progress — Phase 0 (remediation) complete on branch `phase0`.**
+> A code audit found that the v1 results below were produced with **look-ahead bias** (the RL
+> agent was rewarded with a return it could already see) and **overlapping test windows**
+> (735 unique days counted as 3,780). They are kept for the record but are **not valid**.
+> The corrected baseline is produced by `make phase0-baseline`; see
+> [`runlog/phase0/RUNLOG.md`](runlog/phase0/RUNLOG.md) and
+> [`runlog/phase0/HOW_TO_RUN.md`](runlog/phase0/HOW_TO_RUN.md). The v2 proposal is in `Document/`.
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -59,7 +68,7 @@ The system goes far beyond model training — it includes the full ML engineerin
 
 ## Results
 
-### Walk-Forward Backtest (5 Years, 11 Windows)
+### Walk-Forward Backtest (5 Years, 11 Windows) — v1, INVALID (see warning above)
 
 | Metric | RL Agent (PPO) | Markowitz (MVO) | Equal-Weight | Nifty50 Benchmark |
 |---|---|---|---|---|

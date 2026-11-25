@@ -1,0 +1,9 @@
+Demonstration of v1 defects #1 and #5 on synthetic data (make_synthetic_market(n_assets=8, n_days=900, seed=7))
+Policy: overweight assets whose SAME-DAY return is positive (v1 put r[t] in the observation)
+  Sharpe if rewarded with r[t]       (v1 timing):  24.84
+  Sharpe if rewarded with r[t+2]     (v2, lag 1):   0.75
+  Equal-weight Sharpe (same period)             :   1.10
+
+Max weight reachable by softmax(scale * a), a in [-1,1]^N:
+  N=20: v1 scale 1.0 -> 28.0%   v2 scale 5.0 -> 99.9%
+  N=40: v1 scale 1.0 -> 15.9%   v2 scale 5.0 -> 99.8%

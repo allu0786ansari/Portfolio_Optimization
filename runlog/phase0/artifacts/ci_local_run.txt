@@ -1,0 +1,53 @@
+# Phase 0 local CI-equivalent run — 2026-11-25 22:28 IST
+python 3.12.3, uv 0.11.32
+
+$ uv lock --check
+Resolved 224 packages in 2ms
+
+$ ruff check .
+All checks passed!
+
+$ mypy
+Success: no issues found in 22 source files
+
+$ pytest tests/leakage -m leakage -v
+tests/leakage/test_leakage_suite.py::test_feature_pipeline_is_causal PASSED [  9%]
+tests/leakage/test_leakage_suite.py::test_future_shuffle_detects_a_leaky_transform PASSED [ 18%]
+tests/leakage/test_leakage_suite.py::test_walk_forward_decisions_ignore_future_data PASSED [ 27%]
+tests/leakage/test_leakage_suite.py::test_oracle_canary_is_flagged_and_real_features_are_not PASSED [ 36%]
+tests/leakage/test_leakage_suite.py::test_fold_scaler_uses_training_rows_only PASSED [ 45%]
+tests/leakage/test_leakage_suite.py::test_default_splits_never_overlap PASSED [ 54%]
+tests/leakage/test_leakage_suite.py::test_v1_style_overlapping_splits_are_refused PASSED [ 63%]
+tests/leakage/test_leakage_suite.py::test_stitched_oos_dates_are_unique_and_monotonic PASSED [ 72%]
+tests/leakage/test_leakage_suite.py::test_decision_does_not_earn_the_next_days_return PASSED [ 81%]
+tests/leakage/test_leakage_suite.py::test_env_observation_is_independent_of_future_returns PASSED [ 90%]
+tests/leakage/test_leakage_suite.py::test_v1_timing_bug_is_exploitable_and_v2_timing_is_not PASSED [100%]
+============================== 11 passed in 2.14s ==============================
+
+$ pytest tests --cov
+Name                              Stmts   Miss  Cover
+src/pfo/__init__.py                   1      0   100%
+src/pfo/backtest/__init__.py          0      0   100%
+src/pfo/backtest/costs.py             9      0   100%
+src/pfo/backtest/engine.py           70      5    93%
+src/pfo/backtest/metrics.py         110      6    95%
+src/pfo/backtest/splits.py           41      6    85%
+src/pfo/backtest/walkforward.py      75      1    99%
+src/pfo/data/__init__.py              0      0   100%
+src/pfo/data/market.py               85      7    92%
+src/pfo/data/universes.py             4      0   100%
+src/pfo/features/__init__.py          0      0   100%
+src/pfo/features/basic.py            50      1    98%
+src/pfo/reports/__init__.py           0      0   100%
+src/pfo/reports/leakage_scan.py      78      5    94%
+src/pfo/reports/v1_baseline.py      109      2    98%
+src/pfo/rl/__init__.py                0      0   100%
+src/pfo/rl/env.py                    76      4    95%
+src/pfo/rl/strategy.py               38      2    95%
+src/pfo/strategies/__init__.py        0      0   100%
+src/pfo/strategies/base.py           30      0   100%
+src/pfo/strategies/classical.py      56      7    88%
+src/pfo/timing.py                    59      6    90%
+TOTAL                               891     52    94%
+134 passed, 15 skipped, 2 warnings in 42.07s
+wall time: 45s

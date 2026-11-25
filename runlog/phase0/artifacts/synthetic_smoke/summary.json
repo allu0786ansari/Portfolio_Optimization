@@ -1,0 +1,213 @@
+{
+  "generated_utc": "2026-11-25T16:43:55+00:00",
+  "pfo_version": "2.0.0a0",
+  "python": "3.12.3",
+  "source": "synthetic",
+  "config": {
+    "source": "synthetic",
+    "universe": "both",
+    "train_days": 504,
+    "test_days": 126,
+    "rebalance": 21,
+    "execution_lag": 1,
+    "cost_bps": 10.0,
+    "rl_timesteps": 20000,
+    "n_boot": 500,
+    "seed": 0,
+    "synthetic_assets": 20,
+    "synthetic_days": 2000,
+    "out": "runlog/phase0/artifacts/synthetic_smoke"
+  },
+  "v1_claims": {
+    "universe": "40 assets, NSE and NYSE dates intersected, no FX",
+    "windows": "30 overlapping 126-day windows stepped by 21 days (735 unique days counted as 3,780)",
+    "rl_ppo": {
+      "sharpe": 1.466,
+      "cagr": 0.1995,
+      "max_drawdown": -0.3278,
+      "p_value_vs_ew": 4.27e-22
+    },
+    "markowitz_v1": {
+      "sharpe": 0.774,
+      "cagr": 0.0869,
+      "max_drawdown": -0.4233
+    },
+    "equal_weight": {
+      "sharpe": 1.241,
+      "cagr": 0.1687,
+      "max_drawdown": -0.4153
+    }
+  },
+  "universes": {
+    "synthetic": {
+      "strategies": {
+        "equal_weight": {
+          "start": "2018-09-14",
+          "end": "2023-07-12",
+          "n_days": 1259,
+          "cagr": 0.07111261075159536,
+          "ann_vol": 0.08634092683299205,
+          "sharpe": 0.8389072448130495,
+          "sortino": 1.2230470867763177,
+          "max_drawdown": -0.12923923253030078,
+          "calmar": 0.550240119500266,
+          "var_95": -0.00804205124206856,
+          "cvar_95": -0.01180837506388553,
+          "annual_turnover": 1.4104669537522716,
+          "annual_cost_drag": 0.0014104669537522716,
+          "sharpe_ci95": [
+            -0.06422135080381586,
+            1.7508692655597151
+          ],
+          "gross_sharpe": 0.8551013621315177
+        },
+        "min_variance": {
+          "start": "2018-09-14",
+          "end": "2023-07-12",
+          "n_days": 1259,
+          "cagr": 0.07261792757924823,
+          "ann_vol": 0.09042933282237439,
+          "sharpe": 0.8204973677581566,
+          "sortino": 1.2084143922591886,
+          "max_drawdown": -0.15655746813477378,
+          "calmar": 0.4638419900654914,
+          "var_95": -0.008475529323362558,
+          "cvar_95": -0.012359653776412181,
+          "annual_turnover": 1.8488245534894348,
+          "annual_cost_drag": 0.0018488245534894344,
+          "sharpe_ci95": [
+            -0.1665170667502369,
+            1.7432679549853722
+          ],
+          "gross_sharpe": 0.8407538579051369
+        },
+        "markowitz_v1": {
+          "start": "2018-09-14",
+          "end": "2023-07-12",
+          "n_days": 1259,
+          "cagr": 0.0734660330368122,
+          "ann_vol": 0.09046213344518811,
+          "sharpe": 0.8289719844521287,
+          "sortino": 1.2217527185468195,
+          "max_drawdown": -0.15771158483759684,
+          "calmar": 0.46582521577259967,
+          "var_95": -0.008450072755970327,
+          "cvar_95": -0.012370075029661918,
+          "annual_turnover": 1.8247532515784923,
+          "annual_cost_drag": 0.0018247532515784923,
+          "sharpe_ci95": [
+            -0.13836696755501288,
+            1.7475621958475236
+          ],
+          "gross_sharpe": 0.8489533336526729
+        },
+        "rl_ppo": {
+          "start": "2018-09-14",
+          "end": "2023-07-12",
+          "n_days": 1259,
+          "cagr": -0.03317944190499633,
+          "ann_vol": 0.15571091745227417,
+          "sharpe": -0.13857426518663452,
+          "sortino": -0.18647371914308147,
+          "max_drawdown": -0.5468777289725837,
+          "calmar": -0.06067067672938588,
+          "var_95": -0.015355335462274765,
+          "cvar_95": -0.024159092726975504,
+          "annual_turnover": 10.32613130181626,
+          "annual_cost_drag": 0.010326131301816258,
+          "sharpe_ci95": [
+            -1.1424820499703396,
+            0.8352644417237037
+          ],
+          "gross_sharpe": -0.07233603018629989
+        }
+      },
+      "vs_equal_weight": {
+        "min_variance": {
+          "monthly_excess_test": {
+            "n_months": 59,
+            "mean_monthly_excess": 0.00021182284512127233,
+            "t_stat_nw": 0.2453696681689313,
+            "p_value": 0.8070363578056935,
+            "nw_lags": 3
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.01840987705489283,
+            "ci95": [
+              -0.24669916299205658,
+              0.21651832407451949
+            ],
+            "p_value": 0.826
+          },
+          "folds_won": 4,
+          "n_folds": 10
+        },
+        "markowitz_v1": {
+          "monthly_excess_test": {
+            "n_months": 59,
+            "mean_monthly_excess": 0.0002788405427402506,
+            "t_stat_nw": 0.3153748236046534,
+            "p_value": 0.7536090380439244,
+            "nw_lags": 3
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.009935260360920739,
+            "ci95": [
+              -0.25278556032736743,
+              0.2286392784010533
+            ],
+            "p_value": 0.918
+          },
+          "folds_won": 4,
+          "n_folds": 10
+        },
+        "rl_ppo": {
+          "monthly_excess_test": {
+            "n_months": 59,
+            "mean_monthly_excess": -0.007648337111349387,
+            "t_stat_nw": -1.168070035618298,
+            "p_value": 0.24755764307989228,
+            "nw_lags": 3
+          },
+          "sharpe_difference": {
+            "sharpe_diff": -0.977481509999684,
+            "ci95": [
+              -1.845976220832297,
+              -0.05787122620399271
+            ],
+            "p_value": 0.03
+          },
+          "folds_won": 3,
+          "n_folds": 10
+        }
+      },
+      "oos_start": "2018-09-14",
+      "oos_end": "2023-07-12",
+      "oos_days": 1259,
+      "n_folds": 10,
+      "tickers": [
+        "SYN00",
+        "SYN01",
+        "SYN02",
+        "SYN03",
+        "SYN04",
+        "SYN05",
+        "SYN06",
+        "SYN07",
+        "SYN08",
+        "SYN09",
+        "SYN10",
+        "SYN11",
+        "SYN12",
+        "SYN13",
+        "SYN14",
+        "SYN15",
+        "SYN16",
+        "SYN17",
+        "SYN18",
+        "SYN19"
+      ],
+      "runtime_sec": 141.7
+    }
+  }
+}
