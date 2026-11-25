@@ -54,7 +54,6 @@ services:
     environment:
       - API_URL=http://api:8000
     volumes:
-      - ./backtesting/backtest_results.json:/app/backtesting/backtest_results.json:ro
       - ./data/raw:/app/data/raw:ro
       - ./data/processed:/app/data/processed:ro
     depends_on:

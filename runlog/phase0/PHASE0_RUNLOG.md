@@ -1,4 +1,4 @@
-# Phase 0 — Remediation (proposal Weeks 1–2) — RUNLOG
+# Phase 0 runlog — Remediation (proposal Weeks 1–2)
 
 | | |
 |---|---|
@@ -117,6 +117,19 @@ Windows support), and so do the Celery workers. GPU acceleration (simulated bifu
 models) is optional and needs the CUDA build of PyTorch. Everything else (Qiskit, D-Wave Ocean, cvxpy,
 Gurobi/HiGHS, LightGBM, Stable-Baselines3, MLflow, FastAPI, Streamlit) runs natively.
 
+## 3.3 Fresh data and removal of old v1 artifacts (added 2026-11-25)
+
+Development now proceeds phase by phase, and each phase replaces the v1 parts it covers, data included.
+
+| Change | Detail |
+|---|---|
+| New `pfo-download` (`src/pfo/data/download.py`) | Deletes old files and re-downloads both universes + benchmarks from 2010-01-01 to today; retries with back-off; validates rows, prices and impossible jumps; writes `data/raw/_manifest.json` with SHA-256 per file. v1's downloader returned any file already on disk ("cache hit"), so data never refreshed. |
+| `tasks.ps1 data` / `make data` | Now run `pfo-download` (the v1 fetch / feature / macro scripts are no longer part of the pipeline; features are computed causally on the fly). |
+| Removed | `backtesting/backtest_results.json` and `backtest_report.html` (invalid v1 results, 20 MB), `models/rl_agent/saved_models/{ppo,sac}_agent.zip` (trained with look-ahead), `data/raw.dvc` (pointer to an empty directory; DVC returns in Phase 1 with a real remote). |
+| Tests | v1 data tests now key off the fresh download (`_manifest.json` integrity test replaces the v1 processed-features test). 6 new download tests. Without data: 140 passed, 15 skipped; with a (fake) fresh download in `data/raw`: **155 passed, 0 skipped**. |
+| Real data on GitHub | Workflow `Phase 0 - real data run` (`.github/workflows/phase0-real-data.yml`) downloads fresh data, runs the exit gate, the tests and the corrected baseline on GitHub's runners (Yahoo Finance is unreachable from the build sandbox) and uploads the outputs, which are copied to `artifacts/real/`. |
+| Run log | Files renamed to `PHASE0_RUNLOG.md` / `PHASE0_HOW_TO_RUN.md`; the run guide now contains Phase 0 steps only. |
+
 ## 4. Decisions taken
 
 1. **Execution lag 1 day by default** (decide at close *t*, trade at close *t+1*). Market-on-close (`--execution-lag 0`) is available for sensitivity.
@@ -129,7 +142,7 @@ Gurobi/HiGHS, LightGBM, Stable-Baselines3, MLflow, FastAPI, Streamlit) runs nati
 
 ## 5. Not done here / handed to later phases
 
-* **Real-data exit gate and corrected numbers** — run `make data && make leakage-real && make phase0-baseline` locally and commit the outputs to `runlog/phase0/artifacts/real/` (instructions in `HOW_TO_RUN.md` §4).
+* **Real-data exit gate and corrected numbers** — run `make data && make leakage-real && make phase0-baseline` locally and commit the outputs to `runlog/phase0/artifacts/real/` (instructions in `PHASE0_HOW_TO_RUN.md` §5–8).
 * Docker images were not built in the sandbox (no daemon); the CI `docker` job builds and smoke-tests them on GitHub.
 * Phase 1: point-in-time data platform, cross-market universe with FX, square-root impact costs, CPCV, DSR/PBO, SPA.
 * Phase 6: training moves out of the API process into workers (ADR-03); Airflow 3; Grafana provisioning.

@@ -95,6 +95,8 @@ def render_markdown(universe: str, market: MarketData, cfg: WalkForwardConfig, r
     lines = [f"### Universe: `{universe}` ({market.currency}, {len(market.tickers)} assets)", ""]
     lines.append(f"- Out-of-sample: **{ev['oos_start']} → {ev['oos_end']}**, {ev['oos_days']} unique trading days, "
                  f"{len(res.folds)} non-overlapping folds (train {cfg.train_size}d, test {cfg.test_size}d)")
+    if market.dropped:
+        lines.append(f"- Excluded (history covers < 95% of the calendar): {', '.join(market.dropped)}")
     lines.append(f"- Rebalance every {cfg.rebalance_every}d · execution lag {cfg.execution_lag}d · "
                  f"costs {cfg.cost_bps} bps per unit turnover · data source `{source}`")
     lines += ["", "| Strategy | Sharpe (95% CI) | CAGR | Vol | Max DD | CVaR95 (daily) | Turnover/yr | Cost drag/yr |",
@@ -142,6 +144,7 @@ def run(args: argparse.Namespace) -> int:
         any_r = next(iter(res.results.values())).net_returns
         ev.update({"oos_start": str(any_r.index[0].date()), "oos_end": str(any_r.index[-1].date()),
                    "oos_days": int(len(any_r)), "n_folds": len(res.folds), "tickers": market.tickers,
+                   "dropped_tickers": list(market.dropped),
                    "runtime_sec": round(time.time() - t0, 1)})
         report["universes"][u] = ev
         udir = out_dir / u

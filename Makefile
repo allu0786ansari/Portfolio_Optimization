@@ -42,10 +42,8 @@ phase0-smoke:    ## corrected-baseline pipeline on synthetic data (~3 min)
 phase0-baseline: ## corrected v1 baseline on real data (run `make data` first)
 	$(UV) run pfo-v1-baseline --source v1 --universe both --out reports/phase0/real
 
-data:            ## download prices + benchmarks, build v1 features and macro features
-	$(UV) run python -m data.ingestion.fetch_data
-	$(UV) run python -m data.ingestion.feature_engineering
-	$(UV) run python -m data.ingestion.macro_features
+data:            ## FRESH download of prices + benchmarks (deletes old data, writes _manifest.json)
+	$(UV) run pfo-download --universe both
 
 train:           ## train PPO + SAC (needs MLflow at $$MLFLOW_TRACKING_URI)
 	$(UV) run python -m models.rl_agent.train_agent --algo ppo

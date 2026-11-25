@@ -6,9 +6,11 @@ sub-folder with three things:
 
 | File | Purpose |
 |---|---|
-| `phaseN/RUNLOG.md` | What was done, why, what was run, what came out, what is still open. |
-| `phaseN/HOW_TO_RUN.md` | Copy-paste instructions to reproduce the phase on your machine. |
-| `phaseN/artifacts/` | Small outputs produced while building the phase (reports, JSON, CI logs). Large outputs are regenerated, never committed. |
+| `phaseN/PHASEn_RUNLOG.md` | Phase *n* runlog: what was done, why, what was run, what came out, what is still open. |
+| `phaseN/PHASEn_HOW_TO_RUN.md` | Instructions to run **that phase only** on your machine (Windows / VS Code first). |
+| `phaseN/artifacts/` | Small outputs of the phase (reports, JSON, CI logs). Data and models are regenerated, never committed. |
+
+Current files: [`phase0/PHASE0_RUNLOG.md`](phase0/PHASE0_RUNLOG.md) · [`phase0/PHASE0_HOW_TO_RUN.md`](phase0/PHASE0_HOW_TO_RUN.md)
 
 A consolidated `COMPLETE_RUNLOG.md` is written at the end of Phase 7.
 
@@ -41,10 +43,26 @@ main ── phase0 ── phase1 ── phase2 ── phase3 ── phase4 ─�
 ## Platforms
 
 Primary development platform: **Windows 11 + VS Code + PowerShell**. Each phase's
-`HOW_TO_RUN.md` gives VS Code steps and `.\tasks.ps1 <task>` commands first, and
+`PHASEn_HOW_TO_RUN.md` gives VS Code steps and `.\tasks.ps1 <task>` commands first, and
 `make <task>` for Linux/macOS. CI runs Linux and Windows jobs on every push.
 Docker Desktop (WSL 2 backend) is needed only for the container services
 (MLflow server, Airflow, full stack).
+
+## v1 → v2 replacement tracker
+
+Phases are developed and run one at a time; each replaces the old v1 parts it covers.
+
+| v1 component | Replaced in | Status |
+|---|---|---|
+| Market data download (`data/ingestion/fetch_data.py`) | Phase 0 (`pfo-download`, fresh) → Phase 1 (point-in-time platform, FX, DVC remote) | ✅ Phase 0 part done |
+| v1 features (`feature_engineering.py`, `data/processed`) | Phase 0 (causal features) → Phase 1 (feature store) | ✅ Phase 0 part done |
+| Walk-forward backtest + results (`backtesting/`) | Phase 0 (corrected engine) → Phase 1 (event-driven, CPCV) | ✅ Phase 0 part done |
+| RL environment / training (`models/rl_agent/`) | Phase 0 (timing fix) → Phase 3 (redesign) | ✅ Phase 0 part done |
+| Macro features (`macro_features.py`) | Phase 1 | ⏳ |
+| LSTM / ARIMA forecasting (`models/forecasting/`) | Phase 2 | ⏳ |
+| Markowitz / Black-Litterman (`models/classical/`) | Phase 3 | ⏳ |
+| API, dashboard, Airflow, monitoring (`serving/`, `dashboard/`, `mlops/`) | Phase 0 (defect fixes) → Phase 6 (rebuild) | ✅ Phase 0 part done |
+| README, SYSTEM_DESIGN | Phase 7 | ⏳ |
 
 ## Conventions
 

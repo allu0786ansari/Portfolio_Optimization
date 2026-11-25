@@ -75,3 +75,7 @@ coverage.xml
 # Phase outputs (large artifacts are regenerated; small summaries live in runlog/)
 reports/**/*.parquet
 mlflow-data/
+
+# Trained model binaries (registry is the source of truth)
+models/rl_agent/saved_models/*.zip
+models/rl_agent/saved_models/*.spec.json

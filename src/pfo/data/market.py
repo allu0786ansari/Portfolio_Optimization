@@ -18,6 +18,7 @@ class MarketData:
     prices: pd.DataFrame  # T x N close prices (adjusted)
     benchmark: pd.Series | None = None  # benchmark index level, same calendar
     currency: str = "USD"
+    dropped: tuple[str, ...] = ()  # tickers excluded by the coverage rule
 
     @property
     def returns(self) -> pd.DataFrame:
@@ -102,7 +103,7 @@ def load_v1_universe(
         bench = bench.reindex(panel.index).ffill(limit=3)
     logger.info(f"{universe}: {panel.shape[1]} assets, {len(panel)} days "
                 f"({panel.index[0].date()} -> {panel.index[-1].date()})")
-    return MarketData(name=universe, prices=panel, benchmark=bench, currency=ccy)
+    return MarketData(name=universe, prices=panel, benchmark=bench, currency=ccy, dropped=tuple(dropped))
 
 
 def make_synthetic_market(

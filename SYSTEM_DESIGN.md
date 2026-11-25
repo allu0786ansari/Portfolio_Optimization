@@ -1,3 +1,7 @@
+> **Superseded.** This is the v1 design document. Its results were invalidated by the Phase 0 audit
+> (look-ahead bias, overlapping windows). The v2 design is in `Document/portfolio_optimization_proposal_v2.docx`;
+> this file is rewritten in Phase 7.
+
 # AI-Powered Portfolio Optimization Engine
 
 **Author:** Allaudin Ansari

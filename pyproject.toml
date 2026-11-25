@@ -52,6 +52,7 @@ dev = [
 [project.scripts]
 pfo-v1-baseline = "pfo.reports.v1_baseline:main"
 pfo-leakage-scan = "pfo.reports.leakage_scan:main"
+pfo-download = "pfo.data.download:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

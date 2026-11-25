@@ -23,9 +23,9 @@ API_KEY = os.getenv("API_KEY", "portfolio-secret-key-change-in-production")
 
 
 V1_WARNING = (
-    "These are the v1 backtest results. A Phase 0 audit found look-ahead bias and overlapping "
-    "test windows in them, so they are NOT valid. See runlog/phase0 and run `pfo-v1-baseline` "
-    "for the corrected baseline."
+    "These are v1-format backtest results. A Phase 0 audit found look-ahead bias and overlapping "
+    "test windows in v1, so v1 numbers are NOT valid. The corrected baseline is in "
+    "reports/phase0/real/report.md (run `tasks.ps1 phase0-baseline`). The dashboard is rebuilt in Phase 6."
 )
 
 

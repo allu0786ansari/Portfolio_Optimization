@@ -23,9 +23,9 @@
 > A code audit found that the v1 results below were produced with **look-ahead bias** (the RL
 > agent was rewarded with a return it could already see) and **overlapping test windows**
 > (735 unique days counted as 3,780). They are kept for the record but are **not valid**.
-> The corrected baseline is produced by `make phase0-baseline`; see
-> [`runlog/phase0/RUNLOG.md`](runlog/phase0/RUNLOG.md) and
-> [`runlog/phase0/HOW_TO_RUN.md`](runlog/phase0/HOW_TO_RUN.md). The v2 proposal is in `Document/`.
+> The corrected baseline is produced by `.\tasks.ps1 phase0-baseline` (Windows) / `make phase0-baseline`; see
+> [`runlog/phase0/PHASE0_RUNLOG.md`](runlog/phase0/PHASE0_RUNLOG.md) and
+> [`runlog/phase0/PHASE0_HOW_TO_RUN.md`](runlog/phase0/PHASE0_HOW_TO_RUN.md). The v2 proposal is in `Document/`.
 
 ## Table of Contents
 

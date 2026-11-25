@@ -71,7 +71,7 @@ $Tasks = [ordered]@{
     "leakage-real"    = "Phase 0 exit gate on downloaded data (run 'data' first)"
     "phase0-smoke"    = "corrected-baseline pipeline on synthetic data (~3 min)"
     "phase0-baseline" = "corrected v1 baseline on real data (run 'data' first)"
-    "data"            = "download prices + benchmarks, build v1 + macro features"
+    "data"            = "FRESH download of prices + benchmarks (deletes old data, writes _manifest.json)"
     "train"           = "train PPO + SAC (needs MLflow at MLFLOW_TRACKING_URI)"
     "serve"           = "run the API on http://localhost:8000"
     "dashboard"       = "run the Streamlit dashboard on http://localhost:8501"
@@ -126,11 +126,7 @@ switch ($Task) {
     "phase0-baseline" {
         Invoke-UvRun (@("pfo-v1-baseline", "--source", "v1", "--universe", "both", "--out", "reports/phase0/real") + $Extra)
     }
-    "data" {
-        Invoke-UvRun @("python", "-m", "data.ingestion.fetch_data")
-        Invoke-UvRun @("python", "-m", "data.ingestion.feature_engineering")
-        Invoke-UvRun @("python", "-m", "data.ingestion.macro_features")
-    }
+    "data" { Invoke-UvRun (@("pfo-download", "--universe", "both") + $Extra) }
     "train" {
         Invoke-UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "ppo")
         Invoke-UvRun @("python", "-m", "models.rl_agent.train_agent", "--algo", "sac")

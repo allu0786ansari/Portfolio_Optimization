@@ -109,16 +109,22 @@ def test_raw_data_files_exist():
     assert len(parquet_files) >= 5, f"Expected at least 5 Parquet files, found {len(parquet_files)}"
 
 
-def test_processed_features_schema():
-    from data.config import PROCESSED_DIR
-    feature_files = list(PROCESSED_DIR.glob("features_*.parquet"))
-    if len(feature_files) == 0:
-        pytest.skip("Processed features not generated yet — run feature_engineering.py first")
+def test_fresh_download_manifest_is_consistent():
+    """Every file listed in data/raw/_manifest.json exists and matches its SHA-256 (pfo-download)."""
+    import hashlib
+    import json
 
-    df = pd.read_parquet(feature_files[0])
-    required_cols = ["close", "log_return", "momentum_21d", "volatility_21d", "beta_63d", "rsi_14"]
-    for col in required_cols:
-        assert col in df.columns, f"Missing expected column: {col}"
-
-    # No NaNs in the final processed file (we dropped them in feature engineering)
-    assert df.isnull().sum().sum() == 0, "Processed features should have no NaN values"
+    from data.config import RAW_DIR
+    manifest_path = RAW_DIR / "_manifest.json"
+    if not manifest_path.exists():
+        pytest.skip("Market data not downloaded - run `tasks.ps1 data` (pfo-download) first")
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    assert manifest["n_files"] >= 20
+    assert not [t for t in manifest["failures"] if t.startswith("^")], "benchmark download failed"
+    for fname, meta in manifest["files"].items():
+        path = RAW_DIR / fname
+        assert path.exists(), fname
+        assert hashlib.sha256(path.read_bytes()).hexdigest() == meta["sha256"], f"{fname} changed after download"
+        df = pd.read_parquet(path)
+        assert {"Open", "High", "Low", "Close", "Volume"} <= set(df.columns)
+        assert df.index.is_monotonic_increasing and not df.index.has_duplicates

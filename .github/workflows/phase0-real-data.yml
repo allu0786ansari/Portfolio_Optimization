@@ -1,0 +1,84 @@
+name: Phase 0 - real data run
+
+# Fresh market-data download + the Phase 0 exit gate and corrected baseline on
+# real data. Runs on GitHub's runners (they can reach Yahoo Finance).
+# Outputs are uploaded as artifacts and copied into runlog/phase0/artifacts/real/.
+on:
+  workflow_dispatch:
+    inputs:
+      start:
+        description: "First date to download"
+        default: "2010-01-01"
+      rl_timesteps:
+        description: "PPO timesteps per walk-forward fold (0 = skip RL)"
+        default: "30000"
+  push:
+    branches: [phase0]
+    paths:
+      - ".github/workflows/phase0-real-data.yml"
+      - "src/pfo/data/download.py"
+
+concurrency:
+  group: phase0-real-data-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_VERSION: "0.11.32"
+  MLFLOW_DISABLE_AGENT_HINT: "1"
+  START: ${{ github.event.inputs.start || '2010-01-01' }}
+  RL_TIMESTEPS: ${{ github.event.inputs.rl_timesteps || '30000' }}
+
+jobs:
+  real-data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked deps (CPU torch)
+        run: |
+          bash scripts/install_deps.sh "dev rl data"
+          uv pip install --system --no-deps -e .
+
+      - name: 1. Fresh download (deletes old data, writes data/raw/_manifest.json)
+        run: pfo-download --universe both --start "$START"
+
+      - name: 2. Exit gate - leakage scan on real data
+        run: pfo-leakage-scan --source v1 --universe both --out reports/phase0/leakage_scan_real.json
+
+      - name: 3. Tests including the data-dependent v1 tests
+        env:
+          API_KEY: ci-test-key
+        run: pytest tests -q -m "not slow" | tee reports/phase0/pytest_real_data.txt
+
+      - name: 4. Corrected v1 baseline on real data
+        run: |
+          pfo-v1-baseline --source v1 --universe both --rl-timesteps "$RL_TIMESTEPS" --out reports/phase0/real \
+            2>&1 | tee reports/phase0/real_baseline_log.txt
+          cp data/raw/_manifest.json reports/phase0/data_manifest.json
+
+      - name: Job summary
+        if: always()
+        run: |
+          { echo "## Phase 0 real-data run"; echo; cat reports/phase0/real/report.md 2>/dev/null || echo "baseline did not finish"; } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: phase0-real-reports
+          path: reports/phase0/
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: market-data-raw
+          path: data/raw/
+          retention-days: 30
